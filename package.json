@@ -1,0 +1,19 @@
+{
+  "name": "baticalc",
+  "version": "2.6.0",
+  "description": "BatiCalc Pro - Construction Cost & Bill of Quantities Estimator by Scientific Club Archi Art, University of Larbi Ben M'hidi - Oum El Bouaghi",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "construction",
+    "baticalc",
+    "architecture",
+    "civil-engineering",
+    "algeria",
+    "dtr"
+  ],
+  "author": "Scientific Club Archi Art",
+  "license": "MIT"
+}
