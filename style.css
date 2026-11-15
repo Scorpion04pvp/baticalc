@@ -1,0 +1,231 @@
+/* BatiCalc Pro - Architectural & Archi Art Theme */
+
+:root {
+  --archi-navy: #0b132b;
+  --archi-card: #161f36;
+  --archi-border: #223055;
+  --archi-pink: #e11d48;
+  --archi-orange: #f97316;
+  --archi-yellow: #f59e0b;
+  --archi-green: #10b981;
+  --archi-blue: #0284c7;
+}
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Background Blueprint Grid with subtle Archi Art splash gradients */
+body {
+  background-color: #080d1e;
+  background-image: 
+    radial-gradient(rgba(2, 132, 199, 0.12) 1px, transparent 0),
+    radial-gradient(rgba(249, 115, 22, 0.08) 1px, transparent 0);
+  background-size: 26px 26px, 52px 52px;
+  background-position: 0 0, 13px 13px;
+}
+
+/* Arabic RTL support */
+[dir="rtl"] {
+  font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif;
+  text-align: right;
+}
+
+[dir="rtl"] .font-mono {
+  direction: ltr;
+  display: inline-block;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0b132b;
+}
+::-webkit-scrollbar-thumb {
+  background: #223055;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #f97316;
+}
+
+/* Hide scrollbar for clean tab scrolling on mobile */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Navigation Tab Styles */
+.nav-tab {
+  padding: 0.5rem 0.85rem;
+  border-radius: 0.75rem;
+  color: #94a3b8;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
+  font-size: 0.8rem;
+}
+.nav-tab:hover {
+  color: #f8fafc;
+  background-color: rgba(34, 48, 85, 0.7);
+}
+.nav-tab.active-tab {
+  color: #ffffff;
+  background-color: #161f36;
+  border: 1px solid #f97316;
+  box-shadow: 0 4px 14px -2px rgba(249, 115, 22, 0.25);
+}
+
+/* Active Currency Style */
+.currency-toggle-btn.active-currency {
+  background: linear-gradient(135deg, #f97316, #e11d48);
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(225, 29, 72, 0.35);
+}
+
+/* Active Language Button */
+.lang-btn.active-lang {
+  background: linear-gradient(135deg, #0284c7, #10b981);
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(2, 132, 199, 0.35);
+}
+
+/* Active Finish Card Style */
+.finish-card {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.finish-card:hover {
+  transform: translateY(-2px);
+}
+.finish-card.active-finish-card {
+  border-color: #f97316 !important;
+  background-color: rgba(16, 26, 52, 0.95);
+  box-shadow: 0 0 22px -3px rgba(249, 115, 22, 0.25);
+}
+
+/* Floor Button Active */
+.floor-btn.active-floor-btn {
+  background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+  color: #ffffff !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 2px 10px rgba(2, 132, 199, 0.35);
+}
+
+/* Active Chart Toggle Button */
+.active-chart-toggle {
+  background-color: #0284c7 !important;
+  color: #ffffff !important;
+  border-color: #38bdf8 !important;
+}
+
+/* Active BOQ Filter Button */
+.boq-filter-btn.active-filter {
+  background: linear-gradient(135deg, #f97316, #e11d48) !important;
+  color: #ffffff !important;
+  border-color: #f97316 !important;
+}
+
+/* Animations */
+.tab-content {
+  animation: fadeIn 0.3s ease-in-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Range Inputs */
+input[type="range"] {
+  height: 6px;
+  border-radius: 3px;
+  background: #161f36;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+  transition: transform 0.15s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+/* Mobile responsive refinements */
+@media (max-width: 640px) {
+  .nav-tab {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.75rem;
+  }
+  
+  #heroTotalCost {
+    font-size: 1.5rem !important;
+  }
+  
+  input[type="number"], select {
+    font-size: 0.85rem;
+  }
+  
+  /* Touch friendly targets */
+  button, .floor-btn, .lang-btn, .currency-toggle-btn {
+    min-height: 36px;
+  }
+}
+
+/* Desktop Polish */
+@media (min-width: 1024px) {
+  .main-grid {
+    align-items: start;
+  }
+}
+
+/* ============================================== */
+/* PRINT STYLES FOR A4 FORMAL REPORT               */
+/* ============================================== */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+  }
+  
+  header, footer, .nav-tab, #presetDropdownContainer, #tab-overview, #tab-boq, #tab-prices, .no-print, button {
+    display: none !important;
+  }
+  
+  #tab-report {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  #printableReport {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+  
+  table {
+    page-break-inside: auto;
+  }
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+}
