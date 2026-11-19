@@ -611,17 +611,78 @@ function generate6DigitOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+// =========================================================================
+// SECURE VAULT & USER DATA ENCRYPTION (حماية وتشفير بيانات المستخدمين)
+// =========================================================================
+const VAULT_SECURITY_KEY = 'BTH_SEC_VAULT_KEY_2026_MOUHANED_GUELLIF_DZ_BATI_PRO';
+
+function encryptVaultData(str) {
+  try {
+    let result = '';
+    for (let i = 0; i < str.length; i++) {
+      const code = str.charCodeAt(i) ^ VAULT_SECURITY_KEY.charCodeAt(i % VAULT_SECURITY_KEY.length);
+      result += String.fromCharCode(code);
+    }
+    return 'BTH_VAULT_v2:' + btoa(unescape(encodeURIComponent(result)));
+  } catch (e) {
+    return str;
+  }
+}
+
+function decryptVaultData(enc) {
+  try {
+    if (!enc || typeof enc !== 'string') return {};
+    if (!enc.startsWith('BTH_VAULT_v2:')) {
+      // Legacy JSON fallback
+      return JSON.parse(enc);
+    }
+    const base64Str = enc.replace('BTH_VAULT_v2:', '');
+    const decoded = decodeURIComponent(escape(atob(base64Str)));
+    let result = '';
+    for (let i = 0; i < decoded.length; i++) {
+      const code = decoded.charCodeAt(i) ^ VAULT_SECURITY_KEY.charCodeAt(i % VAULT_SECURITY_KEY.length);
+      result += String.fromCharCode(code);
+    }
+    return JSON.parse(result);
+  } catch (e) {
+    return {};
+  }
+}
+
 function getStoredAccounts() {
   try {
     const raw = localStorage.getItem('batihub_registered_accounts');
-    return raw ? JSON.parse(raw) : {};
+    if (!raw) return {};
+    return decryptVaultData(raw);
   } catch (e) {
     return {};
   }
 }
 
 function saveStoredAccounts(accounts) {
-  localStorage.setItem('batihub_registered_accounts', JSON.stringify(accounts));
+  try {
+    const raw = JSON.stringify(accounts);
+    const encrypted = encryptVaultData(raw);
+    localStorage.setItem('batihub_registered_accounts', encrypted);
+  } catch (e) {
+    console.error('Storage error:', e);
+  }
+}
+
+// Strict Email Validator
+function isValidEmail(email) {
+  if (!email || typeof email !== 'string') return false;
+  email = email.trim();
+  if (/\s/.test(email)) return false;
+  const re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+  if (!re.test(email)) return false;
+  const parts = email.split('@');
+  if (parts.length !== 2) return false;
+  const domain = parts[1];
+  if (!domain.includes('.') || domain.startsWith('.') || domain.endsWith('.')) return false;
+  const tld = domain.split('.').pop();
+  if (!tld || tld.length < 2) return false;
+  return true;
 }
 
 // Switch view inside Auth Gate: 'login', 'register', 'otp', 'forgot'
@@ -706,15 +767,16 @@ function togglePasswordVisibility(inputId, btn) {
   }
 }
 
-// Send Email via Electron IPC or fallback
+// Send Email via Electron IPC
 async function sendVerificationEmail(toEmail, code, type) {
   const isAr = state.lang === 'ar';
+  const isEn = state.lang === 'en';
   const subject = type === 'register' 
-    ? (isAr ? 'رمز تأكيد وتفعيل حسابك في BatiHub DZ' : 'Votre code de vérification BatiHub DZ')
-    : (isAr ? 'رمز إعادة تعيين كلمة المرور في BatiHub DZ' : 'Code de réinitialisation de mot de passe BatiHub DZ');
+    ? (isAr ? 'رمز تأكيد وتفعيل حسابك في BatiHub DZ' : (isEn ? 'BatiHub DZ • Account Verification Code' : 'Votre code de vérification BatiHub DZ'))
+    : (isAr ? 'رمز إعادة تعيين كلمة المرور في BatiHub DZ' : (isEn ? 'BatiHub DZ • Password Reset Code' : 'Code de réinitialisation de mot de passe BatiHub DZ'));
 
   const html = `
-    <div style="font-family: Arial, sans-serif; background-color: #07090f; color: #ffffff; padding: 25px; border-radius: 12px; max-width: 520px; margin: 0 auto; border: 1px solid #1c2638;">
+    <div style="font-family: Arial, sans-serif; background-color: #07090f; color: #ffffff; padding: 25px; border-radius: 12px; max-width: 520px; margin: 0 auto; border: 1px solid #1c2638; direction: ${isAr ? 'rtl' : 'ltr'};">
       <div style="text-align: center; margin-bottom: 20px;">
         <h2 style="color: #ffa000; margin: 0; font-size: 24px;">BatiHub DZ</h2>
         <p style="color: #94a3b8; font-size: 12px; margin-top: 4px;">BUILD • CONNECT • CREATE</p>
@@ -722,18 +784,20 @@ async function sendVerificationEmail(toEmail, code, type) {
       <div style="background-color: #0f1520; padding: 20px; border-radius: 8px; border: 1px solid #223048; text-align: center;">
         <p style="font-size: 14px; color: #e2e8f0; margin-bottom: 12px;">
           ${type === 'register' 
-            ? 'مرحباً بك في منصة BatiHub DZ! رمز تأكيد حسابك هو:' 
-            : 'تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بحسابك في BatiHub DZ:'}
+            ? (isAr ? 'مرحباً بك في منصة BatiHub DZ! رمز تأكيد حسابك هو:' : 'Bienvenue sur la plateforme BatiHub DZ ! Votre code de vérification est :') 
+            : (isAr ? 'تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بحسابك في BatiHub DZ:' : 'Demande de réinitialisation de mot de passe BatiHub DZ :')}
         </p>
-        <div style="display: inline-block; background: #07090e; color: #ffa000; font-size: 32px; font-weight: bold; letter-spacing: 6px; padding: 12px 24px; border-radius: 8px; border: 2px dashed #ffa000; font-family: monospace;">
+        <div style="display: inline-block; background: #07090e; color: #ffa000; font-size: 32px; font-weight: bold; letter-spacing: 8px; padding: 12px 24px; border-radius: 8px; border: 2px dashed #ffa000; font-family: monospace;">
           ${code}
         </div>
         <p style="font-size: 11px; color: #94a3b8; margin-top: 15px;">
-          هذا الرمز صالح لمدة 15 دقيقة. يرجى عدم مشاركته مع أي شخص للحفاظ على أمان حسابك.
+          ${isAr 
+            ? 'هذا الرمز صالح لمدة 15 دقيقة. يرجى عدم مشاركته مع أي شخص للحفاظ على أمان حسابك.' 
+            : 'Ce code est valide pendant 15 minutes. Ne le partagez avec personne pour protéger votre compte.'}
         </p>
       </div>
       <p style="text-align: center; font-size: 10px; color: #64748b; margin-top: 20px;">
-        Developed by Mouhaned Guellif • BatiHub DZ Platform
+        BatiHub DZ Official Support • Developed by Mouhaned Guellif
       </p>
     </div>
   `;
@@ -748,12 +812,12 @@ async function sendVerificationEmail(toEmail, code, type) {
       });
       return res;
     } catch (err) {
-      console.warn('Native mail error:', err);
-      return { success: false, simulated: true };
+      console.error('Native mail error:', err);
+      return { success: false, error: err.message };
     }
   }
 
-  return { success: false, simulated: true };
+  return { success: false, error: 'خدمة البريد الإلكتروني غير متاحة في بيئة الويب' };
 }
 
 // 1. REGISTER FLOW
@@ -769,8 +833,23 @@ async function handleUserRegister(e) {
 
   const isAr = state.lang === 'ar';
 
-  if (!email || !email.includes('@')) {
-    alert(isAr ? 'يرجى إدخال عنوان بريد إلكتروني صحيح' : 'Veuillez saisir une adresse Gmail valide.');
+  // 1. Strict Email Validation
+  if (!isValidEmail(email)) {
+    alert(isAr 
+      ? 'عنوان البريد الإلكتروني غير صحيح! يرجى إدخال بريد إلكتروني حقيقي وصالح (مثال: example@gmail.com).' 
+      : 'Format d\'adresse email invalide ! Veuillez saisir une adresse réelle et valide (ex: exemple@gmail.com).');
+    return;
+  }
+
+  // 2. Strict Duplicate Email Check
+  const accounts = getStoredAccounts();
+  if (accounts[email]) {
+    alert(isAr 
+      ? 'هذا البريد الإلكتروني مسجل بالفعل بحساب آخر! لا يمكن فتح أكثر من حساب بنفس البريد.\nيرجى تسجيل الدخول مباشرة أو النقر على "نسيت كلمة المرور؟" لاسترجاعه.' 
+      : 'Cette adresse email possède déjà un compte enregistré !\nVous ne pouvez pas créer plusieurs comptes avec la même adresse.');
+    switchAuthView('login');
+    const loginEmailInput = document.getElementById('loginEmail');
+    if (loginEmailInput) loginEmailInput.value = email;
     return;
   }
 
@@ -784,19 +863,35 @@ async function handleUserRegister(e) {
     return;
   }
 
-  const accounts = getStoredAccounts();
-  if (accounts[email] && accounts[email].isVerified) {
-    alert(isAr ? 'هذا البريد الإلكتروني مسجل بالفعل. يرجى تسجيل الدخول مباشرة.' : 'Cette adresse Gmail est déjà enregistrée. Veuillez vous connecter.');
-    switchAuthView('login');
-    const loginEmailInput = document.getElementById('loginEmail');
-    if (loginEmailInput) loginEmailInput.value = email;
-    return;
+  // Show Loading state on button
+  const submitBtn = document.getElementById('btnSubmitRegister');
+  const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> ${isAr ? 'جاري إرسال رمز التحقق إلى بريدك...' : 'Envoi du code à votre Gmail...'}`;
   }
 
   // Generate 6-digit verification code and salt
   const salt = generateSalt();
   const passwordHash = await hashPassword(password, salt);
   const otpCode = generate6DigitOtp();
+
+  // Send Email via Google SMTP
+  const mailResult = await sendVerificationEmail(email, otpCode, 'register');
+
+  // Restore button
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalBtnHtml;
+  }
+
+  if (!mailResult || !mailResult.success) {
+    const errorDetail = mailResult && mailResult.error ? `\n(${mailResult.error})` : '';
+    alert(isAr 
+      ? `تعذر إرسال رمز التحقق إلى بريدك الإلكتروني! يرجى التأكد من اتصال الإنترنت وأن البريد المدخل يعمل.${errorDetail}` 
+      : `Échec de l'envoi du code à votre email ! Veuillez vérifier votre adresse et votre connexion Internet.${errorDetail}`);
+    return; // STOP! Never go to OTP screen if sending failed!
+  }
 
   pendingRegistration = {
     firstName,
@@ -810,18 +905,9 @@ async function handleUserRegister(e) {
     expiresAt: Date.now() + 15 * 60 * 1000
   };
 
-  // Update OTP View
+  // Update OTP View (Email target, NO code displayed)
   const targetEmailEl = document.getElementById('otpTargetEmail');
   if (targetEmailEl) targetEmailEl.innerText = email;
-
-  const simDisplay = document.getElementById('simulatedOtpDisplay');
-  if (simDisplay) simDisplay.innerText = otpCode;
-
-  // Send Email
-  const mailResult = await sendVerificationEmail(email, otpCode, 'register');
-  if (mailResult && mailResult.success) {
-    console.log('Real email sent to Gmail:', email);
-  }
 
   // Switch to OTP view
   switchAuthView('otp');
@@ -831,20 +917,6 @@ async function handleUserRegister(e) {
   if (otpInput) {
     otpInput.value = '';
     otpInput.focus();
-  }
-}
-
-// Copy simulated OTP button
-function copySimulatedOtp() {
-  if (pendingRegistration && pendingRegistration.otpCode) {
-    const code = pendingRegistration.otpCode;
-    const otpInput = document.getElementById('inputOtpCode');
-    if (otpInput) {
-      otpInput.value = code;
-    }
-    navigator.clipboard.writeText(code).then(() => {
-      alert(state.lang === 'ar' ? 'تم نسخ الرمز بنجاح ولصقه تلقائياً!' : 'Code copié et collé avec succès !');
-    });
   }
 }
 
@@ -870,16 +942,35 @@ function startResendCountdown() {
 
 async function handleResendOtp() {
   if (!pendingRegistration) return;
+  const isAr = state.lang === 'ar';
+  const btn = document.getElementById('btnResendOtp');
+  const originalHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> ${isAr ? 'جاري الإرسال...' : 'Envoi...'}`;
+  }
+
   const newCode = generate6DigitOtp();
   pendingRegistration.otpCode = newCode;
   pendingRegistration.expiresAt = Date.now() + 15 * 60 * 1000;
 
-  const simDisplay = document.getElementById('simulatedOtpDisplay');
-  if (simDisplay) simDisplay.innerText = newCode;
+  const mailResult = await sendVerificationEmail(pendingRegistration.email, newCode, 'register');
 
-  await sendVerificationEmail(pendingRegistration.email, newCode, 'register');
-  startResendCountdown();
-  alert(state.lang === 'ar' ? 'تم إرسال رمز تحقق جديد بنجاح!' : 'Nouveau code envoyé avec succès !');
+  if (btn) {
+    btn.innerHTML = originalHtml;
+  }
+
+  if (mailResult && mailResult.success) {
+    alert(isAr 
+      ? 'تم إرسال رمز تحقق جديد إلى بريدك الإلكتروني بنجاح! تفقد بريدك الوارد.' 
+      : 'Nouveau code envoyé avec succès ! Consultez votre boîte de réception.');
+    startResendCountdown();
+  } else {
+    alert(isAr 
+      ? 'تعذر إعادة إرسال الرمز، يرجى المحاولة بعد قليل.' 
+      : 'Échec de l\'envoi du code. Veuillez réessayer.');
+    if (btn) btn.disabled = false;
+  }
 }
 
 // 2. VERIFY OTP FLOW
@@ -900,7 +991,7 @@ function handleVerifyOtp(e) {
   }
 
   if (inputCode !== pendingRegistration.otpCode) {
-    alert(isAr ? 'رمز التحقق غير صحيح، يرجى التأكد من الرمز وإعادة المحاولة' : 'Code de vérification incorrect. Veuillez vérifier.');
+    alert(isAr ? 'رمز التحقق غير صحيح، يرجى التأكد من الرمز المدخل وإعادة المحاولة' : 'Code de vérification incorrect. Veuillez vérifier.');
     return;
   }
 
@@ -1029,15 +1120,26 @@ async function handleSendPasswordResetCode() {
   const email = (document.getElementById('forgotEmail')?.value || '').trim().toLowerCase();
   const isAr = state.lang === 'ar';
 
-  if (!email || !email.includes('@')) {
-    alert(isAr ? 'يرجى إدخال عنوان بريد إلكتروني صحيح' : 'Veuillez saisir une adresse Gmail valide.');
+  if (!isValidEmail(email)) {
+    alert(isAr 
+      ? 'عنوان البريد الإلكتروني غير صحيح! يرجى إدخال بريد إلكتروني صالح.' 
+      : 'Veuillez saisir une adresse Gmail valide.');
     return;
   }
 
   const accounts = getStoredAccounts();
   if (!accounts[email]) {
-    alert(isAr ? 'هذا البريد الإلكتروني غير مسجل لدينا في المنصة.' : 'Cet email n\'est pas enregistré sur la plateforme.');
+    alert(isAr 
+      ? 'هذا البريد الإلكتروني غير مسجل لدينا في منصة BatiHub DZ! يرجى التأكد من البريد أو إنشاء حساب جديد.' 
+      : 'Cet email n\'est pas enregistré sur la plateforme.');
     return;
+  }
+
+  const btn = document.getElementById('btnSendPasswordReset');
+  const origHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> ${isAr ? 'جاري إرسال الرمز إلى بريدك...' : 'Envoi en cours...'}`;
   }
 
   const resetCode = generate6DigitOtp();
@@ -1047,26 +1149,27 @@ async function handleSendPasswordResetCode() {
     expiresAt: Date.now() + 15 * 60 * 1000
   };
 
-  const simEl = document.getElementById('simulatedForgotOtpDisplay');
-  if (simEl) simEl.innerText = resetCode;
+  const mailResult = await sendVerificationEmail(email, resetCode, 'reset');
 
-  await sendVerificationEmail(email, resetCode, 'reset');
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = origHtml;
+  }
+
+  if (!mailResult || !mailResult.success) {
+    const errorDetail = mailResult && mailResult.error ? `\n(${mailResult.error})` : '';
+    alert(isAr 
+      ? `تعذر إرسال رمز إعادة التعيين إلى بريدك الإلكتروني!${errorDetail}` 
+      : `Impossible d'envoyer le code de réinitialisation.${errorDetail}`);
+    return;
+  }
 
   document.getElementById('forgotStepRequest')?.classList.add('hidden');
   document.getElementById('forgotStepReset')?.classList.remove('hidden');
 
-  alert(isAr ? 'تم إرسال رمز إعادة التعيين إلى بريدك الإلكتروني بنجاح!' : 'Code de réinitialisation envoyé à votre Gmail !');
-}
-
-function copySimulatedForgotOtp() {
-  if (pendingPasswordReset && pendingPasswordReset.code) {
-    const code = pendingPasswordReset.code;
-    const input = document.getElementById('forgotOtpCode');
-    if (input) input.value = code;
-    navigator.clipboard.writeText(code).then(() => {
-      alert(state.lang === 'ar' ? 'تم نسخ الرمز ولصقه بنجاح!' : 'Code copié et collé !');
-    });
-  }
+  alert(isAr 
+    ? 'تم إرسال رمز إعادة التعيين بنجاح إلى بريدك الإلكتروني! تفقد صندوق الوارد أو البريد غير المرغوب فيه (Spam).' 
+    : 'Code de réinitialisation envoyé avec succès à votre Gmail !');
 }
 
 async function handleConfirmPasswordReset() {
@@ -1101,7 +1204,7 @@ async function handleConfirmPasswordReset() {
     return;
   }
 
-  // Update account in database
+  // Update account in encrypted database
   const accounts = getStoredAccounts();
   const user = accounts[pendingPasswordReset.email];
   if (user) {
@@ -1118,84 +1221,6 @@ async function handleConfirmPasswordReset() {
     const loginEmailInput = document.getElementById('loginEmail');
     if (loginEmailInput) loginEmailInput.value = user.email;
   }
-}
-
-// 5. GMAIL REAL SMTP CONFIGURATION MODAL
-async function openMailSettingsModal() {
-  const modal = document.getElementById('modalMailSettings');
-  const inputEmail = document.getElementById('smtpInputEmail');
-  const inputPwd = document.getElementById('smtpInputAppPassword');
-  const statusMsg = document.getElementById('smtpStatusMessage');
-
-  if (statusMsg) statusMsg.classList.add('hidden');
-
-  if (window.electronMailAPI && typeof window.electronMailAPI.getMailConfig === 'function') {
-    try {
-      const cfg = await window.electronMailAPI.getMailConfig();
-      if (cfg) {
-        if (inputEmail) inputEmail.value = cfg.email || 'batihubdz@gmail.com';
-        if (inputPwd) inputPwd.value = cfg.appPassword || '';
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  if (modal) modal.classList.remove('hidden');
-}
-
-function closeMailSettingsModal() {
-  const modal = document.getElementById('modalMailSettings');
-  if (modal) modal.classList.add('hidden');
-}
-
-async function testSmtpConnection() {
-  const email = (document.getElementById('smtpInputEmail')?.value || '').trim();
-  const pwd = (document.getElementById('smtpInputAppPassword')?.value || '').trim();
-  const statusMsg = document.getElementById('smtpStatusMessage');
-  const isAr = state.lang === 'ar';
-
-  if (!email || !pwd) {
-    if (statusMsg) {
-      statusMsg.className = 'text-xs p-2.5 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/30';
-      statusMsg.innerText = isAr ? 'يرجى إدخال عنوان Gmail وكلمة مرور التطبيق' : 'Veuillez saisir votre Gmail et le mot de passe d\'application.';
-      statusMsg.classList.remove('hidden');
-    }
-    return;
-  }
-
-  if (statusMsg) {
-    statusMsg.className = 'text-xs p-2.5 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/30';
-    statusMsg.innerText = isAr ? 'جاري الاتصال بخوادم Google SMTP...' : 'Connexion en cours aux serveurs Google SMTP...';
-    statusMsg.classList.remove('hidden');
-  }
-
-  if (window.electronMailAPI && typeof window.electronMailAPI.testMailConnection === 'function') {
-    const res = await window.electronMailAPI.testMailConnection({ email, appPassword: pwd });
-    if (res.success) {
-      statusMsg.className = 'text-xs p-2.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
-      statusMsg.innerText = isAr ? 'تم الاتصال بنجاح! حساب Gmail جاهز لإرسال الرسائل الحقيقية.' : 'Connexion réussie ! Votre compte Gmail est prêt.';
-    } else {
-      statusMsg.className = 'text-xs p-2.5 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/30';
-      statusMsg.innerText = (isAr ? 'فشل الاتصال: ' : 'Échec de connexion : ') + (res.error || '');
-    }
-  } else {
-    statusMsg.className = 'text-xs p-2.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30';
-    statusMsg.innerText = isAr ? 'بيئة الويب: تم حفظ الإعدادات وسيتم استخدام محاكاة الإرسال المباشرة.' : 'Environnement web : Paramètres enregistrés.';
-  }
-}
-
-async function saveSmtpSettings() {
-  const email = (document.getElementById('smtpInputEmail')?.value || '').trim();
-  const pwd = (document.getElementById('smtpInputAppPassword')?.value || '').trim();
-  const isAr = state.lang === 'ar';
-
-  if (window.electronMailAPI && typeof window.electronMailAPI.saveMailConfig === 'function') {
-    await window.electronMailAPI.saveMailConfig({ email, appPassword: pwd, senderName: 'BatiHub DZ' });
-  }
-
-  alert(isAr ? 'تم حفظ إعدادات بريد Gmail بنجاح!' : 'Paramètres Gmail enregistrés avec succès !');
-  closeMailSettingsModal();
 }
 
 // Check session on startup

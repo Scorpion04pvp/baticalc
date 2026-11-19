@@ -267,7 +267,7 @@
             <span data-i18n="auth_note_otp">سيتم إرسال رمز تحقق مكوّن من 6 أرقام إلى بريدك الإلكتروني لتأكيد ملكية الحساب وحمايته.</span>
           </div>
 
-          <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2">
+          <button type="submit" id="btnSubmitRegister" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2">
             <i class="fa-solid fa-paper-plane"></i>
             <span data-i18n="auth_btn_signup">تأكيد وإنشاء الحساب (إرسال رمز التحقق)</span>
           </button>
@@ -295,15 +295,10 @@
           </p>
         </div>
 
-        <!-- Dev / Simulation OTP helper banner -->
-        <div id="otpSimulationBanner" class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-300 text-left">
-          <div class="flex items-center justify-between font-bold mb-1">
-            <span class="flex items-center gap-1.5"><i class="fa-solid fa-bell"></i> <span data-i18n="auth_otp_preview_title">رمز التحقق المولد :</span></span>
-            <span id="simulatedOtpDisplay" class="font-mono text-base bg-bh-bg px-2.5 py-0.5 rounded border border-bh-yellow text-bh-yellow font-black tracking-widest cursor-pointer" onclick="copySimulatedOtp()" title="انقر لنسخ الرمز">------</span>
-          </div>
-          <p class="text-[10px] text-slate-400" data-i18n="auth_otp_preview_desc">
-            انقر على الرمز أعلاه لنسخه ولصقه مباشرة. (إذا قمت بربط كلمة مرور التطبيقات في إعدادات Gmail فسيصلك الرمز في صندوق بريدك الحقيقي).
-          </p>
+        <!-- Real OTP Info Banner (Code is ONLY sent to email) -->
+        <div class="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs text-emerald-300 text-center flex items-center justify-center gap-2">
+          <i class="fa-solid fa-paper-plane text-emerald-400 text-sm"></i>
+          <span data-i18n="auth_otp_sent_notice">تم إرسال رمز التحقق إلى بريدك الإلكتروني بنجاح! يرجى فتح البريد وإدخال الرمز لتأكيد الحساب.</span>
         </div>
 
         <form onsubmit="handleVerifyOtp(event)" class="space-y-4">
@@ -347,7 +342,7 @@
             </div>
           </div>
 
-          <button type="button" onclick="handleSendPasswordResetCode()" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2">
+          <button type="button" id="btnSendPasswordReset" onclick="handleSendPasswordResetCode()" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2">
             <i class="fa-solid fa-paper-plane"></i>
             <span data-i18n="auth_btn_send_reset_code">إرسال رمز إعادة التعيين</span>
           </button>
@@ -355,9 +350,9 @@
 
         <!-- Step 2: Enter code & new password -->
         <div id="forgotStepReset" class="hidden space-y-3">
-          <div id="forgotSimulationBanner" class="p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-300">
-            <span data-i18n="auth_otp_preview_title">رمز إعادة التعيين :</span>
-            <strong id="simulatedForgotOtpDisplay" class="font-mono text-bh-yellow ml-1 font-bold cursor-pointer" onclick="copySimulatedForgotOtp()">------</strong>
+          <div class="p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs text-emerald-300 text-center flex items-center justify-center gap-2">
+            <i class="fa-solid fa-envelope-circle-check text-emerald-400 text-sm"></i>
+            <span data-i18n="auth_forgot_sent_notice">تم إرسال رمز إعادة التعيين إلى بريدك الإلكتروني بنجاح.</span>
           </div>
 
           <div>
@@ -404,63 +399,15 @@
         </div>
       </div>
 
-      <!-- Footer & Gmail SMTP Setup Trigger -->
-      <div class="pt-2 border-t border-bh-border/70 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
-        <span>BatiHub DZ • Données cryptées & sécurisées</span>
-        <button onclick="openMailSettingsModal()" class="text-bh-yellow hover:underline flex items-center gap-1 font-semibold">
-          <i class="fa-solid fa-gear"></i> <span data-i18n="auth_btn_smtp_settings">إعدادات ربط Gmail الحقيقي</span>
-        </button>
+      <!-- Footer Security Notice -->
+      <div class="pt-2 border-t border-bh-border/70 flex items-center justify-center text-[11px] text-slate-500">
+        <span class="flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-emerald-400"></i> BatiHub DZ • Données cryptées & protégées</span>
       </div>
 
     </div>
   </div>
 
-  <!-- ========================================================================= -->
-  <!-- MODAL: GMAIL REAL SMTP CONFIGURATION (ربط بجيمايل لإرسال الرسائل الحقيقية)  -->
-  <!-- ========================================================================= -->
-  <div id="modalMailSettings" class="fixed inset-0 z-[10000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-bh-card border border-bh-border rounded-2xl max-w-md w-full p-6 text-left space-y-4 shadow-2xl">
-      <div class="flex items-center justify-between border-b border-bh-border pb-3">
-        <h3 class="font-heading font-bold text-white text-base flex items-center gap-2">
-          <i class="fa-brands fa-google text-bh-yellow"></i>
-          <span data-i18n="smtp_modal_title">ربط بريد Gmail لإرسال الرسائل الحقيقية</span>
-        </h3>
-        <button onclick="closeMailSettingsModal()" class="text-slate-400 hover:text-white text-lg">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
 
-      <p class="text-xs text-slate-300 leading-relaxed" data-i18n="smtp_modal_desc">
-        لإرسال رموز التحقق الحقيقية تلقائياً من حساب Gmail الخاص بك إلى الزبائن، يرجى إدخال عنوان Gmail وكلمة مرور التطبيقات (App Password) المكونة من 16 حرفاً من حساب Google.
-      </p>
-
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="block font-semibold text-slate-300 mb-1" data-i18n="smtp_lbl_email">بريد Gmail للمرسل :</label>
-          <input type="email" id="smtpInputEmail" value="batihubdz@gmail.com" placeholder="votre.compte@gmail.com" class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-white font-mono focus:border-bh-yellow outline-none font-bold text-amber-400">
-        </div>
-
-        <div>
-          <label class="block font-semibold text-slate-300 mb-1" data-i18n="smtp_lbl_app_pwd">كلمة مرور التطبيق (16 حرفاً) :</label>
-          <input type="text" id="smtpInputAppPassword" value="" placeholder="xxxx xxxx xxxx xxxx" class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-white font-mono focus:border-bh-yellow outline-none font-bold text-amber-400">
-          <span class="text-[10px] text-slate-400 block mt-1" data-i18n="smtp_hint_app_pwd">
-            يتم توليدها من: Google Account &gt; Security &gt; 2-Step Verification &gt; App Passwords.
-          </span>
-        </div>
-      </div>
-
-      <div id="smtpStatusMessage" class="text-xs p-2.5 rounded-lg hidden"></div>
-
-      <div class="flex items-center justify-end gap-2 pt-2 border-t border-bh-border">
-        <button type="button" onclick="testSmtpConnection()" class="px-3.5 py-2 rounded-xl bg-bh-bg border border-bh-border text-slate-300 hover:text-white font-bold text-xs transition">
-          <i class="fa-solid fa-plug mr-1"></i> <span data-i18n="smtp_btn_test">اختبار الاتصال</span>
-        </button>
-        <button type="button" onclick="saveSmtpSettings()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold text-xs shadow-lg transition">
-          <i class="fa-solid fa-floppy-disk mr-1"></i> <span data-i18n="smtp_btn_save">حفظ الإعدادات</span>
-        </button>
-      </div>
-    </div>
-  </div>
 
   <!-- ========================================================================= -->
   <!-- 3. MAIN APPLICATION HEADER -->
