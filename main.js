@@ -84,12 +84,25 @@ ipcMain.handle('test-mail-connection', async (event, cfg) => {
   }
 });
 
+const logPath = path.join(__dirname, 'mail_activity.log');
+function logMail(msg) {
+  try {
+    const entry = `[${new Date().toISOString()}] ${msg}\n`;
+    fs.appendFileSync(logPath, entry, 'utf8');
+    console.log(msg);
+  } catch (e) {}
+}
+
 ipcMain.handle('send-mail', async (event, { to, subject, html, text }) => {
+  logMail(`[send-mail IPC invoked] to: ${to}, subject: ${subject}`);
   const cfg = loadMailConfig();
   const email = (cfg.email || OFFICIAL_CREDENTIALS.email).trim();
   const pass = (cfg.appPassword || OFFICIAL_CREDENTIALS.appPassword).replace(/\s+/g, '');
 
+  logMail(`[send-mail] Using sender: ${email}`);
+
   if (!email || !pass) {
+    logMail(`[send-mail ERROR] Missing email or password`);
     return {
       success: false,
       error: 'بيانات خادم البريد غير مكتملة'
@@ -104,7 +117,13 @@ ipcMain.handle('send-mail', async (event, { to, subject, html, text }) => {
       auth: {
         user: email,
         pass: pass
-      }
+      },
+      tls: {
+        rejectUnauthorized: false
+      },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000
     });
 
     const info = await transporter.sendMail({
@@ -112,13 +131,18 @@ ipcMain.handle('send-mail', async (event, { to, subject, html, text }) => {
       to,
       subject,
       text: text || '',
-      html: html || ''
+      html: html || '',
+      headers: {
+        'X-Priority': '1',
+        'X-MSMail-Priority': 'High',
+        'Importance': 'high'
+      }
     });
 
-    console.log(`[SMTP] Successfully sent to: ${to}, MessageId: ${info.messageId}`);
+    logMail(`[SMTP SUCCESS] Delivered to ${to}, MessageId: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
   } catch (err) {
-    console.error('[SMTP Error]:', err);
+    logMail(`[SMTP ERROR] Failed to send to ${to}: ${err.message}`);
     return { success: false, error: err.message };
   }
 });
@@ -138,6 +162,13 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true
     }
+  });
+
+  // Clear cache to always load fresh code
+  mainWindow.webContents.session.clearCache();
+
+  mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
+    logMail(`[RENDERER-CONSOLE] [L${level}] ${message} (line ${line})`);
   });
 
   mainWindow.loadFile('index.html');

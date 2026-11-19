@@ -772,8 +772,10 @@ async function sendVerificationEmail(toEmail, code, type) {
   const isAr = state.lang === 'ar';
   const isEn = state.lang === 'en';
   const subject = type === 'register' 
-    ? (isAr ? 'رمز تأكيد وتفعيل حسابك في BatiHub DZ' : (isEn ? 'BatiHub DZ • Account Verification Code' : 'Votre code de vérification BatiHub DZ'))
-    : (isAr ? 'رمز إعادة تعيين كلمة المرور في BatiHub DZ' : (isEn ? 'BatiHub DZ • Password Reset Code' : 'Code de réinitialisation de mot de passe BatiHub DZ'));
+    ? `BatiHub DZ • Code: ${code} (تأكيد الحساب)`
+    : `BatiHub DZ • Code: ${code} (إعادة تعيين كلمة المرور)`;
+
+  const textBody = `BatiHub DZ Verification Code: ${code}\nرمز التأكيد الخاص بك هو: ${code}\nVotre code de confirmation BatiHub DZ est: ${code}\nCe code expire dans 15 minutes.`;
 
   const html = `
     <div style="font-family: Arial, sans-serif; background-color: #07090f; color: #ffffff; padding: 25px; border-radius: 12px; max-width: 520px; margin: 0 auto; border: 1px solid #1c2638; direction: ${isAr ? 'rtl' : 'ltr'};">
@@ -807,7 +809,7 @@ async function sendVerificationEmail(toEmail, code, type) {
       const res = await window.electronMailAPI.sendMail({
         to: toEmail,
         subject: subject,
-        text: `Votre code BatiHub DZ: ${code}`,
+        text: textBody,
         html: html
       });
       return res;

@@ -1,2 +1,4 @@
 ﻿node_modules/
 mail_config.json
+
+mail_activity.log
