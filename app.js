@@ -888,6 +888,16 @@ async function initAccountsDatabase() {
     } catch (e) {}
   }
 
+  // Sync worker posts from disk on Electron
+  if (window.electronDB && window.electronDB.getWorkerPosts) {
+    try {
+      const diskPosts = await window.electronDB.getWorkerPosts();
+      if (Array.isArray(diskPosts) && diskPosts.length > 0) {
+        localStorage.setItem('batihub_worker_posts_v1', JSON.stringify(diskPosts));
+      }
+    } catch (e) {}
+  }
+
   return merged;
 }
 
@@ -1345,6 +1355,7 @@ async function handleVerifyOtp(e) {
       email: userRecord.email,
       avatar: avatarSvg,
       token: 'bth_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
+      passwordHash: userRecord.passwordHash,
       signedAt: new Date().toISOString()
     };
     localStorage.setItem('batihub_user', JSON.stringify(activeSession));
@@ -1444,6 +1455,7 @@ async function handleUserLogin(e) {
     email: user.email,
     avatar: avatarSvg,
     token: 'bth_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
+    passwordHash: user.passwordHash,
     signedAt: new Date().toISOString()
   };
   localStorage.setItem('batihub_user', JSON.stringify(activeSession));
@@ -1596,16 +1608,30 @@ function checkAuthStatus() {
   if (saved) {
     try {
       const user = JSON.parse(saved);
-      if (nameDisplay) nameDisplay.innerText = user.name || 'Utilisateur';
-      if (avatarImg && user.avatar) avatarImg.src = user.avatar;
-      if (authGate) {
-        authGate.classList.add('auth-hide');
-        authGate.style.display = 'none';
+      const accounts = getStoredAccounts();
+      const accountRecord = accounts[user.email?.toLowerCase()];
+
+      // If user's password was changed in DB, invalidate saved session so they must log in with new password
+      if (accountRecord && user.passwordHash && accountRecord.passwordHash !== user.passwordHash) {
+        localStorage.removeItem('batihub_user');
+        if (window.electronDB && window.electronDB.saveActiveSession) {
+          window.electronDB.saveActiveSession(null);
+        }
+        alert(state.lang === 'ar' 
+          ? 'تم تغيير كلمة المرور لهذا الحساب. يرجى إعادة تسجيل الدخول بكلمة المرور الجديدة لحفظها.' 
+          : 'Le mot de passe de ce compte a été modifié. Veuillez vous reconnecter avec le nouveau mot de passe.');
+      } else {
+        if (nameDisplay) nameDisplay.innerText = user.name || 'Utilisateur';
+        if (avatarImg && user.avatar) avatarImg.src = user.avatar;
+        if (authGate) {
+          authGate.classList.add('auth-hide');
+          authGate.style.display = 'none';
+        }
+        if (appDashboard) {
+          appDashboard.classList.remove('hidden');
+        }
+        return true;
       }
-      if (appDashboard) {
-        appDashboard.classList.remove('hidden');
-      }
-      return true;
     } catch (e) {
       console.error('Error parsing stored user:', e);
     }
@@ -2806,7 +2832,32 @@ function switchTab(tabId) {
   const target = document.getElementById(tabId);
   if (target) {
     target.classList.remove('hidden');
-    window.scrollTo({ top: 350, behavior: 'smooth' });
+    if (window.innerWidth <= 768) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 350, behavior: 'smooth' });
+    }
+  }
+
+  // Update mobile bottom nav active classes
+  const mNavCalc = document.getElementById('mNavCalc');
+  const mNavWorkers = document.getElementById('mNavWorkers');
+  if (mNavCalc && mNavWorkers) {
+    if (tabId === 'tab-worker-board') {
+      mNavWorkers.classList.add('text-bh-yellow');
+      mNavWorkers.classList.remove('text-slate-400');
+      mNavCalc.classList.remove('text-bh-yellow');
+      mNavCalc.classList.add('text-slate-400');
+    } else {
+      mNavCalc.classList.add('text-bh-yellow');
+      mNavCalc.classList.remove('text-slate-400');
+      mNavWorkers.classList.remove('text-bh-yellow');
+      mNavWorkers.classList.add('text-slate-400');
+    }
+  }
+
+  if (tabId === 'tab-worker-board') {
+    renderWorkerPostsFeed();
   }
 }
 
@@ -2822,6 +2873,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Start yellow splash screen loader
   initSplashScreen();
+
+  // Initialize Real-time Worker Board Sync
+  initWorkerRealtimeSync();
 
   // Language buttons
   document.getElementById('langFR')?.addEventListener('click', () => setLanguage('fr'));
@@ -3861,6 +3915,928 @@ function checkPwaInstallState() {
 window.addEventListener('load', () => {
   setTimeout(checkPwaInstallState, 1200);
 });
+
+// =========================================================================
+// 12. WORKER & ARTISAN REQUESTS BOARD (سوق العمل وطلب الحرفيين)
+// REAL-TIME PC & MOBILE CROSS-DEVICE SYNCHRONIZATION
+// =========================================================================
+
+let currentWorkerFilter = 'all';
+let selectedPostImageDataUrl = null;
+const activeCommentImages = {};
+const editingCommentState = {};
+const openCommentsMap = {};
+
+let currentDeviceId = localStorage.getItem('bh_device_id');
+if (!currentDeviceId) {
+  currentDeviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+  localStorage.setItem('bh_device_id', currentDeviceId);
+}
+
+function getCurrentSessionUser() {
+  try {
+    const raw = localStorage.getItem('batihub_user');
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+const SEED_WORKER_POSTS = [
+  {
+    id: 'wp_seed_1',
+    authorEmail: 'mouhanedguellif16@gmail.com',
+    authorName: 'fateh fateh',
+    authorAvatar: 'assets/batihub_logo.png',
+    trade: 'بناء (Maçonnerie)',
+    location: 'الجزائر العاصمة (درارية)',
+    description: 'مطلوب بناء محترف وخبير في بناء الجدران وصب الساريات الخرسانية والتلبيس لورشة فيلا. العمل متوفر فوراً مع توفير كافة مواد البناء والعتاد.',
+    phone: '0550123456',
+    image: null,
+    likes: ['mouhanedguellif16@gmail.com', 'client1@batihub.dz'],
+    comments: [
+      {
+        id: 'wc_seed_c1',
+        authorEmail: 'artisan.alger@batihub.dz',
+        authorName: 'عمي رشيد البناء',
+        authorAvatar: '',
+        text: 'السلام عليكم أخي، أنا متوفر مع فريقي من 3 عمال متمرسين. تواصل معي في الهاتف أو الواتساب نتفاهمو.',
+        image: null,
+        timestamp: Date.now() - 3600000 * 2,
+        edited: false
+      }
+    ],
+    timestamp: Date.now() - 3600000 * 5,
+    updatedAt: Date.now() - 3600000 * 5,
+    deleted: false
+  },
+  {
+    id: 'wp_seed_2',
+    authorEmail: 'kamal.electric@gmail.com',
+    authorName: 'كمال كهربائي',
+    authorAvatar: '',
+    trade: 'كهرباء معمارية (Électricité)',
+    location: 'سطيف (العلمة)',
+    description: 'كهربائي معماري وصناعي متمرس، أقوم بجميع أعمال التمديدات الكهربائية، لوحات التوزيع الرئيسية، الإنارة المخفية ليد، وتركيب كاميرات المراقبة بحرفية عالية.',
+    phone: '0661234567',
+    image: null,
+    likes: ['mouhanedguellif16@gmail.com'],
+    comments: [],
+    timestamp: Date.now() - 3600000 * 8,
+    updatedAt: Date.now() - 3600000 * 8,
+    deleted: false
+  },
+  {
+    id: 'wp_seed_3',
+    authorEmail: 'amine.plomb@gmail.com',
+    authorName: 'أمين بلومبي',
+    authorAvatar: '',
+    trade: 'ترصيص وصحي (Plomberie)',
+    location: 'وهران (بئر الجير)',
+    description: 'سباك صحي محترف: تمديد شبكات الغاز والماء بتقنية البولي إيثيلين والـ PPR، تركيب التدفئة المركزية، وتركيب خزانات المياه والمضخات ومعدات الحمامات العصرية.',
+    phone: '0770987654',
+    image: null,
+    likes: ['client2@batihub.dz', 'mouhanedguellif16@gmail.com'],
+    comments: [
+      {
+        id: 'wc_seed_c2',
+        authorEmail: 'mouhanedguellif16@gmail.com',
+        authorName: 'fateh fateh',
+        authorAvatar: 'assets/batihub_logo.png',
+        text: 'خدمة ممتازة بالتوفيق خويا أمين ربي يوفقك',
+        image: null,
+        timestamp: Date.now() - 3600000 * 1,
+        edited: false
+      }
+    ],
+    timestamp: Date.now() - 3600000 * 12,
+    updatedAt: Date.now() - 3600000 * 12,
+    deleted: false
+  }
+];
+
+function getStoredWorkerPosts() {
+  try {
+    const raw = localStorage.getItem('batihub_worker_posts_v1');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.error('Error reading stored worker posts:', e);
+  }
+  localStorage.setItem('batihub_worker_posts_v1', JSON.stringify(SEED_WORKER_POSTS));
+  return [...SEED_WORKER_POSTS];
+}
+
+function saveStoredWorkerPosts(posts) {
+  try {
+    localStorage.setItem('batihub_worker_posts_v1', JSON.stringify(posts));
+    if (window.electronDB && window.electronDB.saveWorkerPosts) {
+      window.electronDB.saveWorkerPosts(posts);
+    }
+  } catch (e) {
+    console.error('Error saving worker posts:', e);
+  }
+}
+
+// -------------------------------------------------------------
+// Real-time Cloud Sync Engine (ntfy.sh Server-Sent Events & Polling)
+// -------------------------------------------------------------
+const WORKER_SYNC_TOPIC = 'https://ntfy.sh/batihub_dz_workers_v1';
+
+async function broadcastWorkerAction(actionType, payload) {
+  try {
+    const messageBody = JSON.stringify({
+      action: actionType,
+      payload: payload,
+      senderDeviceId: currentDeviceId,
+      timestamp: Date.now()
+    });
+    await fetch(WORKER_SYNC_TOPIC, {
+      method: 'POST',
+      body: messageBody,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (err) {
+    console.warn('[Sync] Broadcast failed, will sync via polling:', err);
+  }
+}
+
+let workerEventSource = null;
+let lastSyncedMessageTime = Date.now() - 3600000 * 12;
+
+function initWorkerRealtimeSync() {
+  if (workerEventSource) return;
+
+  // 1. Initial catch-up poll from last 12 hours
+  pollWorkerSyncHistory();
+
+  // 2. Real-time SSE connection
+  try {
+    workerEventSource = new EventSource(`${WORKER_SYNC_TOPIC}/sse`);
+    workerEventSource.onmessage = (event) => {
+      try {
+        const parsedWrapper = JSON.parse(event.data);
+        if (!parsedWrapper.message) return;
+        const packet = JSON.parse(parsedWrapper.message);
+        if (packet.senderDeviceId === currentDeviceId) return; // Ignore own echoes
+        handleIncomingWorkerSyncPacket(packet);
+      } catch (e) {}
+    };
+    workerEventSource.onerror = (err) => {
+      console.warn('[Sync] SSE connection notice:', err);
+    };
+  } catch (e) {
+    console.warn('[Sync] SSE not available, falling back to polling');
+  }
+
+  // 3. Fallback polling every 12 seconds
+  setInterval(pollWorkerSyncHistory, 12000);
+}
+
+async function pollWorkerSyncHistory() {
+  try {
+    const res = await fetch(`${WORKER_SYNC_TOPIC}/json?poll=1&since=12h`);
+    if (!res.ok) return;
+    const text = await res.text();
+    const lines = text.trim().split('\n');
+    lines.forEach(line => {
+      if (!line.trim()) return;
+      try {
+        const obj = JSON.parse(line);
+        if (obj.time && obj.time * 1000 <= lastSyncedMessageTime) return;
+        if (obj.time) lastSyncedMessageTime = obj.time * 1000;
+        if (!obj.message) return;
+        const packet = JSON.parse(obj.message);
+        if (packet.senderDeviceId === currentDeviceId) return;
+        handleIncomingWorkerSyncPacket(packet);
+      } catch (e) {}
+    });
+  } catch (e) {}
+}
+
+function handleIncomingWorkerSyncPacket(packet) {
+  const { action, payload } = packet;
+  let posts = getStoredWorkerPosts();
+  let changed = false;
+
+  if (action === 'publish_post') {
+    if (!posts.some(p => p.id === payload.id)) {
+      posts.unshift(payload);
+      changed = true;
+    }
+  } else if (action === 'edit_post') {
+    const idx = posts.findIndex(p => p.id === payload.id);
+    if (idx !== -1) {
+      posts[idx] = { ...posts[idx], ...payload };
+      changed = true;
+    }
+  } else if (action === 'delete_post') {
+    const idx = posts.findIndex(p => p.id === payload.postId);
+    if (idx !== -1) {
+      posts[idx].deleted = true;
+      posts = posts.filter(p => p.id !== payload.postId);
+      changed = true;
+    }
+  } else if (action === 'toggle_like') {
+    const post = posts.find(p => p.id === payload.postId);
+    if (post) {
+      post.likes = payload.likes;
+      changed = true;
+    }
+  } else if (action === 'add_comment') {
+    const post = posts.find(p => p.id === payload.postId);
+    if (post) {
+      if (!post.comments) post.comments = [];
+      if (!post.comments.some(c => c.id === payload.comment.id)) {
+        post.comments.push(payload.comment);
+        changed = true;
+      }
+    }
+  } else if (action === 'edit_comment') {
+    const post = posts.find(p => p.id === payload.postId);
+    if (post && post.comments) {
+      const cIdx = post.comments.findIndex(c => c.id === payload.commentId);
+      if (cIdx !== -1) {
+        post.comments[cIdx].text = payload.text;
+        post.comments[cIdx].edited = true;
+        post.comments[cIdx].updatedAt = payload.updatedAt || Date.now();
+        changed = true;
+      }
+    }
+  } else if (action === 'delete_comment') {
+    const post = posts.find(p => p.id === payload.postId);
+    if (post && post.comments) {
+      post.comments = post.comments.filter(c => c.id !== payload.commentId);
+      changed = true;
+    }
+  }
+
+  if (changed) {
+    saveStoredWorkerPosts(posts);
+    const workerTab = document.getElementById('tab-worker-board');
+    if (workerTab && !workerTab.classList.contains('hidden')) {
+      renderWorkerPostsFeed();
+    }
+  }
+}
+
+// -------------------------------------------------------------
+// 1-Hour Anti-Spam Rate Limit Check
+// -------------------------------------------------------------
+function canUserPostWorkerRequest(userEmail) {
+  if (!userEmail) return true;
+  const posts = getStoredWorkerPosts();
+  const oneHourAgo = Date.now() - 3600 * 1000;
+  const activePost = posts.find(p => 
+    !p.deleted && 
+    p.authorEmail?.toLowerCase() === userEmail.toLowerCase() && 
+    p.timestamp > oneHourAgo
+  );
+
+  if (activePost) {
+    const remainingMinutes = Math.ceil((activePost.timestamp + 3600000 - Date.now()) / 60000);
+    const isAr = state.lang === 'ar';
+    alert(isAr 
+      ? `⚠️ حماية من التكرار والإزعاج:\n\nمسموح بنشر طلب واحد فقط كل ساعة.\nيرجى الانتظار (${remainingMinutes} دقيقة) أو حذف منشورك السابق لتتمكن من نشر طلب جديد فوراً.`
+      : `⚠️ Limite anti-spam :\n\nUne seule annonce par heure est autorisée.\nVeuillez patienter (${remainingMinutes} min) ou supprimer votre annonce précédente pour en publier une nouvelle immédiatement.`);
+    return false;
+  }
+  return true;
+}
+
+// -------------------------------------------------------------
+// Image Compression for Lightweight Cross-Device Sync
+// -------------------------------------------------------------
+function compressImageFile(file, maxDimension = 640, quality = 0.65) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > maxDimension) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          }
+        } else {
+          if (height > maxDimension) {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => resolve(null);
+      img.src = e.target.result;
+    };
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(file);
+  });
+}
+
+// -------------------------------------------------------------
+// UI Modals & Handlers
+// -------------------------------------------------------------
+function openCreateWorkerPostModal() {
+  const currentUser = getCurrentSessionUser();
+  if (!currentUser || !currentUser.email) {
+    alert(state.lang === 'ar' ? 'يرجى تسجيل الدخول أولاً لتتمكن من نشر طلب عامل.' : 'Veuillez vous connecter pour publier une annonce.');
+    return;
+  }
+  if (!canUserPostWorkerRequest(currentUser.email)) {
+    return;
+  }
+  document.getElementById('modalCreateWorkerPost').classList.remove('hidden');
+}
+
+function closeCreateWorkerPostModal() {
+  document.getElementById('modalCreateWorkerPost').classList.add('hidden');
+}
+
+async function handlePostImageSelect(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const dataUrl = await compressImageFile(file, 640, 0.65);
+  selectedPostImageDataUrl = dataUrl;
+  const nameEl = document.getElementById('postImageFileName');
+  const previewCont = document.getElementById('postImagePreviewContainer');
+  const previewImg = document.getElementById('postImagePreview');
+  const removeBtn = document.getElementById('btnRemovePostImage');
+  if (nameEl) nameEl.innerText = file.name;
+  if (previewImg) previewImg.src = dataUrl;
+  if (previewCont) previewCont.classList.remove('hidden');
+  if (removeBtn) removeBtn.classList.remove('hidden');
+}
+
+function clearPostImageSelection() {
+  selectedPostImageDataUrl = null;
+  const input = document.getElementById('inputPostImage');
+  if (input) input.value = '';
+  const nameEl = document.getElementById('postImageFileName');
+  const previewCont = document.getElementById('postImagePreviewContainer');
+  const removeBtn = document.getElementById('btnRemovePostImage');
+  if (nameEl) nameEl.innerText = 'لم يتم اختيار صورة';
+  if (previewCont) previewCont.classList.add('hidden');
+  if (removeBtn) removeBtn.classList.add('hidden');
+}
+
+async function handlePublishWorkerPost(event) {
+  event.preventDefault();
+  const currentUser = getCurrentSessionUser();
+  if (!currentUser || !currentUser.email) {
+    alert(state.lang === 'ar' ? 'يرجى تسجيل الدخول أولاً لتتمكن من نشر طلب عامل.' : 'Veuillez vous connecter pour publier une annonce.');
+    return;
+  }
+
+  // 1-Hour Anti-Spam check
+  if (!canUserPostWorkerRequest(currentUser.email)) {
+    return;
+  }
+
+  const trade = document.getElementById('inputPostTrade').value;
+  const location = document.getElementById('inputPostLocation').value.trim();
+  const description = document.getElementById('inputPostDescription').value.trim();
+  const phone = document.getElementById('inputPostPhone').value.trim();
+
+  if (!location || !description || !phone) {
+    alert(state.lang === 'ar' ? 'يرجى ملء جميع الحقول المطلوبة.' : 'Veuillez remplir tous les champs obligatoires.');
+    return;
+  }
+
+  const newPost = {
+    id: 'wp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+    authorEmail: currentUser.email,
+    authorName: currentUser.name || 'مستخدم BatiHub',
+    authorAvatar: currentUser.avatar || 'assets/batihub_logo.png',
+    trade: trade,
+    location: location,
+    description: description,
+    phone: phone,
+    image: selectedPostImageDataUrl || null,
+    likes: [],
+    comments: [],
+    timestamp: Date.now(),
+    updatedAt: Date.now(),
+    deleted: false
+  };
+
+  const posts = getStoredWorkerPosts();
+  posts.unshift(newPost);
+  saveStoredWorkerPosts(posts);
+
+  // Broadcast to cloud for real-time mobile and desktop sync
+  broadcastWorkerAction('publish_post', newPost);
+
+  document.getElementById('formCreateWorkerPost').reset();
+  clearPostImageSelection();
+  closeCreateWorkerPostModal();
+
+  renderWorkerPostsFeed();
+  alert(state.lang === 'ar' ? 'تم نشر طلب العامل بنجاح وظهر للجميع في الحاسوب والهاتف!' : 'Votre annonce a été publiée avec succès !');
+}
+
+function handleDeleteWorkerPost(postId) {
+  const currentUser = getCurrentSessionUser();
+  if (!currentUser) return;
+  const posts = getStoredWorkerPosts();
+  const post = posts.find(p => p.id === postId);
+  if (!post) return;
+
+  if (post.authorEmail.toLowerCase() !== currentUser.email.toLowerCase()) {
+    alert(state.lang === 'ar' ? 'لا يمكنك حذف منشور لا تملكه.' : 'Vous ne pouvez pas supprimer cette annonce.');
+    return;
+  }
+
+  const isAr = state.lang === 'ar';
+  if (confirm(isAr ? 'هل أنت متأكد من حذف هذا المنشور؟\n\n(ملاحظة: حذفك للمنشور يسمح لك فوراً بنشر طلب جديد دون انتظار انتهاء الساعة)' : 'Voulez-vous supprimer cette annonce ?')) {
+    const updatedPosts = posts.filter(p => p.id !== postId);
+    saveStoredWorkerPosts(updatedPosts);
+    broadcastWorkerAction('delete_post', { postId: postId });
+    renderWorkerPostsFeed();
+    alert(isAr ? 'تم حذف المنشور بنجاح! يمكنك الآن نشر طلب جديد فوراً.' : 'Annonce supprimée. Vous pouvez publier à nouveau.');
+  }
+}
+
+function openEditWorkerPostModal(postId) {
+  const posts = getStoredWorkerPosts();
+  const post = posts.find(p => p.id === postId);
+  if (!post) return;
+
+  document.getElementById('editPostId').value = post.id;
+  document.getElementById('editPostTrade').value = post.trade;
+  document.getElementById('editPostLocation').value = post.location;
+  document.getElementById('editPostDescription').value = post.description;
+  document.getElementById('editPostPhone').value = post.phone;
+
+  document.getElementById('modalEditWorkerPost').classList.remove('hidden');
+}
+
+function closeEditWorkerPostModal() {
+  document.getElementById('modalEditWorkerPost').classList.add('hidden');
+}
+
+function handleSaveEditedWorkerPost(event) {
+  event.preventDefault();
+  const postId = document.getElementById('editPostId').value;
+  const posts = getStoredWorkerPosts();
+  const post = posts.find(p => p.id === postId);
+  if (!post) return;
+
+  post.trade = document.getElementById('editPostTrade').value;
+  post.location = document.getElementById('editPostLocation').value.trim();
+  post.description = document.getElementById('editPostDescription').value.trim();
+  post.phone = document.getElementById('editPostPhone').value.trim();
+  post.updatedAt = Date.now();
+
+  saveStoredWorkerPosts(posts);
+  broadcastWorkerAction('edit_post', {
+    id: post.id,
+    trade: post.trade,
+    location: post.location,
+    description: post.description,
+    phone: post.phone,
+    updatedAt: post.updatedAt
+  });
+
+  closeEditWorkerPostModal();
+  renderWorkerPostsFeed();
+  alert(state.lang === 'ar' ? 'تم تحديث تفاصيل المنشور بنجاح!' : 'Annonce modifiée avec succès !');
+}
+
+function toggleWorkerPostLike(postId) {
+  const currentUser = getCurrentSessionUser();
+  if (!currentUser || !currentUser.email) {
+    alert(state.lang === 'ar' ? 'يرجى تسجيل الدخول للتفاعل والإعجاب بالمنشور.' : 'Veuillez vous connecter pour aimer cette annonce.');
+    return;
+  }
+  const posts = getStoredWorkerPosts();
+  const post = posts.find(p => p.id === postId);
+  if (!post) return;
+
+  if (!post.likes) post.likes = [];
+  const userEmail = currentUser.email.toLowerCase();
+  const idx = post.likes.map(e => e.toLowerCase()).indexOf(userEmail);
+  if (idx !== -1) {
+    post.likes.splice(idx, 1);
+  } else {
+    post.likes.push(currentUser.email);
+  }
+
+  saveStoredWorkerPosts(posts);
+  broadcastWorkerAction('toggle_like', { postId: postId, likes: post.likes });
+  renderWorkerPostsFeed();
+}
+
+function togglePostComments(postId) {
+  openCommentsMap[postId] = !openCommentsMap[postId];
+  const drawer = document.getElementById(`comments-drawer-${postId}`);
+  if (drawer) {
+    drawer.classList.toggle('hidden', !openCommentsMap[postId]);
+  }
+}
+
+async function handleCommentImageSelect(event, postId) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const dataUrl = await compressImageFile(file, 480, 0.6);
+  activeCommentImages[postId] = dataUrl;
+  const previewEl = document.getElementById(`commentImgPreview-${postId}`);
+  if (previewEl) {
+    previewEl.src = dataUrl;
+    previewEl.classList.remove('hidden');
+  }
+}
+
+async function handleAddWorkerComment(postId, event) {
+  if (event) event.preventDefault();
+  const currentUser = getCurrentSessionUser();
+  if (!currentUser || !currentUser.email) {
+    alert(state.lang === 'ar' ? 'يرجى تسجيل الدخول لإضافة تعليق.' : 'Veuillez vous connecter pour commenter.');
+    return;
+  }
+
+  const input = document.getElementById(`commentInput-${postId}`);
+  if (!input) return;
+  const text = input.value.trim();
+  const attachedImage = activeCommentImages[postId] || null;
+
+  if (!text && !attachedImage) return;
+
+  const posts = getStoredWorkerPosts();
+  const post = posts.find(p => p.id === postId);
+  if (!post) return;
+  if (!post.comments) post.comments = [];
+
+  const newComment = {
+    id: 'wc_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+    authorEmail: currentUser.email,
+    authorName: currentUser.name || 'مستخدم',
+    authorAvatar: currentUser.avatar || 'assets/batihub_logo.png',
+    text: text,
+    image: attachedImage,
+    timestamp: Date.now(),
+    edited: false
+  };
+
+  post.comments.push(newComment);
+  saveStoredWorkerPosts(posts);
+
+  broadcastWorkerAction('add_comment', { postId: postId, comment: newComment });
+
+  input.value = '';
+  delete activeCommentImages[postId];
+  openCommentsMap[postId] = true;
+
+  renderWorkerPostsFeed();
+}
+
+function handleStartEditComment(postId, commentId) {
+  editingCommentState[`${postId}_${commentId}`] = true;
+  renderWorkerPostsFeed();
+}
+
+function handleCancelEditComment(postId, commentId) {
+  delete editingCommentState[`${postId}_${commentId}`];
+  renderWorkerPostsFeed();
+}
+
+function handleSaveEditedWorkerComment(postId, commentId) {
+  const input = document.getElementById(`editCommentInput-${postId}-${commentId}`);
+  if (!input) return;
+  const newText = input.value.trim();
+  if (!newText) return;
+
+  const posts = getStoredWorkerPosts();
+  const post = posts.find(p => p.id === postId);
+  if (!post || !post.comments) return;
+  const comment = post.comments.find(c => c.id === commentId);
+  if (!comment) return;
+
+  comment.text = newText;
+  comment.edited = true;
+  comment.updatedAt = Date.now();
+
+  delete editingCommentState[`${postId}_${commentId}`];
+  saveStoredWorkerPosts(posts);
+  broadcastWorkerAction('edit_comment', {
+    postId: postId,
+    commentId: commentId,
+    text: newText,
+    updatedAt: comment.updatedAt
+  });
+
+  renderWorkerPostsFeed();
+}
+
+function handleDeleteWorkerComment(postId, commentId) {
+  const currentUser = getCurrentSessionUser();
+  if (!currentUser) return;
+  const posts = getStoredWorkerPosts();
+  const post = posts.find(p => p.id === postId);
+  if (!post || !post.comments) return;
+  const comment = post.comments.find(c => c.id === commentId);
+  if (!comment) return;
+
+  if (comment.authorEmail.toLowerCase() !== currentUser.email.toLowerCase()) {
+    alert(state.lang === 'ar' ? 'لا يمكنك حذف تعليق شخص آخر.' : 'Vous ne pouvez pas supprimer ce commentaire.');
+    return;
+  }
+
+  if (confirm(state.lang === 'ar' ? 'هل أنت متأكد من حذف هذا التعليق؟' : 'Supprimer ce commentaire ?')) {
+    post.comments = post.comments.filter(c => c.id !== commentId);
+    saveStoredWorkerPosts(posts);
+    broadcastWorkerAction('delete_comment', { postId: postId, commentId: commentId });
+    renderWorkerPostsFeed();
+  }
+}
+
+function openImageLightbox(src) {
+  const box = document.getElementById('modalImageLightbox');
+  const img = document.getElementById('lightboxImg');
+  if (box && img) {
+    img.src = src;
+    box.classList.remove('hidden');
+  }
+}
+
+function closeImageLightbox() {
+  const box = document.getElementById('modalImageLightbox');
+  if (box) box.classList.add('hidden');
+}
+
+function filterWorkerFeed(trade, btn) {
+  currentWorkerFilter = trade;
+  document.querySelectorAll('.worker-filter-pill').forEach(b => {
+    b.classList.remove('bg-bh-yellow', 'text-slate-950', 'border-bh-yellow', 'active-filter');
+    b.classList.add('bg-bh-card', 'text-slate-300', 'border-bh-border');
+  });
+  if (btn) {
+    btn.classList.add('bg-bh-yellow', 'text-slate-950', 'border-bh-yellow', 'active-filter');
+    btn.classList.remove('bg-bh-card', 'text-slate-300', 'border-bh-border');
+  }
+  renderWorkerPostsFeed();
+}
+
+function formatPostTime(ts) {
+  if (!ts) return '';
+  const diffSec = Math.floor((Date.now() - ts) / 1000);
+  const isAr = state.lang === 'ar';
+  if (diffSec < 60) return isAr ? 'الآن' : 'À l\'instant';
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return isAr ? `منذ ${diffMin} دقيقة` : `Il y a ${diffMin} min`;
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) return isAr ? `منذ ${diffHours} ساعة` : `Il y a ${diffHours} h`;
+  const diffDays = Math.floor(diffHours / 24);
+  return isAr ? `منذ ${diffDays} يوم` : `Il y a ${diffDays} j`;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderWorkerPostsFeed() {
+  const container = document.getElementById('workerPostsFeedContainer');
+  if (!container) return;
+
+  const currentUser = getCurrentSessionUser();
+  const userEmail = currentUser?.email?.toLowerCase() || '';
+  const posts = getStoredWorkerPosts().filter(p => !p.deleted);
+
+  let filtered = posts;
+  if (currentWorkerFilter !== 'all') {
+    filtered = posts.filter(p => p.trade === currentWorkerFilter);
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="bg-bh-card border border-bh-border rounded-2xl p-10 text-center space-y-3">
+        <div class="w-16 h-16 mx-auto rounded-full bg-bh-bg border border-bh-border flex items-center justify-center text-bh-yellow text-2xl">
+          <i class="fa-solid fa-helmet-safety"></i>
+        </div>
+        <h4 class="text-base font-bold text-white">لا توجد طلبات عمال معروضة حالياً في هذا التخصص</h4>
+        <p class="text-xs text-slate-400 max-w-md mx-auto">كن أول من ينشر طلب أو عرض عمل في هذا المجال وسيتلقاه الحرفيون فوراً في الحاسوب والهاتف!</p>
+        <button onclick="openCreateWorkerPostModal()" class="px-4 py-2 bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold rounded-xl text-xs shadow-lg transition">
+          <i class="fa-solid fa-plus mr-1"></i> نشر طلب عامل الآن
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = filtered.map(post => {
+    const isAuthor = userEmail && post.authorEmail?.toLowerCase() === userEmail;
+    const liked = userEmail && (post.likes || []).map(e => e.toLowerCase()).includes(userEmail);
+    const likesCount = (post.likes || []).length;
+    const comments = post.comments || [];
+    const commentsCount = comments.length;
+    const isCommentsOpen = openCommentsMap[post.id] === true;
+
+    let tradeIcon = 'fa-hammer';
+    if (post.trade.includes('بناء')) tradeIcon = 'fa-trowel-bricks';
+    else if (post.trade.includes('كهرباء')) tradeIcon = 'fa-bolt';
+    else if (post.trade.includes('ترصيص')) tradeIcon = 'fa-faucet-drip';
+    else if (post.trade.includes('دهان')) tradeIcon = 'fa-paint-roller';
+    else if (post.trade.includes('بلاط')) tradeIcon = 'fa-border-all';
+    else if (post.trade.includes('ألمنيوم')) tradeIcon = 'fa-window-maximize';
+    else if (post.trade.includes('حدادة')) tradeIcon = 'fa-cubes-stacked';
+
+    const timeStr = formatPostTime(post.timestamp);
+
+    return `
+      <article class="bg-bh-card border border-bh-border hover:border-bh-yellow/30 rounded-2xl p-5 shadow-xl transition space-y-4" dir="rtl">
+        
+        <!-- Post Header -->
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <img src="${post.authorAvatar || 'assets/batihub_logo.png'}" alt="${escapeHtml(post.authorName)}" class="w-11 h-11 rounded-full object-cover border border-bh-border bg-bh-bg shadow-sm shrink-0">
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="font-bold text-white text-sm">${escapeHtml(post.authorName)}</h3>
+                ${isAuthor ? '<span class="text-[9px] bg-bh-yellow/20 text-bh-yellow border border-bh-yellow/30 px-1.5 py-0.5 rounded-md font-bold">أنت (الناشر)</span>' : ''}
+              </div>
+              <div class="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
+                <span>${timeStr}</span>
+                <span>•</span>
+                <span class="text-amber-400 font-medium"><i class="fa-solid fa-location-dot text-[10px] ml-0.5"></i> ${escapeHtml(post.location)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <span class="px-2.5 py-1 rounded-xl bg-bh-bg border border-bh-border text-bh-yellow text-[11px] font-bold flex items-center gap-1.5 shrink-0">
+              <i class="fa-solid ${tradeIcon}"></i>
+              <span>${escapeHtml(post.trade)}</span>
+            </span>
+
+            ${isAuthor ? `
+              <div class="flex items-center gap-1 mr-1">
+                <button onclick="openEditWorkerPostModal('${post.id}')" title="تعديل المنشور" class="w-7 h-7 rounded-lg bg-bh-bg hover:bg-slate-800 text-slate-300 hover:text-bh-yellow flex items-center justify-center text-xs transition border border-bh-border">
+                  <i class="fa-solid fa-pencil"></i>
+                </button>
+                <button onclick="handleDeleteWorkerPost('${post.id}')" title="حذف المنشور (يسمح لك بالنشر مجدداً فوراً)" class="w-7 h-7 rounded-lg bg-bh-bg hover:bg-rose-950/40 text-slate-300 hover:text-rose-400 flex items-center justify-center text-xs transition border border-bh-border">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+
+        <!-- Post Content / Description -->
+        <p class="text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-line select-text">
+          ${escapeHtml(post.description)}
+        </p>
+
+        <!-- Optional Post Image -->
+        ${post.image ? `
+          <div class="relative group cursor-pointer overflow-hidden rounded-xl border border-bh-border bg-black/40 max-h-80 flex items-center justify-center" onclick="openImageLightbox('${post.image}')">
+            <img src="${post.image}" alt="صورة العمل" class="max-h-80 w-full object-cover group-hover:scale-102 transition duration-300">
+            <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-sm font-bold gap-2">
+              <i class="fa-solid fa-expand"></i> <span>اضغط لتكبير الصورة</span>
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- Direct Contact Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-bh-bg/80 border border-bh-border">
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-400 font-medium">الهاتف :</span>
+            <span class="text-sm font-mono font-bold text-white tracking-wider">${escapeHtml(post.phone)}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <a href="tel:${escapeHtml(post.phone)}" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 active:scale-95">
+              <i class="fa-solid fa-phone"></i>
+              <span>اتصال مباشر</span>
+            </a>
+            <a href="https://wa.me/213${escapeHtml(post.phone.replace(/^0/, ''))}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg bg-green-700/30 hover:bg-green-700/50 text-green-300 border border-green-600/40 text-xs font-bold transition flex items-center gap-1.5">
+              <i class="fa-brands fa-whatsapp"></i>
+              <span>واتساب</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Post Interactions (Likes & Comments toggle) -->
+        <div class="flex items-center justify-between pt-2 border-t border-bh-border text-xs">
+          <div class="flex items-center gap-3">
+            <button onclick="toggleWorkerPostLike('${post.id}')" class="px-3 py-1.5 rounded-xl ${liked ? 'bg-amber-500/20 text-bh-yellow border border-bh-yellow/40' : 'bg-bh-bg hover:bg-slate-800 text-slate-400 border border-bh-border'} transition flex items-center gap-1.5 active:scale-90 font-bold">
+              <i class="fa-solid fa-thumbs-up ${liked ? 'text-bh-yellow animate-bounce' : ''}"></i>
+              <span>جام (${likesCount})</span>
+            </button>
+
+            <button onclick="togglePostComments('${post.id}')" class="px-3 py-1.5 rounded-xl bg-bh-bg hover:bg-slate-800 text-slate-300 hover:text-white border border-bh-border transition flex items-center gap-1.5">
+              <i class="fa-solid fa-comment text-slate-400"></i>
+              <span>تعليقات (${commentsCount})</span>
+              <i class="fa-solid fa-chevron-${isCommentsOpen ? 'up' : 'down'} text-[10px] mr-1"></i>
+            </button>
+          </div>
+
+          <span class="text-[11px] text-slate-500 font-mono">ID: ${post.id.substring(3, 8)}</span>
+        </div>
+
+        <!-- Comments Drawer -->
+        <div id="comments-drawer-${post.id}" class="${isCommentsOpen ? '' : 'hidden'} space-y-3 pt-3 border-t border-bh-border/70">
+          
+          <!-- Existing Comments List -->
+          <div class="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+            ${comments.length === 0 ? `
+              <p class="text-center text-xs text-slate-500 py-3">لا توجد تعليقات بعد. كن أول من يترك تعليقاً أو استفساراً!</p>
+            ` : comments.map(comment => {
+              const isCommentAuthor = userEmail && comment.authorEmail?.toLowerCase() === userEmail;
+              const isEditing = editingCommentState[`${post.id}_${comment.id}`] === true;
+
+              if (isEditing) {
+                return `
+                  <div class="p-3 rounded-xl bg-bh-bg border border-bh-yellow/40 space-y-2">
+                    <span class="text-[11px] text-bh-yellow font-bold">تعديل تعليقك :</span>
+                    <textarea id="editCommentInput-${post.id}-${comment.id}" rows="2" class="w-full bg-bh-card border border-bh-border rounded-lg p-2 text-xs text-white focus:outline-none focus:border-bh-yellow resize-none">${escapeHtml(comment.text)}</textarea>
+                    <div class="flex items-center justify-end gap-2">
+                      <button onclick="handleCancelEditComment('${post.id}', '${comment.id}')" class="px-2.5 py-1 rounded-lg text-xs text-slate-400 hover:text-white">إلغاء</button>
+                      <button onclick="handleSaveEditedWorkerComment('${post.id}', '${comment.id}')" class="px-3 py-1 rounded-lg bg-bh-yellow text-slate-950 font-bold text-xs">حفظ</button>
+                    </div>
+                  </div>
+                `;
+              }
+
+              return `
+                <div class="flex items-start gap-2.5 p-2.5 rounded-xl bg-bh-bg/60 border border-bh-border/60">
+                  <img src="${comment.authorAvatar || 'assets/batihub_logo.png'}" alt="${escapeHtml(comment.authorName)}" class="w-7 h-7 rounded-full object-cover border border-bh-border shrink-0 mt-0.5">
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between gap-2">
+                      <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-bold text-white">${escapeHtml(comment.authorName)}</span>
+                        ${isCommentAuthor ? '<span class="text-[9px] text-bh-yellow font-bold">(أنت)</span>' : ''}
+                        <span class="text-[10px] text-slate-500">${formatPostTime(comment.timestamp)}</span>
+                        ${comment.edited ? '<span class="text-[9px] text-slate-500 font-mono">(معدل)</span>' : ''}
+                      </div>
+
+                      ${isCommentAuthor ? `
+                        <div class="flex items-center gap-1">
+                          <button onclick="handleStartEditComment('${post.id}', '${comment.id}')" title="تعديل التعليق" class="text-slate-400 hover:text-bh-yellow text-[11px] px-1">
+                            <i class="fa-solid fa-pen"></i>
+                          </button>
+                          <button onclick="handleDeleteWorkerComment('${post.id}', '${comment.id}')" title="حذف التعليق" class="text-slate-400 hover:text-rose-400 text-[11px] px-1">
+                            <i class="fa-solid fa-trash"></i>
+                          </button>
+                        </div>
+                      ` : ''}
+                    </div>
+
+                    <p class="text-xs text-slate-300 mt-1 whitespace-pre-line leading-relaxed select-text">${escapeHtml(comment.text)}</p>
+
+                    ${comment.image ? `
+                      <div class="mt-2 inline-block cursor-pointer" onclick="openImageLightbox('${comment.image}')">
+                        <img src="${comment.image}" alt="صورة مرفقة بالتعليق" class="max-h-32 rounded-lg border border-bh-border object-contain hover:scale-105 transition">
+                      </div>
+                    ` : ''}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- Add Comment Input Box -->
+          <form onsubmit="handleAddWorkerComment('${post.id}', event)" class="pt-2">
+            <div class="flex items-center gap-2">
+              <div class="flex-1 relative">
+                <input type="text" id="commentInput-${post.id}" placeholder="اكتب تعليقك أو استفسارك هنا..." class="w-full bg-bh-bg border border-bh-border rounded-xl pr-3 pl-10 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow">
+                <label class="absolute inset-y-0 left-0 pl-2.5 flex items-center cursor-pointer text-slate-400 hover:text-bh-yellow transition" title="إرفاق صورة مع التعليق">
+                  <i class="fa-solid fa-camera text-sm"></i>
+                  <input type="file" accept="image/*" class="hidden" onchange="handleCommentImageSelect(event, '${post.id}')">
+                </label>
+              </div>
+
+              <button type="submit" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold text-xs shadow-md hover:opacity-90 transition shrink-0 active:scale-95 flex items-center gap-1">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>إرسال</span>
+              </button>
+            </div>
+
+            <!-- Attached image preview for comment -->
+            <div class="mt-1 flex items-center gap-2">
+              <img id="commentImgPreview-${post.id}" src="" alt="معاينة" class="hidden max-h-12 rounded border border-bh-border">
+            </div>
+          </form>
+
+        </div>
+
+      </article>
+    `;
+  }).join('');
+}
 
 
 

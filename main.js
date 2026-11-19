@@ -156,7 +156,8 @@ function getDbPaths() {
     accountsPrimary: path.join(userDir, 'batihub_accounts_db.json'),
     accountsBackup: path.join(__dirname, 'batihub_accounts_db.json'),
     profiles: path.join(userDir, 'batihub_saved_profiles.json'),
-    session: path.join(userDir, 'batihub_active_session.json')
+    session: path.join(userDir, 'batihub_active_session.json'),
+    workerPosts: path.join(userDir, 'batihub_worker_posts.json')
   };
 }
 
@@ -224,6 +225,26 @@ ipcMain.handle('db-get-active-session', async () => {
   try {
     if (fs.existsSync(paths.session)) {
       return JSON.parse(fs.readFileSync(paths.session, 'utf8'));
+    }
+  } catch (e) {}
+  return null;
+});
+
+ipcMain.handle('db-save-worker-posts', async (event, posts) => {
+  const paths = getDbPaths();
+  try {
+    fs.writeFileSync(paths.workerPosts, JSON.stringify(posts, null, 2), 'utf8');
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+});
+
+ipcMain.handle('db-get-worker-posts', async () => {
+  const paths = getDbPaths();
+  try {
+    if (fs.existsSync(paths.workerPosts)) {
+      return JSON.parse(fs.readFileSync(paths.workerPosts, 'utf8'));
     }
   } catch (e) {}
   return null;

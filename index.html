@@ -506,11 +506,16 @@
 
         </div>
 
-        <!-- Navigation Tabs: Clean Single Category (Scientific & Civil Engineering Calculator) -->
+        <!-- Navigation Tabs: Calculator & Worker Board -->
         <div class="flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-bh-border pt-2 pb-1 text-xs">
-          <button class="nav-tab active-tab" data-tab="tab-scientific-calculator">
+          <button class="nav-tab active-tab" data-tab="tab-scientific-calculator" onclick="switchTab('tab-scientific-calculator')">
             <i class="fa-solid fa-calculator text-bh-yellow mr-1.5"></i>
-            <span data-i18n="nav_scientific_calc">آلة حاسبة علمية وهندسية</span>
+            <span data-i18n="nav_scientific_calc">آلة حاسبة علمية</span>
+          </button>
+          <button class="nav-tab" data-tab="tab-worker-board" onclick="switchTab('tab-worker-board')">
+            <i class="fa-solid fa-people-carry-box text-bh-orange mr-1.5"></i>
+            <span data-i18n="nav_worker_board">طلب عامل وحرفي (سوق العمل)</span>
+            <span class="ml-1 px-1.5 py-0.5 rounded-full text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">مباشر ⚡</span>
           </button>
         </div>
 
@@ -564,8 +569,8 @@
         <!-- Main Calculator Grid: Left (Scientific Core) | Right (Civil & Building Quick Tools) -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          <!-- LEFT COLUMN: SCIENTIFIC CALCULATOR CORE (7 COLS) -->
-          <div class="lg:col-span-7 bg-bh-card border border-bh-border rounded-2xl p-5 shadow-2xl space-y-4">
+          <!-- LEFT COLUMN: SCIENTIFIC CALCULATOR CORE (8 COLS) -->
+          <div class="lg:col-span-8 bg-bh-card border border-bh-border rounded-2xl p-5 shadow-2xl space-y-4">
             
             <!-- LCD Digital Screen Panel -->
             <div class="rounded-2xl bg-gradient-to-b from-[#0a0f18] to-[#05070a] border-2 border-bh-border p-4 shadow-inner relative overflow-hidden">
@@ -672,175 +677,95 @@
 
           </div>
 
-          <!-- RIGHT COLUMN: CIVIL ENGINEERING & CONSTRUCTION TOOLS (5 COLS) -->
-          <div class="lg:col-span-5 space-y-4">
+          <!-- RIGHT COLUMN: CALCULATION JOURNAL TAPE ONLY (4 COLS) -->
+          <div class="lg:col-span-4 space-y-4">
             
-            <!-- Tool 1: Surface & Perimeter Quick Calc -->
-            <div class="bg-bh-card border border-bh-border rounded-2xl p-4 shadow-xl space-y-3">
-              <div class="flex items-center justify-between pb-2 border-b border-bh-border">
+            <!-- Calculation History Tape -->
+            <div class="bg-bh-card border border-bh-border rounded-2xl p-5 shadow-2xl space-y-3 sticky top-24">
+              <div class="flex items-center justify-between pb-3 border-b border-bh-border">
                 <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-vector-square text-bh-yellow text-sm"></i>
-                  <h3 class="font-bold text-white text-xs sm:text-sm" data-i18n="qc_surface_title">1. حساب المساحة والمحيط (Surface & Périmètre)</h3>
+                  <i class="fa-solid fa-clock-rotate-left text-bh-yellow text-base"></i>
+                  <h3 class="font-bold text-white text-sm" data-i18n="qc_history_title">سجل العمليات الحسابية (Journal)</h3>
                 </div>
-                <span class="text-[10px] text-slate-400 font-mono">m² / m</span>
-              </div>
-              
-              <div class="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <label class="block text-[11px] text-slate-400 mb-1" data-i18n="qc_length">الطول (L en m) :</label>
-                  <input type="number" id="qcLength" value="12" step="0.1" oninput="runQuickCalcSurface()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-2 text-white font-mono font-bold focus:border-bh-yellow focus:outline-none">
-                </div>
-                <div>
-                  <label class="block text-[11px] text-slate-400 mb-1" data-i18n="qc_width">العرض (W en m) :</label>
-                  <input type="number" id="qcWidth" value="8" step="0.1" oninput="runQuickCalcSurface()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-2 text-white font-mono font-bold focus:border-bh-yellow focus:outline-none">
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-2 bg-bh-bg p-2.5 rounded-xl border border-bh-border text-xs font-mono">
-                <div>
-                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_area_res">المساحة الإجمالية:</span>
-                  <span id="qcAreaOutput" class="text-sm font-black text-bh-yellow">96.00 m²</span>
-                </div>
-                <div>
-                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_perim_res">المحيط:</span>
-                  <span id="qcPerimOutput" class="text-sm font-black text-emerald-400">40.00 m</span>
-                </div>
-              </div>
-
-              <button onclick="injectQuickValue('qcAreaOutput')" class="w-full py-1.5 rounded-lg bg-bh-cardhover hover:bg-bh-yellow/20 text-bh-yellow border border-bh-border hover:border-bh-yellow/40 text-xs font-bold transition flex items-center justify-center gap-1.5">
-                <i class="fa-solid fa-arrow-down-left-and-up-right-to-center text-[10px]"></i>
-                <span data-i18n="qc_btn_inject_calc">نقل المساحة إلى الآلة الحاسبة</span>
-              </button>
-            </div>
-
-            <!-- Tool 2: Concrete Volume & Cement Bags -->
-            <div class="bg-bh-card border border-bh-border rounded-2xl p-4 shadow-xl space-y-3">
-              <div class="flex items-center justify-between pb-2 border-b border-bh-border">
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-cubes text-emerald-400 text-sm"></i>
-                  <h3 class="font-bold text-white text-xs sm:text-sm" data-i18n="qc_concrete_title">2. حجم الخرسانة وأكياس الإسمنت (Béton & Ciment)</h3>
-                </div>
-                <span class="text-[10px] text-slate-400 font-mono">m³</span>
-              </div>
-
-              <div class="grid grid-cols-3 gap-2 text-xs">
-                <div>
-                  <label class="block text-[10px] text-slate-400 mb-1">L (m):</label>
-                  <input type="number" id="qcConcL" value="10" step="0.1" oninput="runQuickCalcConcrete()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-1.5 text-white font-mono font-bold focus:border-bh-yellow focus:outline-none">
-                </div>
-                <div>
-                  <label class="block text-[10px] text-slate-400 mb-1">W (m):</label>
-                  <input type="number" id="qcConcW" value="5" step="0.1" oninput="runQuickCalcConcrete()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-1.5 text-white font-mono font-bold focus:border-bh-yellow focus:outline-none">
-                </div>
-                <div>
-                  <label class="block text-[10px] text-slate-400 mb-1">H/Ép (m):</label>
-                  <input type="number" id="qcConcH" value="0.20" step="0.05" oninput="runQuickCalcConcrete()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-1.5 text-white font-mono font-bold focus:border-bh-yellow focus:outline-none">
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <label class="block text-[10px] text-slate-400 mb-1" data-i18n="qc_dosage">عيار الإسمنت (Dosage):</label>
-                  <select id="qcConcDosage" onchange="runQuickCalcConcrete()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-1.5 text-white text-xs font-mono focus:border-bh-yellow focus:outline-none">
-                    <option value="350">350 kg/m³ (عناصر مسلحة / Dalles & Poteaux)</option>
-                    <option value="250">250 kg/m³ (خرسانة نظافة / Béton de propreté)</option>
-                    <option value="400">400 kg/m³ (خرسانة عالية القوة / Hautes performances)</option>
-                  </select>
-                </div>
-                <div class="bg-bh-bg p-2 rounded-xl border border-bh-border flex flex-col justify-center">
-                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_vol_res">حجم الخرسانة:</span>
-                  <span id="qcConcVolOutput" class="text-sm font-black text-emerald-400 font-mono">10.00 m³</span>
-                </div>
-              </div>
-
-              <!-- Cement & Aggregates breakdown -->
-              <div class="grid grid-cols-3 gap-2 bg-bh-bg p-2 rounded-xl border border-bh-border text-center text-xs font-mono">
-                <div>
-                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_cement_bags">أكياس الإسمنت:</span>
-                  <span id="qcBagsOutput" class="text-xs font-black text-bh-yellow">70 كيس (3.5T)</span>
-                </div>
-                <div>
-                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_sand_vol">الرمل (Sable):</span>
-                  <span id="qcSandOutput" class="text-xs font-bold text-slate-200">4.00 m³</span>
-                </div>
-                <div>
-                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_gravel_vol">الحصى (Gravier):</span>
-                  <span id="qcGravelOutput" class="text-xs font-bold text-slate-200">8.00 m³</span>
-                </div>
-              </div>
-
-              <button onclick="injectQuickValue('qcConcVolOutput')" class="w-full py-1.5 rounded-lg bg-bh-cardhover hover:bg-emerald-500/20 text-emerald-400 border border-bh-border hover:border-emerald-500/40 text-xs font-bold transition flex items-center justify-center gap-1.5">
-                <i class="fa-solid fa-arrow-down-left-and-up-right-to-center text-[10px]"></i>
-                <span data-i18n="qc_btn_inject_vol">نقل الحجم إلى الآلة الحاسبة</span>
-              </button>
-            </div>
-
-            <!-- Tool 3: Steel Rebar Weight (Poids d'Acier FeE500) -->
-            <div class="bg-bh-card border border-bh-border rounded-2xl p-4 shadow-xl space-y-3">
-              <div class="flex items-center justify-between pb-2 border-b border-bh-border">
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-bars text-bh-orange text-sm"></i>
-                  <h3 class="font-bold text-white text-xs sm:text-sm" data-i18n="qc_steel_title">3. وزن حديد التسليح (Poids d'Acier FeE500)</h3>
-                </div>
-                <span class="text-[10px] text-slate-400 font-mono">kg / Q</span>
-              </div>
-
-              <div class="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <label class="block text-[10px] text-slate-400 mb-1" data-i18n="qc_steel_dia">قطر السيخ (Diamètre) :</label>
-                  <select id="qcSteelDiameter" onchange="runQuickCalcSteel()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-2 text-white text-xs font-mono focus:border-bh-yellow focus:outline-none">
-                    <option value="6">Ø 6 mm (0.222 kg/m)</option>
-                    <option value="8">Ø 8 mm (0.395 kg/m)</option>
-                    <option value="10">Ø 10 mm (0.617 kg/m)</option>
-                    <option value="12" selected>Ø 12 mm (0.888 kg/m)</option>
-                    <option value="14">Ø 14 mm (1.208 kg/m)</option>
-                    <option value="16">Ø 16 mm (1.578 kg/m)</option>
-                    <option value="20">Ø 20 mm (2.466 kg/m)</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-[10px] text-slate-400 mb-1" data-i18n="qc_steel_len">الطول الإجمالي (Longueur en m) :</label>
-                  <input type="number" id="qcSteelLength" value="120" step="1" oninput="runQuickCalcSteel()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-2 text-white font-mono font-bold focus:border-bh-yellow focus:outline-none">
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-2 bg-bh-bg p-2.5 rounded-xl border border-bh-border text-xs font-mono">
-                <div>
-                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_steel_weight">الوزن الإجمالي:</span>
-                  <span id="qcSteelWeightOutput" class="text-sm font-black text-bh-orange">106.56 kg</span>
-                </div>
-                <div>
-                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_steel_quintals">بالقنطار (Quintaux):</span>
-                  <span id="qcSteelQuintalsOutput" class="text-sm font-black text-white">1.07 Q</span>
-                </div>
-              </div>
-
-              <button onclick="injectQuickValue('qcSteelWeightOutput')" class="w-full py-1.5 rounded-lg bg-bh-cardhover hover:bg-bh-orange/20 text-bh-orange border border-bh-border hover:border-bh-orange/40 text-xs font-bold transition flex items-center justify-center gap-1.5">
-                <i class="fa-solid fa-arrow-down-left-and-up-right-to-center text-[10px]"></i>
-                <span data-i18n="qc_btn_inject_steel">نقل الوزن إلى الآلة الحاسبة</span>
-              </button>
-            </div>
-
-            <!-- Tool 4: Calculation History Tape -->
-            <div class="bg-bh-card border border-bh-border rounded-2xl p-4 shadow-xl space-y-3">
-              <div class="flex items-center justify-between pb-2 border-b border-bh-border">
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-clock-rotate-left text-bh-yellow text-sm"></i>
-                  <h3 class="font-bold text-white text-xs sm:text-sm" data-i18n="qc_history_title">سجل العمليات الحسابية (Journal)</h3>
-                </div>
-                <button onclick="clearCalcHistory()" class="text-[10px] text-slate-400 hover:text-rose-400 transition" data-i18n="qc_btn_clear_history">
+                <button onclick="clearCalcHistory()" class="text-xs text-slate-400 hover:text-rose-400 transition" data-i18n="qc_btn_clear_history">
                   <i class="fa-regular fa-trash-can mr-1"></i> مسح السجل
                 </button>
               </div>
 
-              <div id="calcHistoryTapeContainer" class="max-h-48 overflow-y-auto space-y-1.5 pr-1 text-xs font-mono">
+              <div id="calcHistoryTapeContainer" class="max-h-[460px] overflow-y-auto space-y-2 pr-1 text-xs font-mono">
                 <!-- Populated dynamically via JS -->
-                <p class="text-[11px] text-slate-500 text-center py-4" data-i18n="qc_history_empty">لا توجد عمليات سابقة بعد</p>
+                <p class="text-[11px] text-slate-500 text-center py-6" data-i18n="qc_history_empty">لا توجد عمليات سابقة بعد</p>
               </div>
             </div>
 
           </div>
 
+        </div>
+
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- TAB: BOURSE DE TRAVAIL & DEMANDE D'ARTISANS (سوق العمل وطلب الحرفيين)      -->
+      <!-- ========================================================================= -->
+      <div id="tab-worker-board" class="tab-content hidden space-y-6">
+
+        <!-- Top Header & Create Post Trigger -->
+        <div class="bg-gradient-to-r from-bh-card via-bh-cardhover to-bh-card border border-bh-border rounded-2xl p-4 sm:p-6 flex flex-wrap items-center justify-between gap-4 shadow-xl">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-bh-orange to-bh-yellow flex items-center justify-center text-slate-950 text-xl font-black shadow-lg shadow-bh-orange/30">
+              <i class="fa-solid fa-people-carry-box"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="font-heading font-black text-lg sm:text-xl text-white tracking-tight" data-i18n="worker_board_title">سوق العمل وطلب الحرفيين في الجزائر</h2>
+                <span class="text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> متصل مباشرة
+                </span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5" data-i18n="worker_board_sub">انشر طلبات العمال والحرفيين (بناء، كهرباء، ترصيص...)، تواصل مع الحرفيين، وعلّق وتفاعل لحظياً بين الحاسوب والهاتف</p>
+            </div>
+          </div>
+
+          <button onclick="openCreateWorkerPostModal()" class="px-4 py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs sm:text-sm shadow-lg shadow-bh-orange/20 transition flex items-center gap-2 cursor-pointer active:scale-95">
+            <i class="fa-solid fa-circle-plus"></i>
+            <span data-i18n="btn_new_worker_post">نشر طلب عامل جديد</span>
+          </button>
+        </div>
+
+        <!-- Category Filter Pills -->
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
+          <button onclick="filterWorkerFeed('all', this)" class="worker-filter-pill active-filter px-3.5 py-1.5 rounded-xl bg-bh-yellow text-slate-950 font-bold border border-bh-yellow transition shrink-0">
+            الكل (Tous)
+          </button>
+          <button onclick="filterWorkerFeed('بناء (Maçonnerie)', this)" class="worker-filter-pill px-3.5 py-1.5 rounded-xl bg-bh-card text-slate-300 hover:text-white border border-bh-border transition shrink-0">
+            🧱 بناء (Maçon)
+          </button>
+          <button onclick="filterWorkerFeed('كهرباء معمارية (Électricité)', this)" class="worker-filter-pill px-3.5 py-1.5 rounded-xl bg-bh-card text-slate-300 hover:text-white border border-bh-border transition shrink-0">
+            ⚡ كهرباء (Électricien)
+          </button>
+          <button onclick="filterWorkerFeed('ترصيص وصحي (Plomberie)', this)" class="worker-filter-pill px-3.5 py-1.5 rounded-xl bg-bh-card text-slate-300 hover:text-white border border-bh-border transition shrink-0">
+            🚰 سباك / بلومبي (Plombier)
+          </button>
+          <button onclick="filterWorkerFeed('دهان وديكور (Peinture)', this)" class="worker-filter-pill px-3.5 py-1.5 rounded-xl bg-bh-card text-slate-300 hover:text-white border border-bh-border transition shrink-0">
+            🎨 دهان (Peintre)
+          </button>
+          <button onclick="filterWorkerFeed('بلاط وسيراميك (Carrelage)', this)" class="worker-filter-pill px-3.5 py-1.5 rounded-xl bg-bh-card text-slate-300 hover:text-white border border-bh-border transition shrink-0">
+            🔨 تلبيس وبلاط (Carreleur)
+          </button>
+          <button onclick="filterWorkerFeed('ألمنيوم ونجارة (Menuiserie)', this)" class="worker-filter-pill px-3.5 py-1.5 rounded-xl bg-bh-card text-slate-300 hover:text-white border border-bh-border transition shrink-0">
+            🪵 نجارة وألمنيوم (Alu)
+          </button>
+          <button onclick="filterWorkerFeed('حدادة وتسليح (Ferraillage)', this)" class="worker-filter-pill px-3.5 py-1.5 rounded-xl bg-bh-card text-slate-300 hover:text-white border border-bh-border transition shrink-0">
+            🏗️ حدادة وأشغال كبرى
+          </button>
+          <button onclick="filterWorkerFeed('تكييف وتبريد (Climatisation)', this)" class="worker-filter-pill px-3.5 py-1.5 rounded-xl bg-bh-card text-slate-300 hover:text-white border border-bh-border transition shrink-0">
+            ❄️ تكييف وتبريد
+          </button>
+        </div>
+
+        <!-- Feed Container (Cards will be rendered dynamically) -->
+        <div id="workerPostsFeedContainer" class="space-y-4">
+          <!-- Populated by JS -->
         </div>
 
       </div>
@@ -877,6 +802,181 @@
     </footer>
 
   </div> <!-- End #appDashboard -->
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: CREATE WORKER POST (نشر طلب عامل وحرفي)                             -->
+  <!-- ========================================================================= -->
+  <div id="modalCreateWorkerPost" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bg-bh-card border border-bh-border rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden relative text-right" dir="rtl">
+      
+      <!-- Modal Header -->
+      <div class="px-5 py-4 border-b border-bh-border flex items-center justify-between bg-bh-cardhover">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-bh-yellow/20 text-bh-yellow flex items-center justify-center font-bold">
+            <i class="fa-solid fa-bullhorn text-sm"></i>
+          </div>
+          <h3 class="font-bold text-white text-sm" id="postModalTitle">نشر طلب عامل / حرفي جديد</h3>
+        </div>
+        <button onclick="closeCreateWorkerPostModal()" class="w-7 h-7 rounded-full bg-bh-bg hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <form id="formCreateWorkerPost" onsubmit="handlePublishWorkerPost(event)" class="p-5 space-y-4">
+        
+        <!-- Trade Selection -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">تخصص العامل المطلوب :</label>
+          <select id="inputPostTrade" required class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-bh-yellow">
+            <option value="بناء (Maçonnerie)">🧱 بناء (Maçon - أعمال البناء والأسمنت)</option>
+            <option value="كهرباء معمارية (Électricité)">⚡ كهربائي (Électricien - تمديدات كهربائية)</option>
+            <option value="ترصيص وصحي (Plomberie)">🚰 سباك / بلومبي (Plombier - مياه وصرف)</option>
+            <option value="دهان وديكور (Peinture)">🎨 دهان وديكور (Peintre & Finition)</option>
+            <option value="بلاط وسيراميك (Carrelage)">🔨 بلاط وكلاج (Carreleur)</option>
+            <option value="ألمنيوم ونجارة (Menuiserie)">🪵 نجارة وألمنيوم وبيافي سي (Menuisier)</option>
+            <option value="حدادة وتسليح (Ferraillage)">🏗️ حداد تسليح وأشغال خرسانية</option>
+            <option value="تكييف وتبريد (Climatisation)">❄️ فني تكييف وتدفئة مركزية</option>
+            <option value="أشغال حفر وتطهير (Terrassement)">🚜 سائق آليات وأشغال حفر</option>
+            <option value="تخصص آخر (Autre métier)">🛠️ تخصص أو حرفة أخرى</option>
+          </select>
+        </div>
+
+        <!-- Wilaya / Location -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">الولاية / مكان الورشة :</label>
+          <input type="text" id="inputPostLocation" required placeholder="مثال: الجزائر العاصمة، سطيف، وهران، قسنطينة..." class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow">
+        </div>
+
+        <!-- Job Details & Description -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">تفاصيل ومواصفات العمل المطلوبة :</label>
+          <textarea id="inputPostDescription" required rows="3" placeholder="اشرح واش يحب يخدم بالتفصيل، مواصفات الورشة، المدة المتوقعة..." class="w-full bg-bh-bg border border-bh-border rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow resize-none"></textarea>
+        </div>
+
+        <!-- Phone Number -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">رقم الهاتف للتواصل المباشر :</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-bh-yellow">
+              <i class="fa-solid fa-phone"></i>
+            </span>
+            <input type="tel" id="inputPostPhone" required placeholder="0550123456" class="w-full bg-bh-bg border border-bh-border rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono">
+          </div>
+        </div>
+
+        <!-- Optional Image Upload -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">صورة توضيحية للورشة أو العمل (اختياري) :</label>
+          <div class="flex items-center gap-3">
+            <label class="cursor-pointer px-3 py-2 bg-bh-bg hover:bg-slate-800 border border-bh-border hover:border-bh-yellow/50 rounded-xl text-xs text-slate-300 flex items-center gap-2 transition">
+              <i class="fa-solid fa-camera text-bh-yellow"></i>
+              <span>اختر صورة</span>
+              <input type="file" id="inputPostImage" accept="image/*" class="hidden" onchange="handlePostImageSelect(event)">
+            </label>
+            <span id="postImageFileName" class="text-[11px] text-slate-500 truncate max-w-[200px]">لم يتم اختيار صورة</span>
+            <button type="button" id="btnRemovePostImage" onclick="clearPostImageSelection()" class="text-rose-400 hover:text-rose-300 text-xs hidden">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+          <div id="postImagePreviewContainer" class="hidden mt-2">
+            <img id="postImagePreview" src="" alt="معاينة" class="max-h-36 rounded-xl object-contain border border-bh-border">
+          </div>
+        </div>
+
+        <!-- Rate Limit Alert Note -->
+        <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-300 flex items-center gap-2">
+          <i class="fa-solid fa-shield-halved text-amber-400 text-sm shrink-0"></i>
+          <span>حماية من التكرار: مسموح بنشر طلب واحد كل ساعة (إذا حذفت منشورك السابق يمكنك النشر فوراً).</span>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-bh-border">
+          <button type="button" onclick="closeCreateWorkerPostModal()" class="px-3 py-2 rounded-xl text-xs text-slate-400 hover:text-white transition">
+            إلغاء
+          </button>
+          <button type="submit" id="btnSubmitWorkerPost" class="px-5 py-2 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold text-xs shadow-lg transition flex items-center gap-2 cursor-pointer active:scale-95">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span>نشر الطلب الآن</span>
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: EDIT WORKER POST (تعديل المنشور)                                    -->
+  <!-- ========================================================================= -->
+  <div id="modalEditWorkerPost" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bg-bh-card border border-bh-border rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden relative text-right" dir="rtl">
+      
+      <div class="px-5 py-4 border-b border-bh-border flex items-center justify-between bg-bh-cardhover">
+        <h3 class="font-bold text-white text-sm"><i class="fa-solid fa-pen-to-square text-bh-yellow mr-2"></i> تعديل تفاصيل الطلب</h3>
+        <button onclick="closeEditWorkerPostModal()" class="w-7 h-7 rounded-full bg-bh-bg hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <form id="formEditWorkerPost" onsubmit="handleSaveEditedWorkerPost(event)" class="p-5 space-y-4">
+        <input type="hidden" id="editPostId">
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">تخصص العامل :</label>
+          <select id="editPostTrade" required class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-bh-yellow">
+            <option value="بناء (Maçonnerie)">🧱 بناء (Maçon)</option>
+            <option value="كهرباء معمارية (Électricité)">⚡ كهربائي (Électricien)</option>
+            <option value="ترصيص وصحي (Plomberie)">🚰 سباك / بلومبي (Plombier)</option>
+            <option value="دهان وديكور (Peinture)">🎨 دهان وديكور (Peintre)</option>
+            <option value="بلاط وسيراميك (Carrelage)">🔨 بلاط وكلاج (Carreleur)</option>
+            <option value="ألمنيوم ونجارة (Menuiserie)">🪵 نجارة وألمنيوم وبيافي سي</option>
+            <option value="حدادة وتسليح (Ferraillage)">🏗️ حداد تسليح وأشغال خرسانية</option>
+            <option value="تكييف وتبريد (Climatisation)">❄️ فني تكييف وتدفئة</option>
+            <option value="أشغال حفر وتطهير (Terrassement)">🚜 سائق آليات وأشغال حفر</option>
+            <option value="تخصص آخر (Autre métier)">🛠️ تخصص أو حرفة أخرى</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">الولاية / المكان :</label>
+          <input type="text" id="editPostLocation" required class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-bh-yellow">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">تفاصيل العمل :</label>
+          <textarea id="editPostDescription" required rows="3" class="w-full bg-bh-bg border border-bh-border rounded-xl p-3 text-xs text-white focus:outline-none focus:border-bh-yellow resize-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">رقم الهاتف :</label>
+          <input type="tel" id="editPostPhone" required class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-bh-yellow font-mono">
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-bh-border">
+          <button type="button" onclick="closeEditWorkerPostModal()" class="px-3 py-2 rounded-xl text-xs text-slate-400 hover:text-white transition">
+            إلغاء
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold text-xs shadow-lg transition">
+            حفظ التعديلات
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: IMAGE LIGHTBOX VIEWER                                              -->
+  <!-- ========================================================================= -->
+  <div id="modalImageLightbox" onclick="closeImageLightbox()" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 hidden cursor-zoom-out">
+    <div class="relative max-w-4xl max-h-[90vh]">
+      <img id="lightboxImg" src="" alt="صورة مكبرة" class="max-h-[85vh] max-w-full rounded-2xl object-contain shadow-2xl border border-bh-border">
+      <button onclick="closeImageLightbox()" class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-bh-card border border-bh-border text-white hover:text-bh-yellow flex items-center justify-center shadow-lg">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+    </div>
+  </div>
 
   <!-- ========================================================================= -->
   <!-- MODAL 1: USER PROFILE & SETTINGS                                         -->
@@ -1055,22 +1155,27 @@
 
   <!-- MOBILE BOTTOM NAVIGATION BAR (VISIBLE ONLY ON MOBILE DEVICES) -->
   <nav id="mobileBottomNav" class="fixed bottom-0 left-0 right-0 z-40 bg-[#0c1017]/95 backdrop-blur-xl border-t border-bh-border px-3 py-1.5 flex items-center justify-around md:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.7)] safe-area-bottom">
-    <button type="button" onclick="switchTab('tab-scientific-calculator')" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-3 rounded-xl text-bh-yellow transition active:scale-90">
+    <button type="button" onclick="switchTab('tab-scientific-calculator')" id="mNavCalc" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-bh-yellow transition active:scale-90">
       <i class="fa-solid fa-calculator text-lg"></i>
       <span class="text-[10px] font-bold mt-0.5 tracking-tight" data-i18n="m_nav_calc">الحاسبة</span>
     </button>
 
-    <button type="button" onclick="openUserProfileModal()" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-3 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
+    <button type="button" onclick="switchTab('tab-worker-board')" id="mNavWorkers" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
+      <i class="fa-solid fa-helmet-safety text-lg"></i>
+      <span class="text-[10px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_workers">طلب عامل</span>
+    </button>
+
+    <button type="button" onclick="openUserProfileModal()" id="mNavProfile" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
       <i class="fa-solid fa-user-gear text-lg"></i>
       <span class="text-[10px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_profile">حسابي</span>
     </button>
 
-    <button type="button" onclick="toggleLanguageQuick()" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-3 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
+    <button type="button" onclick="toggleLanguageQuick()" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
       <i class="fa-solid fa-globe text-lg"></i>
       <span class="text-[10px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_lang">اللغة</span>
     </button>
 
-    <button type="button" id="btnMobileInstallPwa" onclick="promptInstallPwa()" class="hidden mobile-nav-item flex flex-col items-center justify-center py-1 px-3 rounded-xl text-amber-400 transition active:scale-90">
+    <button type="button" id="btnMobileInstallPwa" onclick="promptInstallPwa()" class="hidden mobile-nav-item flex flex-col items-center justify-center py-1 px-2 rounded-xl text-amber-400 transition active:scale-90">
       <i class="fa-solid fa-mobile-screen-button text-lg animate-bounce text-bh-yellow"></i>
       <span class="text-[10px] font-bold mt-0.5 tracking-tight text-bh-yellow" data-i18n="m_nav_install">تثبيت</span>
     </button>

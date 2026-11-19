@@ -13,5 +13,7 @@ contextBridge.exposeInMainWorld('electronDB', {
   getSavedProfiles: () => ipcRenderer.invoke('db-get-saved-profiles'),
   saveSavedProfiles: (profiles) => ipcRenderer.invoke('db-save-saved-profiles', profiles),
   getActiveSession: () => ipcRenderer.invoke('db-get-active-session'),
-  saveActiveSession: (session) => ipcRenderer.invoke('db-save-active-session', session)
+  saveActiveSession: (session) => ipcRenderer.invoke('db-save-active-session', session),
+  getWorkerPosts: () => ipcRenderer.invoke('db-get-worker-posts'),
+  saveWorkerPosts: (posts) => ipcRenderer.invoke('db-save-worker-posts', posts)
 });
