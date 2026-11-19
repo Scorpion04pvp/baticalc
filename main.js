@@ -20,17 +20,22 @@ function getConfigPath() {
 }
 
 function loadMailConfig() {
+  const p1 = getConfigPath();
+  const p2 = path.join(__dirname, 'mail_config.json');
   try {
-    const p = getConfigPath();
-    if (fs.existsSync(p)) {
-      return JSON.parse(fs.readFileSync(p, 'utf8'));
+    if (fs.existsSync(p1)) {
+      const cfg = JSON.parse(fs.readFileSync(p1, 'utf8'));
+      if (cfg && (cfg.email || cfg.appPassword)) return cfg;
+    }
+    if (fs.existsSync(p2)) {
+      return JSON.parse(fs.readFileSync(p2, 'utf8'));
     }
   } catch (e) {
     console.error('Error loading mail config:', e);
   }
   return {
     email: '',
-    appPassword: '', // 16-character Google App Password
+    appPassword: 'ehnrqlxlrwgdcipy',
     senderName: 'BatiHub DZ Support'
   };
 }
