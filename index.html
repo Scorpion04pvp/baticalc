@@ -111,7 +111,7 @@
   <!-- ========================================================================= -->
   <!-- 2. REAL GMAIL SECURE AUTHENTICATION SYSTEM (LOGIN, REGISTER, OTP, RESET)  -->
   <!-- ========================================================================= -->
-  <div id="authGateScreen" class="auth-hide">
+  <div id="authGateScreen">
     <div class="auth-card max-w-lg w-full p-6 sm:p-8 text-center space-y-5">
       
       <!-- Header Logo & Brand -->
@@ -119,13 +119,6 @@
         <img src="assets/batihub_logo.png" alt="BatiHub DZ" class="w-32 h-auto object-contain mb-2 drop-shadow-lg">
         <h2 class="text-xl font-heading font-black text-white" id="authScreenHeaderTitle">BatiHub DZ • Espace Sécurisé</h2>
         <p class="text-xs text-slate-400 mt-0.5" id="authScreenHeaderSubtitle">Système d'authentification professionnelle lié à votre adresse Gmail</p>
-      </div>
-
-      <!-- Language selector inside login modal -->
-      <div class="flex justify-center gap-2 text-xs">
-        <button onclick="setLanguage('fr')" class="px-2.5 py-1 rounded-md bg-bh-card border border-bh-border text-slate-300 hover:text-white font-bold">Français</button>
-        <button onclick="setLanguage('ar')" class="px-2.5 py-1 rounded-md bg-bh-card border border-bh-border text-slate-300 hover:text-white font-bold font-arabic">العربية</button>
-        <button onclick="setLanguage('en')" class="px-2.5 py-1 rounded-md bg-bh-card border border-bh-border text-slate-300 hover:text-white font-bold">English</button>
       </div>
 
       <!-- Auth Mode Tabs: Login vs Register -->
@@ -142,6 +135,13 @@
       <!-- VIEW 1: LOGIN (تسجيل الدخول)                   -->
       <!-- ============================================== -->
       <div id="viewLogin" class="space-y-4 text-left">
+        
+        <!-- Saved Accounts on this device -->
+        <div id="savedAccountsContainer" class="hidden space-y-1.5 p-2.5 rounded-xl bg-bh-bg border border-bh-border">
+          <span class="text-[10px] text-slate-400 font-semibold block" data-i18n="auth_lbl_saved_accounts">الحسابات المحفوظة على هذا الجهاز (انقر للملء التلقائي) :</span>
+          <div id="savedAccountsList" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
         <form onsubmit="handleUserLogin(event)" class="space-y-3.5">
           <div>
             <label class="block text-[11px] font-semibold text-slate-300 mb-1" data-i18n="auth_lbl_gmail">عنوان بريد Gmail :</label>
@@ -167,6 +167,13 @@
                 <i class="fa-solid fa-eye"></i>
               </button>
             </div>
+          </div>
+
+          <div class="flex items-center justify-between text-[11px] text-slate-400">
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="checkbox" id="rememberMeCheck" checked class="rounded border-bh-border text-bh-yellow focus:ring-0 bg-bh-bg">
+              <span data-i18n="auth_remember_me">تذكر بيانات تسجيل الدخول على هذا الجهاز</span>
+            </label>
           </div>
 
           <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2">
@@ -419,1118 +426,622 @@
     </div>
   </div>
 
-
-
   <!-- ========================================================================= -->
-  <!-- 3. MAIN APPLICATION HEADER -->
+  <!-- 3. MAIN DASHBOARD WRAPPER (HIDDEN UNTIL AUTHENTICATED)                   -->
   <!-- ========================================================================= -->
-  <header class="border-b border-bh-border bg-bh-bg/95 backdrop-blur-md sticky top-0 z-40 shadow-2xl">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <!-- Top Info Strip (Removed the PC badge as requested) -->
-      <div class="py-2 border-b border-bh-border/70 flex flex-wrap items-center justify-between text-xs gap-3">
-        <div class="flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-bh-yellow animate-ping"></span>
-          <span class="font-bold text-slate-200 tracking-wide text-[11px]">BatiHub DZ</span>
-          <span class="text-slate-600">|</span>
-          <span class="text-bh-yellow font-bold text-[11px]" data-i18n="app_slogan">كل خدمات البناء في مكان واحد</span>
-        </div>
+  <div id="appDashboard" class="hidden">
 
-        <div class="flex items-center gap-3 text-[11px]">
-          <span class="text-slate-400">
-            <span data-i18n="dev_by">Conçu & développé par:</span> <strong class="text-bh-yellow">Mouhaned Guellif</strong>
-          </span>
-          <div class="h-4 w-px bg-bh-border hidden sm:block"></div>
-          
-          <!-- User Profile Display Pill -->
-          <div id="userProfilePill" class="flex items-center gap-2 bg-bh-card border border-bh-border px-2.5 py-1 rounded-xl">
-            <img id="userAvatarImg" src="assets/batihub_logo.png" alt="Avatar" class="w-5 h-5 rounded-full object-cover border border-bh-yellow">
-            <span id="userNameDisplay" class="font-bold text-slate-200 text-xs">Utilisateur</span>
-            <button onclick="handleSignOut()" title="Déconnexion" class="text-slate-400 hover:text-rose-400 transition ml-1 text-xs">
-              <i class="fa-solid fa-arrow-right-from-bracket"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Main Navigation Toolbar -->
-      <div class="py-3 flex flex-wrap items-center justify-between gap-3">
+    <!-- MAIN APPLICATION HEADER -->
+    <header class="border-b border-bh-border bg-bh-bg/95 backdrop-blur-md sticky top-0 z-40 shadow-2xl">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <!-- Logo & Brand Header -->
-        <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('tab-calculator')">
-          <img src="assets/batihub_logo.png" alt="BatiHub DZ Logo" class="h-11 sm:h-12 w-auto object-contain hover:scale-105 transition">
-          <div class="hidden sm:block">
-            <h1 class="font-heading font-black text-xl text-white tracking-tight flex items-center gap-1.5">
-              <span>Bati<span class="text-transparent bg-clip-text bg-gradient-to-r from-bh-yellow to-bh-orange">Hub</span></span>
-              <span class="text-[10px] font-bold bg-bh-yellow/20 text-bh-yellow border border-bh-yellow/40 px-2 py-0.5 rounded-full font-mono">DZ PRO</span>
-            </h1>
-            <p class="text-[11px] text-slate-400">BUILD • CONNECT • CREATE</p>
+        <!-- Top Info Strip with Online Sync & Clock -->
+        <div class="py-2 border-b border-bh-border/70 flex flex-wrap items-center justify-between text-xs gap-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-bh-yellow animate-ping"></span>
+            <span class="font-bold text-slate-200 tracking-wide text-[11px]">BatiHub DZ</span>
+            <span class="text-slate-600">|</span>
+            <span class="text-bh-yellow font-bold text-[11px]" data-i18n="app_slogan">كل خدمات البناء في مكان واحد</span>
+          </div>
+
+          <div class="flex items-center gap-3 text-[11px]">
+            <!-- Live Internet Connection Badge -->
+            <div id="networkStatusBadge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono">
+              <span id="networkStatusDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span id="networkStatusText" data-i18n="status_online">متصل بالإنترنت</span>
+            </div>
+
+            <!-- Live Real-Time Clock -->
+            <div id="liveClockDisplay" class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-bh-card border border-bh-border text-slate-300 text-[11px] font-mono">
+              <i class="fa-regular fa-clock text-bh-yellow"></i>
+              <span id="liveClockTime">--:--:--</span>
+            </div>
+
+            <div class="h-4 w-px bg-bh-border hidden sm:block"></div>
+            
+            <!-- User Profile Pill (Opens Profile Modal) -->
+            <div id="userProfilePill" onclick="openUserProfileModal()" class="flex items-center gap-2 bg-bh-card hover:bg-slate-800/80 cursor-pointer border border-bh-border hover:border-bh-yellow/50 transition px-2.5 py-1 rounded-xl" title="الملف الشخصي والإعدادات">
+              <div class="relative">
+                <img id="userAvatarImg" src="assets/batihub_logo.png" alt="Avatar" class="w-5 h-5 rounded-full object-cover border border-bh-yellow">
+                <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-bh-card"></span>
+              </div>
+              <span id="userNameDisplay" class="font-bold text-slate-200 text-xs truncate max-w-[130px]">Utilisateur</span>
+              <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+            </div>
           </div>
         </div>
 
-        <!-- Toolbar Buttons: Languages, Currencies, Presets & Export -->
-        <div class="flex flex-wrap items-center gap-2">
+        <!-- Main Navigation Toolbar -->
+        <div class="py-3 flex flex-wrap items-center justify-between gap-3">
           
-          <!-- LANGUAGE SWITCHER (FR / AR / EN) -->
-          <div class="flex items-center rounded-xl bg-bh-card border border-bh-border p-1 shadow-inner text-xs">
-            <button id="langFR" onclick="setLanguage('fr')" class="lang-btn active-lang px-2.5 py-1 rounded-lg font-bold transition">
-              Français
-            </button>
-            <button id="langAR" onclick="setLanguage('ar')" class="lang-btn px-2.5 py-1 rounded-lg font-bold transition text-slate-400 hover:text-white font-arabic">
-              العربية
-            </button>
-            <button id="langEN" onclick="setLanguage('en')" class="lang-btn px-2.5 py-1 rounded-lg font-bold transition text-slate-400 hover:text-white">
-              English
-            </button>
-          </div>
-
-          <!-- CURRENCY SWITCHER (DZD / USD) -->
-          <div class="flex items-center rounded-xl bg-bh-card border border-bh-border p-1 shadow-inner text-xs">
-            <button id="currDZD" class="currency-toggle-btn active-currency px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1">
-              <span>🇩🇿 DZD</span>
-              <span class="text-[10px] opacity-75 font-normal">(د.ج)</span>
-            </button>
-            <button id="currUSD" class="currency-toggle-btn px-2.5 py-1 rounded-lg font-bold transition text-slate-400 hover:text-white flex items-center gap-1">
-              <span>🇺🇸 USD</span>
-              <span class="text-[10px] opacity-75 font-normal">($)</span>
-            </button>
-          </div>
-
-          <!-- Presets Dropdown -->
-          <div class="relative" id="presetDropdownContainer">
-            <button id="presetBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-bh-card hover:bg-slate-800 text-xs font-semibold border border-bh-border text-slate-200 transition">
-              <i class="fa-solid fa-house-chimney text-bh-yellow"></i>
-              <span id="currentPresetName" data-i18n="preset_btn">Modèles Types</span>
-              <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
-            </button>
-            <div id="presetMenu" class="hidden absolute right-0 mt-2 w-72 bg-bh-card border border-bh-border rounded-xl shadow-2xl z-50 p-2 text-xs divide-y divide-bh-border/60">
-              <div class="p-1.5 text-[11px] font-bold text-bh-yellow uppercase tracking-wider" data-i18n="preset_heading">Modèles de Maisons en Algérie</div>
-              <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 flex flex-col gap-0.5 preset-opt" data-preset="economy_villa">
-                <span class="font-bold text-bh-yellow" data-i18n="preset_1_title">1. Villa Plain-pied (120 m² - RDC)</span>
-                <span class="text-[10px] text-slate-400" data-i18n="preset_1_sub">Terrain 160m², Bâti 120m², 1 Niveau</span>
-              </button>
-              <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 flex flex-col gap-0.5 preset-opt" data-preset="family_r1">
-                <span class="font-bold text-sky-400" data-i18n="preset_2_title">2. Maison Familiale R+1 (240 m²)</span >
-                <span class="text-[10px] text-slate-400" data-i18n="preset_2_sub">Terrain 180m², Bâti 120m², 2 Niveaux</span>
-              </button>
-              <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 flex flex-col gap-0.5 preset-opt" data-preset="luxury_r2">
-                <span class="font-bold text-bh-orange" data-i18n="preset_3_title">3. Villa Moderne avec Décor R+2 (360 m²)</span>
-                <span class="text-[10px] text-slate-400" data-i18n="preset_3_sub">Terrain 250m², Bâti 120m², Finitions Haut Standing</span>
-              </button>
-              <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 flex flex-col gap-0.5 preset-opt" data-preset="residential_building">
-                <span class="font-bold text-emerald-400" data-i18n="preset_4_title">4. Petit Immeuble Résidentiel R+3 (600 m²)</span>
-                <span class="text-[10px] text-slate-400" data-i18n="preset_4_sub">Terrain 200m², Bâti 150m², 4 Niveaux</span>
-              </button>
+          <!-- Logo & Brand Header -->
+          <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('tab-scientific-calculator')">
+            <img src="assets/batihub_logo.png" alt="BatiHub DZ Logo" class="h-11 sm:h-12 w-auto object-contain hover:scale-105 transition">
+            <div class="hidden sm:block">
+              <h1 class="font-heading font-black text-xl text-white tracking-tight flex items-center gap-1.5">
+                <span>Bati<span class="text-transparent bg-clip-text bg-gradient-to-r from-bh-yellow to-bh-orange">Hub</span></span>
+                <span class="text-[10px] font-bold bg-bh-yellow/20 text-bh-yellow border border-bh-yellow/40 px-2 py-0.5 rounded-full font-mono">DZ PRO</span>
+              </h1>
+              <p class="text-[11px] text-slate-400">BUILD • CONNECT • CREATE</p>
             </div>
           </div>
 
-          <!-- Print / Export Devis Button -->
-          <button id="printReportBtn" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold text-xs shadow-lg shadow-bh-orange/20 transition">
-            <i class="fa-solid fa-file-invoice-dollar"></i>
-            <span data-i18n="export_pdf_btn">Imprimer Devis (PDF)</span>
+          <!-- Quick Actions & Profile Shortcut -->
+          <div class="flex items-center gap-2">
+            <button onclick="openUserProfileModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-bh-card hover:bg-bh-cardhover text-slate-200 hover:text-white border border-bh-border hover:border-bh-yellow/50 text-xs font-semibold transition">
+              <i class="fa-solid fa-user-gear text-bh-yellow"></i>
+              <span data-i18n="btn_user_settings">الإعدادات والملف الشخصي</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Navigation Tabs: Clean Single Category (Scientific & Civil Engineering Calculator) -->
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-bh-border pt-2 pb-1 text-xs">
+          <button class="nav-tab active-tab" data-tab="tab-scientific-calculator">
+            <i class="fa-solid fa-calculator text-bh-yellow mr-1.5"></i>
+            <span data-i18n="nav_scientific_calc">آلة حاسبة علمية وهندسية</span>
           </button>
-
         </div>
+
       </div>
+    </header>
 
-      <!-- Navigation Tabs (CLEANED UP - EMPTY PLACEHOLDER TABS REMOVED) -->
-      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-bh-border pt-2 pb-1 text-xs">
-        <button class="nav-tab active-tab" data-tab="tab-calculator">
-          <i class="fa-solid fa-calculator mr-1"></i><span data-i18n="nav_calculator">Calculateur de Coûts & Matériaux</span>
-        </button>
-        <button class="nav-tab" data-tab="tab-boq">
-          <i class="fa-solid fa-list-check mr-1 text-bh-yellow"></i><span data-i18n="nav_boq">Bordereau Détaillé (BOQ)</span>
-        </button>
-        <button class="nav-tab" data-tab="tab-report">
-          <i class="fa-solid fa-file-signature mr-1 text-bh-yellow"></i><span data-i18n="nav_report">Devis Officiel A4</span>
-        </button>
+    <!-- OFFICIAL BANNER EMBEDDED -->
+    <section id="heroBannerContainer" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
+      <div class="relative rounded-2xl overflow-hidden border border-bh-border shadow-2xl bg-bh-card">
+        <img src="assets/batihub_banner.jpg" alt="BatiHub DZ Banner" class="w-full h-auto object-cover max-h-56 sm:max-h-64 md:max-h-72">
       </div>
-
-    </div>
-  </header>
-
-  <!-- ========================================================================= -->
-  <!-- 4. OFFICIAL BANNER EMBEDDED -->
-  <!-- ========================================================================= -->
-  <section id="heroBannerContainer" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
-    <div class="relative rounded-2xl overflow-hidden border border-bh-border shadow-2xl bg-bh-card">
-      <img src="assets/batihub_banner.jpg" alt="BatiHub DZ Banner" class="w-full h-auto object-cover max-h-72 sm:max-h-80 md:max-h-96">
-    </div>
-  </section>
-
-  <!-- ========================================================================= -->
-  <!-- 5. MAIN CONTENT -->
-  <!-- ========================================================================= -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
-    <!-- HERO METRICS ROW -->
-    <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      
-      <!-- Total Estimated Budget -->
-      <div class="col-span-2 sm:col-span-1 rounded-2xl bg-gradient-to-br from-bh-card to-bh-bg border border-bh-yellow/40 p-4 shadow-xl relative overflow-hidden group">
-        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-bh-yellow/15 rounded-full blur-xl group-hover:bg-bh-yellow/25 transition"></div>
-        <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-1.5">
-          <span class="flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-bh-yellow animate-pulse"></span>
-            <span data-i18n="hero_total_cost">Coût Total Estimé</span>
-          </span>
-          <i class="fa-solid fa-coins text-bh-yellow text-sm"></i>
-        </div>
-        <div class="text-2xl sm:text-3xl font-heading font-black text-white tracking-tight" id="heroTotalCost">
-          0 <span class="text-sm font-normal text-bh-yellow" id="heroCurrencyBadge">DZD</span>
-        </div>
-        <div class="text-[11px] text-slate-400 mt-2 flex items-center justify-between">
-          <span data-i18n="cost_per_m2">Coût au m² bâti:</span>
-          <span class="font-bold text-bh-yellow font-mono" id="heroCostPerM2">0 DZD/m²</span>
-        </div>
-      </div>
-
-      <!-- Total Built Area (GFA) -->
-      <div class="rounded-2xl bg-bh-card border border-bh-border p-4 shadow-xl relative overflow-hidden">
-        <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-1.5">
-          <span data-i18n="hero_built_area">Surface Bâtie Totale</span>
-          <i class="fa-solid fa-ruler-combined text-emerald-400 text-sm"></i>
-        </div>
-        <div class="text-2xl sm:text-3xl font-heading font-black text-white tracking-tight" id="heroTotalArea">
-          0 <span class="text-sm font-normal text-slate-400">m²</span>
-        </div>
-        <div class="text-[11px] text-slate-400 mt-2 flex items-center justify-between">
-          <span data-i18n="hero_footprint">Emprise au Sol:</span>
-          <span class="font-bold text-emerald-400 font-mono" id="heroFootprintArea">0 m²</span>
-        </div>
-      </div>
-
-      <!-- Free Yard / Setback Area -->
-      <div class="rounded-2xl bg-bh-card border border-bh-border p-4 shadow-xl relative overflow-hidden">
-        <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-1.5">
-          <span data-i18n="hero_yard_area">Cour & Espaces Libres</span>
-          <i class="fa-solid fa-tree text-teal-400 text-sm"></i>
-        </div>
-        <div class="text-2xl sm:text-3xl font-heading font-black text-teal-300 tracking-tight" id="heroUnbuiltArea">
-          0 <span class="text-sm font-normal text-slate-400">m²</span>
-        </div>
-        <div class="text-[11px] text-slate-400 mt-2 flex items-center justify-between">
-          <span data-i18n="hero_ces_ratio">Coefficient d'Emprise (CES):</span>
-          <span class="font-bold text-teal-400 font-mono" id="heroCESRatio">0%</span>
-        </div>
-      </div>
-
-      <!-- Quick Glance Structural Materials -->
-      <div class="col-span-2 sm:col-span-1 rounded-2xl bg-bh-card border border-bh-border p-4 shadow-xl relative overflow-hidden">
-        <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-1.5">
-          <span data-i18n="hero_key_materials">Matériaux Principaux</span>
-          <i class="fa-solid fa-cubes-stacked text-bh-orange text-sm"></i>
-        </div>
-        <div class="grid grid-cols-2 gap-2 mt-1">
-          <div class="bg-bh-bg rounded-lg p-1.5 border border-bh-border">
-            <span class="text-[10px] text-slate-400 block" data-i18n="mat_cement_short">Ciment:</span>
-            <span class="font-bold text-white text-xs font-mono" id="heroCementTons">0 T</span>
-          </div>
-          <div class="bg-bh-bg rounded-lg p-1.5 border border-bh-border">
-            <span class="text-[10px] text-slate-400 block" data-i18n="mat_steel_short">Acier:</span>
-            <span class="font-bold text-white text-xs font-mono" id="heroSteelTons">0 T</span>
-          </div>
-          <div class="bg-bh-bg rounded-lg p-1.5 border border-bh-border">
-            <span class="text-[10px] text-slate-400 block" data-i18n="mat_bricks_short">Briques:</span>
-            <span class="font-bold text-white text-xs font-mono" id="heroBricksCount">0 pcs</span>
-          </div>
-          <div class="bg-bh-bg rounded-lg p-1.5 border border-bh-border">
-            <span class="text-[10px] text-slate-400 block" data-i18n="mat_aggregates_short">Granulats:</span>
-            <span class="font-bold text-white text-xs font-mono" id="heroAggregates">0 m³</span>
-          </div>
-        </div>
-      </div>
-
     </section>
 
-    <!-- ========================================================================= -->
-    <!-- TAB 1: CALCULATEUR DE COÛTS & MATÉRIAUX -->
-    <!-- ========================================================================= -->
-    <div id="tab-calculator" class="tab-content active-content">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- MAIN CONTENT -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-        <!-- LEFT PANEL: DIMENSIONS, FINISHES & REAL-TIME PRICES (5 COLS) -->
-        <div class="lg:col-span-5 space-y-6">
-
-          <!-- 1. LAND & BUILDING DIMENSIONS -->
-          <div class="bg-bh-card border border-bh-border rounded-2xl p-5 shadow-xl">
-            <div class="flex items-center justify-between pb-3 mb-4 border-b border-bh-border">
-              <div class="flex items-center gap-2.5">
-                <span class="w-7 h-7 rounded-lg bg-bh-yellow/20 border border-bh-yellow/40 text-bh-yellow flex items-center justify-center text-xs font-bold font-mono">1</span>
-                <div>
-                  <h3 class="font-heading font-bold text-base text-white" data-i18n="sec1_title">Dimensions du Terrain & Bâti</h3>
-                  <p class="text-[11px] text-slate-400" data-i18n="sec1_subtitle">Surfaces de la parcelle, de l'emprise et nombre d'étages</p>
-                </div>
-              </div>
-              <i class="fa-solid fa-compass-drafting text-slate-500 text-lg"></i>
-            </div>
-
-            <div class="space-y-4">
-              
-              <!-- Total Plot Area -->
-              <div>
-                <div class="flex items-center justify-between text-xs font-semibold mb-1.5">
-                  <label for="inputLandArea" class="text-slate-200 flex items-center gap-1.5">
-                    <i class="fa-solid fa-vector-square text-bh-yellow text-xs"></i>
-                    <span data-i18n="lbl_land_area">Surface Totale du Terrain</span> (<span class="font-mono">m²</span>)
-                  </label>
-                  <span class="text-bh-yellow font-mono font-bold" id="labelLandAreaVal">160 m²</span>
-                </div>
-                <div class="flex items-center gap-3">
-                  <input type="range" id="sliderLandArea" min="50" max="1000" step="5" value="160" class="w-full accent-bh-yellow">
-                  <input type="number" id="inputLandArea" min="30" max="5000" value="160" class="w-24 bg-bh-bg border border-bh-border rounded-lg px-2.5 py-1 text-xs font-mono font-bold text-center text-white focus:outline-none focus:border-bh-yellow">
-                </div>
-                <span class="text-[10px] text-slate-500" data-i18n="hint_land_area">Surface totale de la parcelle cadastrale</span>
-              </div>
-
-              <!-- Built Footprint Area -->
-              <div>
-                <div class="flex items-center justify-between text-xs font-semibold mb-1.5">
-                  <label for="inputFootprintArea" class="text-slate-200 flex items-center gap-1.5">
-                    <i class="fa-solid fa-house-chimney text-emerald-400 text-xs"></i>
-                    <span data-i18n="lbl_footprint_area">Emprise au Sol du Bâtiment</span> (<span class="font-mono">m²</span>)
-                  </label>
-                  <span class="text-emerald-400 font-mono font-bold" id="labelFootprintVal">120 m²</span>
-                </div>
-                <div class="flex items-center gap-3">
-                  <input type="range" id="sliderFootprintArea" min="40" max="600" step="5" value="120" class="w-full accent-emerald-400">
-                  <input type="number" id="inputFootprintArea" min="30" max="3000" value="120" class="w-24 bg-bh-bg border border-bh-border rounded-lg px-2.5 py-1 text-xs font-mono font-bold text-center text-white focus:outline-none focus:border-emerald-400">
-                </div>
-                <span class="text-[10px] text-slate-500" data-i18n="hint_footprint_area">Surface couverte au rez-de-chaussée</span>
-              </div>
-
-              <!-- Free Yard Area (Calculated) -->
-              <div class="bg-bh-bg border border-bh-border rounded-xl p-3 flex items-center justify-between text-xs">
-                <div>
-                  <span class="font-bold text-slate-200 block" data-i18n="lbl_yard_area">Cour & Espaces Libres:</span>
-                  <span class="text-[10px] text-slate-400" data-i18n="hint_yard_area">Jardin, cour intérieure et allée</span>
-                </div>
-                <div class="text-right">
-                  <span class="text-sm font-heading font-black text-teal-400 font-mono" id="calcYardAreaVal">40 m²</span>
-                  <span class="text-[10px] text-slate-500 block" id="calcYardPercentVal">(25%)</span>
-                </div>
-              </div>
-
-              <!-- Number of Floors -->
-              <div>
-                <div class="flex items-center justify-between text-xs font-semibold mb-2">
-                  <label class="text-slate-200 flex items-center gap-1.5">
-                    <i class="fa-solid fa-layer-group text-bh-orange text-xs"></i>
-                    <span data-i18n="lbl_floors_count">Nombre d'Étages</span>
-                  </label>
-                  <span class="text-bh-orange font-bold" id="labelFloorsVal">RDC</span>
-                </div>
-                
-                <div class="grid grid-cols-5 gap-1.5" id="floorButtonsGroup">
-                  <button type="button" class="floor-btn active-floor-btn py-2 rounded-lg border border-bh-border bg-slate-800 text-xs font-bold transition text-center" data-floors="1">
-                    RDC
-                  </button>
-                  <button type="button" class="floor-btn py-2 rounded-lg border border-bh-border bg-bh-bg text-xs font-bold transition text-center text-slate-400 hover:text-white" data-floors="2">
-                    R+1
-                  </button>
-                  <button type="button" class="floor-btn py-2 rounded-lg border border-bh-border bg-bh-bg text-xs font-bold transition text-center text-slate-400 hover:text-white" data-floors="3">
-                    R+2
-                  </button>
-                  <button type="button" class="floor-btn py-2 rounded-lg border border-bh-border bg-bh-bg text-xs font-bold transition text-center text-slate-400 hover:text-white" data-floors="4">
-                    R+3
-                  </button>
-                  <button type="button" class="floor-btn py-2 rounded-lg border border-bh-border bg-bh-bg text-xs font-bold transition text-center text-slate-400 hover:text-white" data-floors="5">
-                    R+4
-                  </button>
-                </div>
-              </div>
-
-              <!-- Basement and Overhang checkboxes -->
-              <div class="grid grid-cols-2 gap-3 pt-2">
-                <label class="cursor-pointer bg-bh-bg border border-bh-border rounded-xl p-2.5 flex items-center gap-2 hover:border-bh-yellow transition">
-                  <input type="checkbox" id="checkBasement" class="rounded accent-bh-yellow w-4 h-4">
-                  <div class="text-[11px]">
-                    <span class="font-bold text-slate-200 block" data-i18n="opt_basement">Sous-sol Inclus</span>
-                    <span class="text-[10px] text-slate-500" data-i18n="opt_basement_sub">Sous-sol (+1 niveau bas)</span>
-                  </div>
-                </label>
-
-                <label class="cursor-pointer bg-bh-bg border border-bh-border rounded-xl p-2.5 flex items-center gap-2 hover:border-bh-yellow transition">
-                  <input type="checkbox" id="checkOverhang" class="rounded accent-bh-yellow w-4 h-4" checked>
-                  <div class="text-[11px]">
-                    <span class="font-bold text-slate-200 block" data-i18n="opt_overhang">Encorbellement</span>
-                    <span class="text-[10px] text-slate-500" data-i18n="opt_overhang_sub">+10% étages hauts</span>
-                  </div>
-                </label>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- 2. FINISHING QUALITY & ARCHITECTURAL STYLE -->
-          <div class="bg-bh-card border border-bh-border rounded-2xl p-5 shadow-xl">
-            <div class="flex items-center justify-between pb-3 mb-4 border-b border-bh-border">
-              <div class="flex items-center gap-2.5">
-                <span class="w-7 h-7 rounded-lg bg-bh-orange/20 border border-bh-orange/40 text-bh-orange flex items-center justify-center text-xs font-bold font-mono">2</span>
-                <div>
-                  <h3 class="font-heading font-bold text-base text-white" data-i18n="sec2_title">Qualité des Finitions & Décoration</h3>
-                  <p class="text-[11px] text-slate-400" data-i18n="sec2_subtitle">Maison standard, haut standing décorée ou gros œuvre seul</p>
-                </div>
-              </div>
-              <i class="fa-solid fa-paint-roller text-bh-yellow text-lg"></i>
-            </div>
-
-            <div class="space-y-3" id="finishTiersContainer">
-              
-              <!-- Tier 1: Standard Residential -->
-              <label class="finish-card active-finish-card cursor-pointer block bg-bh-bg border-2 border-bh-yellow rounded-xl p-3.5 transition" data-tier="standard">
-                <div class="flex items-start justify-between">
-                  <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base">
-                      <i class="fa-solid fa-house"></i>
-                    </div>
-                    <div>
-                      <div class="flex items-center gap-2">
-                        <span class="font-bold text-sm text-white" data-i18n="tier_standard_title">Maison Résidentielle Standard</span>
-                        <span class="text-[10px] font-bold bg-slate-800 text-slate-300 px-2 py-0.5 rounded" data-i18n="tier_standard_badge">Standard</span>
-                      </div>
-                      <p class="text-xs text-slate-400 mt-0.5" data-i18n="tier_standard_desc">Finitions classiques durables: Carrelage monocuisson, plâtre traditionnel, menuiserie aluminium standard, sanitaires classiques.</p>
-                    </div>
-                  </div>
-                  <input type="radio" name="finishQuality" value="standard" checked class="accent-bh-yellow mt-1">
-                </div>
-                <div class="mt-2.5 pt-2 border-t border-bh-border flex items-center justify-between text-[11px] text-slate-400">
-                  <span class="text-emerald-400 font-semibold"><i class="fa-solid fa-check mr-1"></i> <span data-i18n="tier_standard_badge">Économique & Optimisé</span></span>
-                  <span class="font-mono text-slate-300">~ 42,000 - 48,000 DZD/m²</span>
-                </div>
-              </label>
-
-              <!-- Tier 2: Decorated / High Finish -->
-              <label class="finish-card cursor-pointer block bg-bh-bg border border-bh-border rounded-xl p-3.5 hover:border-bh-yellow transition" data-tier="decorated">
-                <div class="flex items-start justify-between">
-                  <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-lg bg-bh-yellow/20 text-bh-yellow flex items-center justify-center text-base">
-                      <i class="fa-solid fa-wand-magic-sparkles"></i>
-                    </div>
-                    <div>
-                      <div class="flex items-center gap-2">
-                        <span class="font-bold text-sm text-white" data-i18n="tier_decorated_title">Villa Moderne avec Décor & Moulures</span>
-                        <span class="text-[10px] font-bold bg-bh-yellow/20 text-bh-yellow px-2 py-0.5 rounded" data-i18n="tier_decorated_badge">Haut Standing</span>
-                      </div>
-                      <p class="text-xs text-slate-400 mt-0.5" data-i18n="tier_decorated_desc">Faux plafonds BA13 avec gorge lumineuse LED, grès cérame 60x60, peinture décorative (stucco/carénia), aluminium à rupture de pont thermique.</p>
-                    </div>
-                  </div>
-                  <input type="radio" name="finishQuality" value="decorated" class="accent-bh-yellow mt-1">
-                </div>
-                <div class="mt-2.5 pt-2 border-t border-bh-border flex items-center justify-between text-[11px] text-slate-400">
-                  <span class="text-bh-yellow font-semibold"><i class="fa-solid fa-star mr-1"></i> <span data-i18n="tier_decorated_badge">Haut Standing Moderne</span></span>
-                  <span class="font-mono text-slate-300">~ 62,000 - 72,000 DZD/m²</span>
-                </div>
-              </label>
-
-              <!-- Tier 3: Structural Shell Only -->
-              <label class="finish-card cursor-pointer block bg-bh-bg border border-bh-border rounded-xl p-3.5 hover:border-bh-orange transition" data-tier="shell">
-                <div class="flex items-start justify-between">
-                  <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-lg bg-bh-orange/20 text-bh-orange flex items-center justify-center text-base">
-                      <i class="fa-solid fa-trowel-bricks"></i>
-                    </div>
-                    <div>
-                      <div class="flex items-center gap-2">
-                        <span class="font-bold text-sm text-white" data-i18n="tier_shell_title">Gros Œuvre / Carcasse Seule</span>
-                        <span class="text-[10px] font-bold bg-bh-orange/20 text-bh-orange px-2 py-0.5 rounded" data-i18n="tier_shell_badge">Structure Seule</span>
-                      </div>
-                      <p class="text-xs text-slate-400 mt-0.5" data-i18n="tier_shell_desc">Fondations, poteaux-poutres béton armé, dalles hourdis, double cloison brique et étanchéité terrasse (sans finitions intérieures).</p>
-                    </div>
-                  </div>
-                  <input type="radio" name="finishQuality" value="shell" class="accent-bh-yellow mt-1">
-                </div>
-                <div class="mt-2.5 pt-2 border-t border-bh-border flex items-center justify-between text-[11px] text-slate-400">
-                  <span class="text-bh-orange font-semibold"><i class="fa-solid fa-hammer mr-1"></i> <span data-i18n="tier_shell_badge">Structure Seule</span></span>
-                  <span class="font-mono text-slate-300">~ 24,000 - 28,000 DZD/m²</span>
-                </div>
-              </label>
-
-            </div>
-
-            <!-- Foundation & Contingency -->
-            <div class="mt-4 pt-3 border-t border-bh-border grid grid-cols-2 gap-3 text-xs">
-              <div>
-                <label class="text-slate-400 block mb-1 font-semibold" data-i18n="lbl_foundation_type">Type de Fondations:</label>
-                <select id="selectFoundationType" class="w-full bg-bh-bg border border-bh-border rounded-lg p-2 text-xs text-white focus:outline-none focus:border-bh-yellow">
-                  <option value="isolated" data-i18n="opt_isolated">Semelles Isolées & Filantes</option>
-                  <option value="raft" data-i18n="opt_raft">Radier Général (+20% béton)</option>
-                </select>
-              </div>
-              <div>
-                <label class="text-slate-400 block mb-1 font-semibold" data-i18n="lbl_contingency">Marge Aléas / Imprévus:</label>
-                <select id="selectContingency" class="w-full bg-bh-bg border border-bh-border rounded-lg p-2 text-xs text-white focus:outline-none focus:border-bh-yellow">
-                  <option value="0.05">5% Standard</option>
-                  <option value="0.10" selected>10% Recommandée</option>
-                  <option value="0.15">15% Sécuritaire</option>
-                </select>
-              </div>
-            </div>
-
-          </div>
-
-          <!-- 3. DIRECT MATERIAL UNIT PRICES CONTROLS -->
-          <div class="bg-bh-card border border-bh-border rounded-2xl p-5 shadow-xl">
-            <div class="flex items-center justify-between pb-3 mb-4 border-b border-bh-border">
-              <div class="flex items-center gap-2.5">
-                <span class="w-7 h-7 rounded-lg bg-bh-yellow/20 border border-bh-yellow/40 text-bh-yellow flex items-center justify-center text-xs font-bold font-mono">3</span>
-                <div>
-                  <h3 class="font-heading font-bold text-base text-white" data-i18n="sec3_title">Prix Unitaires des Matériaux</h3>
-                  <p class="text-[11px] text-slate-400" data-i18n="sec3_subtitle">Ajustez les prix en DZD selon votre marché local</p>
-                </div>
-              </div>
-              <button onclick="restoreAllDefaultPrices()" class="text-[11px] text-bh-yellow hover:underline font-semibold" data-i18n="btn_reset_prices">
-                Réinitialiser
-              </button>
-            </div>
-
-            <!-- Material Inputs Grid -->
-            <div class="space-y-2.5 text-xs">
-              
-              <!-- Cement -->
-              <div class="flex items-center justify-between p-2 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow transition">
-                <div>
-                  <span class="font-bold text-slate-200 block" data-i18n="price_cement_name">Sac de Ciment 50kg</span>
-                  <span class="text-[10px] text-slate-500">CPJ-CEM II 42.5 (Sac 50kg)</span>
-                </div>
-                <div class="w-28 flex items-center gap-1">
-                  <input type="number" id="quickPriceCement" value="680" min="200" max="2500" class="w-full bg-bh-card border border-bh-border rounded-lg px-2 py-1 text-xs font-mono font-bold text-bh-yellow text-right focus:outline-none focus:border-bh-yellow">
-                  <span class="text-[10px] text-slate-400 font-bold curr-symbol">DZD</span>
-                </div>
-              </div>
-
-              <!-- Rebar Steel -->
-              <div class="flex items-center justify-between p-2 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow transition">
-                <div>
-                  <span class="font-bold text-slate-200 block" data-i18n="price_steel_name">Acier / Quintal</span>
-                  <span class="text-[10px] text-slate-500">Rond à béton FeE500 (100 kg)</span>
-                </div>
-                <div class="w-28 flex items-center gap-1">
-                  <input type="number" id="quickPriceSteel" value="12800" min="5000" max="35000" class="w-full bg-bh-card border border-bh-border rounded-lg px-2 py-1 text-xs font-mono font-bold text-bh-yellow text-right focus:outline-none focus:border-bh-yellow">
-                  <span class="text-[10px] text-slate-400 font-bold curr-symbol">DZD</span>
-                </div>
-              </div>
-
-              <!-- Sand -->
-              <div class="flex items-center justify-between p-2 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow transition">
-                <div>
-                  <span class="font-bold text-slate-200 block" data-i18n="price_sand_name">Sable au m³</span>
-                  <span class="text-[10px] text-slate-500">Sable lavé pour béton & mortier</span>
-                </div>
-                <div class="w-28 flex items-center gap-1">
-                  <input type="number" id="quickPriceSand" value="2800" min="500" max="10000" class="w-full bg-bh-card border border-bh-border rounded-lg px-2 py-1 text-xs font-mono font-bold text-bh-yellow text-right focus:outline-none focus:border-bh-yellow">
-                  <span class="text-[10px] text-slate-400 font-bold curr-symbol">DZD</span>
-                </div>
-              </div>
-
-              <!-- Gravel -->
-              <div class="flex items-center justify-between p-2 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow transition">
-                <div>
-                  <span class="font-bold text-slate-200 block" data-i18n="price_gravel_name">Gravier au m³</span>
-                  <span class="text-[10px] text-slate-500">Granulats concassés 8/15 & 15/25</span>
-                </div>
-                <div class="w-28 flex items-center gap-1">
-                  <input type="number" id="quickPriceGravel" value="2300" min="500" max="10000" class="w-full bg-bh-card border border-bh-border rounded-lg px-2 py-1 text-xs font-mono font-bold text-bh-yellow text-right focus:outline-none focus:border-bh-yellow">
-                  <span class="text-[10px] text-slate-400 font-bold curr-symbol">DZD</span>
-                </div>
-              </div>
-
-              <!-- Brick 12 Holes -->
-              <div class="flex items-center justify-between p-2 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow transition">
-                <div>
-                  <span class="font-bold text-slate-200 block" data-i18n="price_brick12_name">Brique 12 Trous</span>
-                  <span class="text-[10px] text-slate-500">À la pièce (Murs extérieurs)</span>
-                </div>
-                <div class="w-28 flex items-center gap-1">
-                  <input type="number" id="quickPriceBrick12" value="40" min="10" max="200" class="w-full bg-bh-card border border-bh-border rounded-lg px-2 py-1 text-xs font-mono font-bold text-bh-yellow text-right focus:outline-none focus:border-bh-yellow">
-                  <span class="text-[10px] text-slate-400 font-bold curr-symbol">DZD</span>
-                </div>
-              </div>
-
-              <!-- Brick 8 Holes -->
-              <div class="flex items-center justify-between p-2 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow transition">
-                <div>
-                  <span class="font-bold text-slate-200 block" data-i18n="price_brick8_name">Brique 8 Trous</span>
-                  <span class="text-[10px] text-slate-500">À la pièce (Cloisons intérieures)</span>
-                </div>
-                <div class="w-28 flex items-center gap-1">
-                  <input type="number" id="quickPriceBrick8" value="34" min="10" max="200" class="w-full bg-bh-card border border-bh-border rounded-lg px-2 py-1 text-xs font-mono font-bold text-bh-yellow text-right focus:outline-none focus:border-bh-yellow">
-                  <span class="text-[10px] text-slate-400 font-bold curr-symbol">DZD</span>
-                </div>
-              </div>
-
-              <!-- Foundation Stones -->
-              <div class="flex items-center justify-between p-2 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow transition">
-                <div>
-                  <span class="font-bold text-slate-200 block" data-i18n="price_stones_name">Moellons au m³</span>
-                  <span class="text-[10px] text-slate-500">Pierres hérisson pour fondations</span>
-                </div>
-                <div class="w-28 flex items-center gap-1">
-                  <input type="number" id="quickPriceStones" value="1900" min="500" max="8000" class="w-full bg-bh-card border border-bh-border rounded-lg px-2 py-1 text-xs font-mono font-bold text-bh-yellow text-right focus:outline-none focus:border-bh-yellow">
-                  <span class="text-[10px] text-slate-400 font-bold curr-symbol">DZD</span>
-                </div>
-              </div>
-
-              <!-- Shell Labor -->
-              <div class="flex items-center justify-between p-2 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow transition">
-                <div>
-                  <span class="font-bold text-slate-200 block" data-i18n="price_labor_name">Main d'œuvre Gros Œuvre / m²</span>
-                  <span class="text-[10px] text-slate-500">Coffrage, ferraillage, coulage</span>
-                </div>
-                <div class="w-28 flex items-center gap-1">
-                  <input type="number" id="quickPriceLabor" value="9500" min="2000" max="30000" class="w-full bg-bh-card border border-bh-border rounded-lg px-2 py-1 text-xs font-mono font-bold text-bh-yellow text-right focus:outline-none focus:border-bh-yellow">
-                  <span class="text-[10px] text-slate-400 font-bold curr-symbol">DZD</span>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-        </div>
-
-        <!-- RIGHT PANEL: DETAILED QUANTITIES & VISUAL ANALYTICS (7 COLS) -->
-        <div class="lg:col-span-7 space-y-6">
-
-          <!-- 4. REQUIRED MATERIALS QUANTITIES & COSTS -->
-          <div class="bg-bh-card border border-bh-border rounded-2xl p-5 shadow-xl">
-            <div class="flex items-center justify-between pb-3 mb-4 border-b border-bh-border">
-              <div class="flex items-center gap-2.5">
-                <i class="fa-solid fa-clipboard-list text-bh-yellow text-lg"></i>
-                <div>
-                  <h3 class="font-heading font-bold text-base text-white" data-i18n="mat_detail_title">Quantités Exactes de Matériaux Nécessaires</h3>
-                  <p class="text-[11px] text-slate-400" data-i18n="mat_detail_subtitle">Calcul automatique selon les ratios techniques du DTR Algérien</p>
-                </div>
-              </div>
-              <span class="px-2.5 py-1 rounded-full bg-bh-yellow/20 text-bh-yellow text-[11px] font-bold font-mono">
-                DTR B.C. 2.2
-              </span>
-            </div>
-
-            <!-- Material Quantities Cards Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5" id="materialCardsGrid">
-              
-              <!-- 1. Cement -->
-              <div class="bg-bh-bg border border-bh-border rounded-xl p-3.5 flex flex-col justify-between hover:border-bh-yellow transition">
-                <div class="flex items-center justify-between mb-2">
-                  <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-bh-yellow/20 text-bh-yellow flex items-center justify-center text-sm">
-                      <i class="fa-solid fa-cubes-stacked"></i>
-                    </div>
-                    <div>
-                      <h4 class="font-bold text-sm text-white" data-i18n="card_cement_title">Ciment Portland</h4>
-                      <span class="text-[10px] text-slate-400">CPJ-CEM II 42.5</span>
-                    </div>
-                  </div>
-                  <span class="text-xs font-mono font-bold text-bh-yellow" id="calcCementTonnes">0 Tonnes</span>
-                </div>
-                <div class="space-y-1 text-xs pt-2 border-t border-bh-border">
-                  <div class="flex justify-between text-slate-300">
-                    <span data-i18n="calc_cement_bags">Nombre de Sacs (50kg):</span>
-                    <span class="font-mono font-bold text-white" id="calcCementBags">0 Sacs</span>
-                  </div>
-                  <div class="flex justify-between text-slate-400">
-                    <span data-i18n="calc_unit_price">Prix Unitaire:</span>
-                    <span class="font-mono" id="calcCementUnitPrice">680 DZD</span>
-                  </div>
-                  <div class="flex justify-between text-slate-200 font-bold pt-1 border-t border-bh-border/50">
-                    <span data-i18n="calc_total_cost">Coût Total Estimé:</span>
-                    <span class="font-mono text-bh-yellow text-sm" id="calcCementTotalCost">0 DZD</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 2. Rebar Steel -->
-              <div class="bg-bh-bg border border-bh-border rounded-xl p-3.5 flex flex-col justify-between hover:border-sky-400 transition">
-                <div class="flex items-center justify-between mb-2">
-                  <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center text-sm">
-                      <i class="fa-solid fa-bars-staggered"></i>
-                    </div>
-                    <div>
-                      <h4 class="font-bold text-sm text-white" data-i18n="card_steel_title">Acier pour Béton</h4>
-                      <span class="text-[10px] text-slate-400">FeE500 Haute Adhérence</span>
-                    </div>
-                  </div>
-                  <span class="text-xs font-mono font-bold text-sky-400" id="calcSteelTonnes">0 Tonnes</span>
-                </div>
-                <div class="space-y-1 text-xs pt-2 border-t border-bh-border">
-                  <div class="flex justify-between text-slate-300">
-                    <span data-i18n="calc_steel_quintals">Quantité en Quintaux (100kg):</span>
-                    <span class="font-mono font-bold text-white" id="calcSteelQuintals">0 Qx</span>
-                  </div>
-                  <div class="flex justify-between text-slate-400">
-                    <span data-i18n="calc_unit_price">Prix Unitaire:</span>
-                    <span class="font-mono" id="calcSteelUnitPrice">12,800 DZD</span>
-                  </div>
-                  <div class="flex justify-between text-slate-200 font-bold pt-1 border-t border-bh-border/50">
-                    <span data-i18n="calc_total_cost">Coût Total Estimé:</span>
-                    <span class="font-mono text-sky-400 text-sm" id="calcSteelTotalCost">0 DZD</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 3. Red Bricks -->
-              <div class="bg-bh-bg border border-bh-border rounded-xl p-3.5 flex flex-col justify-between hover:border-bh-orange transition">
-                <div class="flex items-center justify-between mb-2">
-                  <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-bh-orange/20 text-bh-orange flex items-center justify-center text-sm">
-                      <i class="fa-solid fa-shapes"></i>
-                    </div>
-                    <div>
-                      <h4 class="font-bold text-sm text-white" data-i18n="card_bricks_title">Briques en Terre Cuite</h4>
-                      <span class="text-[10px] text-slate-400">12 Trous & 8 Trous</span>
-                    </div>
-                  </div>
-                  <span class="text-xs font-mono font-bold text-bh-orange" id="calcTotalBricks">0 Pièces</span>
-                </div>
-                <div class="space-y-1 text-xs pt-2 border-t border-bh-border">
-                  <div class="flex justify-between text-slate-300">
-                    <span data-i18n="calc_brick12">Brique 12 Trous (Extérieur):</span>
-                    <span class="font-mono font-bold text-white" id="calcBricks12Count">0 pcs</span>
-                  </div>
-                  <div class="flex justify-between text-slate-300">
-                    <span data-i18n="calc_brick8">Brique 8 Trous (Intérieur):</span>
-                    <span class="font-mono font-bold text-white" id="calcBricks8Count">0 pcs</span>
-                  </div>
-                  <div class="flex justify-between text-slate-200 font-bold pt-1 border-t border-bh-border/50">
-                    <span data-i18n="calc_total_cost">Coût Total Estimé:</span>
-                    <span class="font-mono text-bh-orange text-sm" id="calcBricksTotalCost">0 DZD</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 4. Sand -->
-              <div class="bg-bh-bg border border-bh-border rounded-xl p-3.5 flex flex-col justify-between hover:border-bh-yellow transition">
-                <div class="flex items-center justify-between mb-2">
-                  <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-bh-yellow/20 text-bh-yellow flex items-center justify-center text-sm">
-                      <i class="fa-solid fa-water"></i>
-                    </div>
-                    <div>
-                      <h4 class="font-bold text-sm text-white" data-i18n="card_sand_title">Sable de Rivière Lavé</h4>
-                      <span class="text-[10px] text-slate-400">Béton & mortiers</span>
-                    </div>
-                  </div>
-                  <span class="text-xs font-mono font-bold text-bh-yellow" id="calcSandVol">0 m³</span>
-                </div>
-                <div class="space-y-1 text-xs pt-2 border-t border-bh-border">
-                  <div class="flex justify-between text-slate-300">
-                    <span data-i18n="calc_sand_trucks">Camions Estimés (~16m³):</span>
-                    <span class="font-mono font-bold text-white" id="calcSandTrucks">0 Camions</span>
-                  </div>
-                  <div class="flex justify-between text-slate-400">
-                    <span data-i18n="calc_unit_price">Prix Unitaire / m³:</span>
-                    <span class="font-mono" id="calcSandUnitPrice">2,800 DZD</span>
-                  </div>
-                  <div class="flex justify-between text-slate-200 font-bold pt-1 border-t border-bh-border/50">
-                    <span data-i18n="calc_total_cost">Coût Total Estimé:</span>
-                    <span class="font-mono text-bh-yellow text-sm" id="calcSandTotalCost">0 DZD</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 5. Gravel -->
-              <div class="bg-bh-bg border border-bh-border rounded-xl p-3.5 flex flex-col justify-between hover:border-teal-400 transition">
-                <div class="flex items-center justify-between mb-2">
-                  <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-400 flex items-center justify-center text-sm">
-                      <i class="fa-solid fa-gem"></i>
-                    </div>
-                    <div>
-                      <h4 class="font-bold text-sm text-white" data-i18n="card_gravel_title">Gravier Concassé</h4>
-                      <span class="text-[10px] text-slate-400">Agrégats 8/15 & 15/25</span>
-                    </div>
-                  </div>
-                  <span class="text-xs font-mono font-bold text-teal-400" id="calcGravelVol">0 m³</span>
-                </div>
-                <div class="space-y-1 text-xs pt-2 border-t border-bh-border">
-                  <div class="flex justify-between text-slate-300">
-                    <span data-i18n="calc_gravel_trucks">Camions Estimés (~16m³):</span>
-                    <span class="font-mono font-bold text-white" id="calcGravelTrucks">0 Camions</span>
-                  </div>
-                  <div class="flex justify-between text-slate-400">
-                    <span data-i18n="calc_unit_price">Prix Unitaire / m³:</span>
-                    <span class="font-mono" id="calcGravelUnitPrice">2,300 DZD</span>
-                  </div>
-                  <div class="flex justify-between text-slate-200 font-bold pt-1 border-t border-bh-border/50">
-                    <span data-i18n="calc_total_cost">Coût Total Estimé:</span>
-                    <span class="font-mono text-teal-400 text-sm" id="calcGravelTotalCost">0 DZD</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 6. Hourdis & Stones -->
-              <div class="bg-bh-bg border border-bh-border rounded-xl p-3.5 flex flex-col justify-between hover:border-emerald-400 transition">
-                <div class="flex items-center justify-between mb-2">
-                  <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm">
-                      <i class="fa-solid fa-layer-group"></i>
-                    </div>
-                    <div>
-                      <h4 class="font-bold text-sm text-white" data-i18n="card_hourdis_title">Hourdis & Moellons</h4>
-                      <span class="text-[10px] text-slate-400">Corps creux 16+4 & Hérisson</span>
-                    </div>
-                  </div>
-                  <span class="text-xs font-mono font-bold text-emerald-400" id="calcHourdisCount">0 Pièces</span>
-                </div>
-                <div class="space-y-1 text-xs pt-2 border-t border-bh-border">
-                  <div class="flex justify-between text-slate-300">
-                    <span data-i18n="calc_foundation_rocks">Pierres Fondations:</span>
-                    <span class="font-mono font-bold text-white" id="calcStonesVol">0 m³</span>
-                  </div>
-                  <div class="flex justify-between text-slate-400">
-                    <span data-i18n="calc_waterproofing">Étanchéité Toiture:</span>
-                    <span class="font-mono" id="calcWaterproofingArea">0 m²</span>
-                  </div>
-                  <div class="flex justify-between text-slate-200 font-bold pt-1 border-t border-bh-border/50">
-                    <span data-i18n="calc_total_cost">Coût Total Estimé:</span>
-                    <span class="font-mono text-emerald-400 text-sm" id="calcHourdisStonesCost">0 DZD</span>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- 5. PHASE ACCORDION BREAKDOWN -->
-          <div class="bg-bh-card border border-bh-border rounded-2xl p-5 shadow-xl">
-            <div class="flex items-center justify-between pb-3 mb-4 border-b border-bh-border">
-              <div class="flex items-center gap-2.5">
-                <i class="fa-solid fa-diagram-project text-bh-yellow text-lg"></i>
-                <div>
-                  <h3 class="font-heading font-bold text-base text-white" data-i18n="sec5_title">Décomposition par Phase d'Exécution</h3>
-                  <p class="text-[11px] text-slate-400" data-i18n="sec5_subtitle">Coûts échelonnés selon les étapes de construction</p>
-                </div>
-              </div>
-              <button id="toggleAllPhasesBtn" class="text-xs text-bh-yellow hover:underline font-semibold" data-i18n="btn_expand_details">
-                Développer les Détails
-              </button>
-            </div>
-
-            <div class="space-y-3" id="phaseBreakdownList">
-              <!-- Rendered via JavaScript -->
-            </div>
-          </div>
-
-          <!-- 6. INTERACTIVE CHART ANALYTICS -->
-          <div class="bg-bh-card border border-bh-border rounded-2xl p-5 shadow-xl">
-            <div class="flex items-center justify-between pb-3 mb-4 border-b border-bh-border">
-              <div class="flex items-center gap-2.5">
-                <i class="fa-solid fa-chart-pie text-bh-orange text-lg"></i>
-                <div>
-                  <h3 class="font-heading font-bold text-base text-white" data-i18n="sec6_title">Répartition Financière du Projet</h3>
-                  <p class="text-[11px] text-slate-400" data-i18n="sec6_subtitle">Visualisation graphique des dépenses</p>
-                </div>
-              </div>
-              <div class="flex items-center gap-2 text-xs">
-                <button id="chartViewDonut" class="px-2.5 py-1 rounded-lg bg-bh-bg text-slate-200 border border-bh-border font-semibold active-chart-toggle" data-i18n="chart_btn_phase">Par Phase</button>
-                <button id="chartViewBar" class="px-2.5 py-1 rounded-lg bg-bh-card text-slate-400 border border-bh-border font-semibold hover:text-white" data-i18n="chart_btn_mat">Par Catégorie</button>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-              <div class="md:col-span-7 h-64 relative flex items-center justify-center">
-                <canvas id="mainBreakdownChart"></canvas>
-              </div>
-
-              <div class="md:col-span-5 space-y-2.5 text-xs">
-                <div class="bg-bh-bg border border-bh-border rounded-xl p-3">
-                  <div class="flex items-center justify-between mb-1">
-                    <span class="text-slate-400" data-i18n="chart_lbl_struct">Gros Œuvre & Structure:</span>
-                    <span class="font-bold text-bh-yellow font-mono" id="statStructurePercent">48%</span>
-                  </div>
-                  <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                    <div id="barStructurePercent" class="bg-bh-yellow h-full rounded-full transition-all" style="width: 48%"></div>
-                  </div>
-                </div>
-
-                <div class="bg-bh-bg border border-bh-border rounded-xl p-3">
-                  <div class="flex items-center justify-between mb-1">
-                    <span class="text-slate-400" data-i18n="chart_lbl_finishes">Finitions & Décoration:</span>
-                    <span class="font-bold text-bh-orange font-mono" id="statFinishesPercent">32%</span>
-                  </div>
-                  <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                    <div id="barFinishesPercent" class="bg-bh-orange h-full rounded-full transition-all" style="width: 32%"></div>
-                  </div>
-                </div>
-
-                <div class="bg-bh-bg border border-bh-border rounded-xl p-3">
-                  <div class="flex items-center justify-between mb-1">
-                    <span class="text-slate-400" data-i18n="chart_lbl_labor">Main d'œuvre Qualifiée:</span>
-                    <span class="font-bold text-emerald-400 font-mono" id="statLaborPercent">20%</span>
-                  </div>
-                  <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                    <div id="barLaborPercent" class="bg-emerald-400 h-full rounded-full transition-all" style="width: 20%"></div>
-                  </div>
-                </div>
-
-                <div class="bg-bh-yellow/10 border border-bh-yellow/20 rounded-xl p-3 text-[11px] text-bh-yellow leading-relaxed">
-                  <i class="fa-solid fa-circle-info mr-1"></i>
-                  <span data-i18n="disclaimer_market">Calibré selon les barèmes moyens du bâtiment en Algérie (DTR B.C. 2.2). Vous pouvez personnaliser les prix unitaires à gauche.</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ========================================================================= -->
-    <!-- TAB 2: BORDEREAU DES PRIX & QUANTITÉS (BOQ) -->
-    <!-- ========================================================================= -->
-    <div id="tab-boq" class="tab-content hidden">
-      <div class="bg-bh-card border border-bh-border rounded-2xl p-5 shadow-xl">
+      <!-- ========================================================================= -->
+      <!-- TAB: CALCULATRICE SCIENTIFIQUE & GÉNIE CIVIL                               -->
+      <!-- ========================================================================= -->
+      <div id="tab-scientific-calculator" class="tab-content active-content space-y-6">
         
-        <div class="flex flex-wrap items-center justify-between gap-4 pb-4 mb-4 border-b border-bh-border">
-          <div>
-            <h3 class="font-heading font-bold text-lg text-white flex items-center gap-2">
-              <i class="fa-solid fa-table-list text-bh-yellow"></i>
-              <span data-i18n="boq_title">Bordereau des Prix & Détail Estimatif (BOQ)</span>
-            </h3>
-            <p class="text-xs text-slate-400" data-i18n="boq_subtitle">Calculs techniques métrés détaillés conformes aux normes DTR</p>
+        <!-- Top Engine Header Badge Strip -->
+        <div class="bg-gradient-to-r from-bh-card via-bh-cardhover to-bh-card border border-bh-border rounded-2xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 shadow-xl">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-bh-yellow to-bh-orange flex items-center justify-center text-slate-950 text-xl font-black shadow-lg shadow-bh-orange/30">
+              <i class="fa-solid fa-calculator"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="font-heading font-black text-lg sm:text-xl text-white tracking-tight" data-i18n="calc_title">الآلة الحاسبة العلمية والهندسية</h2>
+                <span class="text-[10px] font-bold bg-bh-yellow/20 text-bh-yellow border border-bh-yellow/40 px-2 py-0.5 rounded-full font-mono uppercase">V2.6 PRO</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5" data-i18n="calc_sub">أداة احترافية بدقة عالية للمهندسين المعماريين، الهندسة المدنية وخبراء البناء</p>
+            </div>
           </div>
 
-          <div class="flex flex-wrap items-center gap-1.5 text-xs font-semibold">
-            <button class="boq-filter-btn active-filter px-3 py-1.5 rounded-lg border border-bh-border bg-slate-800 text-slate-200" data-filter="all" data-i18n="filter_all">Tous les Postes</button>
-            <button class="boq-filter-btn px-3 py-1.5 rounded-lg border border-bh-border bg-bh-bg text-slate-400 hover:text-white" data-filter="structure" data-i18n="filter_structure">Gros Œuvre</button>
-            <button class="boq-filter-btn px-3 py-1.5 rounded-lg border border-bh-border bg-bh-bg text-slate-400 hover:text-white" data-filter="masonry" data-i18n="filter_masonry">Maçonnerie</button>
-            <button class="boq-filter-btn px-3 py-1.5 rounded-lg border border-bh-border bg-bh-bg text-slate-400 hover:text-white" data-filter="finishes" data-i18n="filter_finishes">Finitions</button>
-            <button class="boq-filter-btn px-3 py-1.5 rounded-lg border border-bh-border bg-bh-bg text-slate-400 hover:text-white" data-filter="mep" data-i18n="filter_mep">Plomberie & Électricité</button>
-            <button class="boq-filter-btn px-3 py-1.5 rounded-lg border border-bh-border bg-bh-bg text-slate-400 hover:text-white" data-filter="labor" data-i18n="filter_labor">Main d'œuvre</button>
+          <div class="flex items-center gap-2">
+            <!-- Real-time sync pill -->
+            <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              <span data-i18n="calc_live_ready">تحديث لحظي ومستمر</span>
+            </div>
+            <!-- Angle Mode Toggle Pill -->
+            <button id="calcAngleModeToggle" onclick="toggleCalcAngleMode()" class="px-3 py-1.5 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow/50 text-bh-yellow text-xs font-mono font-bold transition flex items-center gap-1.5">
+              <i class="fa-solid fa-compass"></i>
+              <span id="calcAngleModeBadge">DEG</span>
+            </button>
           </div>
         </div>
 
-        <div class="overflow-x-auto rounded-xl border border-bh-border">
-          <table class="w-full text-left text-xs" id="boqTable">
-            <thead class="bg-bh-bg text-slate-300 font-bold uppercase tracking-wider text-[11px] border-b border-bh-border">
-              <tr>
-                <th class="py-3 px-3.5">#</th>
-                <th class="py-3 px-3.5" data-i18n="th_category">Corps d'État</th>
-                <th class="py-3 px-3.5" data-i18n="th_description">Désignation & Spécifications</th>
-                <th class="py-3 px-3.5 text-right" data-i18n="th_quantity">Quantité</th>
-                <th class="py-3 px-3.5 text-center" data-i18n="th_unit">Unité</th>
-                <th class="py-3 px-3.5 text-right"><span data-i18n="th_unit_price">Prix Unitaire</span> (<span class="curr-symbol">DZD</span>)</th>
-                <th class="py-3 px-3.5 text-right"><span data-i18n="th_total">Montant Total</span> (<span class="curr-symbol">DZD</span>)</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-bh-border/70" id="boqTableBody">
-              <!-- Rendered via JavaScript -->
-            </tbody>
-            <tfoot class="bg-bh-bg font-bold text-slate-200 border-t-2 border-bh-border">
-              <tr>
-                <td colspan="6" class="py-3 px-4 text-right text-sm" data-i18n="boq_grand_total_lbl">Total Général Estimé du Projet:</td>
-                <td class="py-3 px-4 text-right text-base text-bh-yellow font-mono" id="boqGrandTotal">0 DZD</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
+        <!-- Main Calculator Grid: Left (Scientific Core) | Right (Civil & Building Quick Tools) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          <!-- LEFT COLUMN: SCIENTIFIC CALCULATOR CORE (7 COLS) -->
+          <div class="lg:col-span-7 bg-bh-card border border-bh-border rounded-2xl p-5 shadow-2xl space-y-4">
+            
+            <!-- LCD Digital Screen Panel -->
+            <div class="rounded-2xl bg-gradient-to-b from-[#0a0f18] to-[#05070a] border-2 border-bh-border p-4 shadow-inner relative overflow-hidden">
+              <!-- Screen Header Bar (Mode, Memory, Copy, Backspace) -->
+              <div class="flex items-center justify-between text-xs text-slate-400 mb-1 pb-1.5 border-b border-bh-border/40">
+                <div class="flex items-center gap-2">
+                  <span id="calcScreenAngleMode" class="text-[10px] font-mono px-2 py-0.5 rounded bg-bh-yellow/20 text-bh-yellow font-bold">DEG</span>
+                  <span id="calcScreenMemoryFlag" class="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-500/20 text-sky-400 font-bold hidden">M</span>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                  <button onclick="copyCalcResult()" class="text-slate-400 hover:text-bh-yellow transition px-2 py-0.5 rounded hover:bg-slate-800" title="نسخ النتيجة">
+                    <i class="fa-regular fa-copy"></i>
+                  </button>
+                  <button onclick="calcBackspace()" class="text-slate-400 hover:text-rose-400 transition px-2 py-0.5 rounded hover:bg-slate-800" title="مسح رقم واحد">
+                    <i class="fa-solid fa-delete-left"></i>
+                  </button>
+                  <button onclick="calcClear()" class="text-slate-400 hover:text-amber-400 transition px-2 py-0.5 rounded hover:bg-slate-800 font-mono font-bold" title="تفريغ الشاشة">
+                    C
+                  </button>
+                </div>
+              </div>
 
-        <div class="mt-4 flex items-center justify-between text-xs text-slate-400">
-          <span data-i18n="boq_note">* Normes et règles de calcul technique DTR B.C. 2.2 / Eurocodes.</span>
-          <button id="copyBoqBtn" class="text-bh-yellow hover:underline flex items-center gap-1 font-semibold">
-            <i class="fa-solid fa-copy"></i> <span data-i18n="copy_boq">Copier le Récapitulatif</span>
-          </button>
+              <!-- Previous Expression / Formula History Line -->
+              <div id="calcHistoryDisplay" class="h-6 text-right font-mono text-xs sm:text-sm text-slate-400 overflow-x-auto no-scrollbar whitespace-nowrap tracking-wide select-all">
+                <!-- e.g. sin(45) * 12 + 8 -->
+              </div>
+
+              <!-- Current Primary Output / Readout Line -->
+              <div id="calcMainDisplay" class="text-right font-mono text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight overflow-x-auto no-scrollbar whitespace-nowrap py-1 select-all font-mono drop-shadow-[0_0_15px_rgba(255,160,0,0.35)]">
+                0
+              </div>
+            </div>
+
+            <!-- Keypads Container -->
+            <div class="space-y-2.5">
+              
+              <!-- Scientific Functions Grid (Row 1 to 3) -->
+              <div class="grid grid-cols-6 gap-1.5 text-xs font-mono font-semibold">
+                <button onclick="calcScientific('sin')" class="calc-sci-btn">sin</button>
+                <button onclick="calcScientific('cos')" class="calc-sci-btn">cos</button>
+                <button onclick="calcScientific('tan')" class="calc-sci-btn">tan</button>
+                <button onclick="calcInsert('π')" class="calc-sci-btn text-bh-yellow">π</button>
+                <button onclick="calcInsert('e')" class="calc-sci-btn text-bh-yellow">e</button>
+                <button onclick="calcScientific('sqrt')" class="calc-sci-btn text-bh-yellow font-bold">√x</button>
+
+                <button onclick="calcScientific('asin')" class="calc-sci-btn">sin⁻¹</button>
+                <button onclick="calcScientific('acos')" class="calc-sci-btn">cos⁻¹</button>
+                <button onclick="calcScientific('atan')" class="calc-sci-btn">tan⁻¹</button>
+                <button onclick="calcScientific('sqr')" class="calc-sci-btn">x²</button>
+                <button onclick="calcScientific('cube')" class="calc-sci-btn">x³</button>
+                <button onclick="calcInsert('^')" class="calc-sci-btn">xʸ</button>
+
+                <button onclick="calcScientific('log')" class="calc-sci-btn">log</button>
+                <button onclick="calcScientific('ln')" class="calc-sci-btn">ln</button>
+                <button onclick="calcScientific('inv')" class="calc-sci-btn">1/x</button>
+                <button onclick="calcInsert('(')" class="calc-sci-btn">(</button>
+                <button onclick="calcInsert(')')" class="calc-sci-btn">)</button>
+                <button onclick="calcInsert('%')" class="calc-sci-btn">%</button>
+              </div>
+
+              <!-- Memory Bar -->
+              <div class="grid grid-cols-5 gap-1.5 text-[11px] font-mono font-bold">
+                <button onclick="calcMemoryOp('MC')" class="calc-mem-btn text-rose-400">MC</button>
+                <button onclick="calcMemoryOp('MR')" class="calc-mem-btn text-sky-400">MR</button>
+                <button onclick="calcMemoryOp('M+')" class="calc-mem-btn text-emerald-400">M+</button>
+                <button onclick="calcMemoryOp('M-')" class="calc-mem-btn text-amber-400">M-</button>
+                <button onclick="calcMemoryOp('MS')" class="calc-mem-btn text-purple-400">MS</button>
+              </div>
+
+              <!-- Main Numeric & Arithmetic Keypad (4 Cols) -->
+              <div class="grid grid-cols-4 gap-2 text-base font-bold font-mono">
+                <button onclick="calcClearAll()" class="calc-op-btn text-rose-400 bg-rose-500/10 border-rose-500/30 hover:bg-rose-500/20">AC</button>
+                <button onclick="calcToggleSign()" class="calc-op-btn text-slate-300">+/-</button>
+                <button onclick="calcScientific('abs')" class="calc-op-btn text-slate-300">|x|</button>
+                <button onclick="calcInsert('/')" class="calc-op-btn text-bh-yellow bg-bh-yellow/10 border-bh-yellow/30">÷</button>
+
+                <button onclick="calcInsert('7')" class="calc-num-btn">7</button>
+                <button onclick="calcInsert('8')" class="calc-num-btn">8</button>
+                <button onclick="calcInsert('9')" class="calc-num-btn">9</button>
+                <button onclick="calcInsert('*')" class="calc-op-btn text-bh-yellow bg-bh-yellow/10 border-bh-yellow/30">×</button>
+
+                <button onclick="calcInsert('4')" class="calc-num-btn">4</button>
+                <button onclick="calcInsert('5')" class="calc-num-btn">5</button>
+                <button onclick="calcInsert('6')" class="calc-num-btn">6</button>
+                <button onclick="calcInsert('-')" class="calc-op-btn text-bh-yellow bg-bh-yellow/10 border-bh-yellow/30">−</button>
+
+                <button onclick="calcInsert('1')" class="calc-num-btn">1</button>
+                <button onclick="calcInsert('2')" class="calc-num-btn">2</button>
+                <button onclick="calcInsert('3')" class="calc-num-btn">3</button>
+                <button onclick="calcInsert('+')" class="calc-op-btn text-bh-yellow bg-bh-yellow/10 border-bh-yellow/30">+</button>
+
+                <button onclick="calcInsert('0')" class="calc-num-btn col-span-2">0</button>
+                <button onclick="calcInsert('.')" class="calc-num-btn">.</button>
+                <button onclick="calcEvaluate()" class="calc-equals-btn">=</button>
+              </div>
+
+            </div>
+
+            <!-- Keyboard hints -->
+            <div class="pt-2 border-t border-bh-border/70 flex items-center justify-between text-[11px] text-slate-500">
+              <span><i class="fa-solid fa-keyboard mr-1 text-bh-yellow"></i> يدعم الإدخال المباشر من لوحة المفاتيح</span>
+              <span class="font-mono">Enter: = | Esc: C | Backspace: ⌫</span>
+            </div>
+
+          </div>
+
+          <!-- RIGHT COLUMN: CIVIL ENGINEERING & CONSTRUCTION TOOLS (5 COLS) -->
+          <div class="lg:col-span-5 space-y-4">
+            
+            <!-- Tool 1: Surface & Perimeter Quick Calc -->
+            <div class="bg-bh-card border border-bh-border rounded-2xl p-4 shadow-xl space-y-3">
+              <div class="flex items-center justify-between pb-2 border-b border-bh-border">
+                <div class="flex items-center gap-2">
+                  <i class="fa-solid fa-vector-square text-bh-yellow text-sm"></i>
+                  <h3 class="font-bold text-white text-xs sm:text-sm" data-i18n="qc_surface_title">1. حساب المساحة والمحيط (Surface & Périmètre)</h3>
+                </div>
+                <span class="text-[10px] text-slate-400 font-mono">m² / m</span>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <label class="block text-[11px] text-slate-400 mb-1" data-i18n="qc_length">الطول (L en m) :</label>
+                  <input type="number" id="qcLength" value="12" step="0.1" oninput="runQuickCalcSurface()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-2 text-white font-mono font-bold focus:border-bh-yellow focus:outline-none">
+                </div>
+                <div>
+                  <label class="block text-[11px] text-slate-400 mb-1" data-i18n="qc_width">العرض (W en m) :</label>
+                  <input type="number" id="qcWidth" value="8" step="0.1" oninput="runQuickCalcSurface()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-2 text-white font-mono font-bold focus:border-bh-yellow focus:outline-none">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 bg-bh-bg p-2.5 rounded-xl border border-bh-border text-xs font-mono">
+                <div>
+                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_area_res">المساحة الإجمالية:</span>
+                  <span id="qcAreaOutput" class="text-sm font-black text-bh-yellow">96.00 m²</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_perim_res">المحيط:</span>
+                  <span id="qcPerimOutput" class="text-sm font-black text-emerald-400">40.00 m</span>
+                </div>
+              </div>
+
+              <button onclick="injectQuickValue('qcAreaOutput')" class="w-full py-1.5 rounded-lg bg-bh-cardhover hover:bg-bh-yellow/20 text-bh-yellow border border-bh-border hover:border-bh-yellow/40 text-xs font-bold transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-arrow-down-left-and-up-right-to-center text-[10px]"></i>
+                <span data-i18n="qc_btn_inject_calc">نقل المساحة إلى الآلة الحاسبة</span>
+              </button>
+            </div>
+
+            <!-- Tool 2: Concrete Volume & Cement Bags -->
+            <div class="bg-bh-card border border-bh-border rounded-2xl p-4 shadow-xl space-y-3">
+              <div class="flex items-center justify-between pb-2 border-b border-bh-border">
+                <div class="flex items-center gap-2">
+                  <i class="fa-solid fa-cubes text-emerald-400 text-sm"></i>
+                  <h3 class="font-bold text-white text-xs sm:text-sm" data-i18n="qc_concrete_title">2. حجم الخرسانة وأكياس الإسمنت (Béton & Ciment)</h3>
+                </div>
+                <span class="text-[10px] text-slate-400 font-mono">m³</span>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2 text-xs">
+                <div>
+                  <label class="block text-[10px] text-slate-400 mb-1">L (m):</label>
+                  <input type="number" id="qcConcL" value="10" step="0.1" oninput="runQuickCalcConcrete()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-1.5 text-white font-mono font-bold focus:border-bh-yellow focus:outline-none">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-400 mb-1">W (m):</label>
+                  <input type="number" id="qcConcW" value="5" step="0.1" oninput="runQuickCalcConcrete()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-1.5 text-white font-mono font-bold focus:border-bh-yellow focus:outline-none">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-400 mb-1">H/Ép (m):</label>
+                  <input type="number" id="qcConcH" value="0.20" step="0.05" oninput="runQuickCalcConcrete()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-1.5 text-white font-mono font-bold focus:border-bh-yellow focus:outline-none">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <label class="block text-[10px] text-slate-400 mb-1" data-i18n="qc_dosage">عيار الإسمنت (Dosage):</label>
+                  <select id="qcConcDosage" onchange="runQuickCalcConcrete()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-1.5 text-white text-xs font-mono focus:border-bh-yellow focus:outline-none">
+                    <option value="350">350 kg/m³ (عناصر مسلحة / Dalles & Poteaux)</option>
+                    <option value="250">250 kg/m³ (خرسانة نظافة / Béton de propreté)</option>
+                    <option value="400">400 kg/m³ (خرسانة عالية القوة / Hautes performances)</option>
+                  </select>
+                </div>
+                <div class="bg-bh-bg p-2 rounded-xl border border-bh-border flex flex-col justify-center">
+                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_vol_res">حجم الخرسانة:</span>
+                  <span id="qcConcVolOutput" class="text-sm font-black text-emerald-400 font-mono">10.00 m³</span>
+                </div>
+              </div>
+
+              <!-- Cement & Aggregates breakdown -->
+              <div class="grid grid-cols-3 gap-2 bg-bh-bg p-2 rounded-xl border border-bh-border text-center text-xs font-mono">
+                <div>
+                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_cement_bags">أكياس الإسمنت:</span>
+                  <span id="qcBagsOutput" class="text-xs font-black text-bh-yellow">70 كيس (3.5T)</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_sand_vol">الرمل (Sable):</span>
+                  <span id="qcSandOutput" class="text-xs font-bold text-slate-200">4.00 m³</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_gravel_vol">الحصى (Gravier):</span>
+                  <span id="qcGravelOutput" class="text-xs font-bold text-slate-200">8.00 m³</span>
+                </div>
+              </div>
+
+              <button onclick="injectQuickValue('qcConcVolOutput')" class="w-full py-1.5 rounded-lg bg-bh-cardhover hover:bg-emerald-500/20 text-emerald-400 border border-bh-border hover:border-emerald-500/40 text-xs font-bold transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-arrow-down-left-and-up-right-to-center text-[10px]"></i>
+                <span data-i18n="qc_btn_inject_vol">نقل الحجم إلى الآلة الحاسبة</span>
+              </button>
+            </div>
+
+            <!-- Tool 3: Steel Rebar Weight (Poids d'Acier FeE500) -->
+            <div class="bg-bh-card border border-bh-border rounded-2xl p-4 shadow-xl space-y-3">
+              <div class="flex items-center justify-between pb-2 border-b border-bh-border">
+                <div class="flex items-center gap-2">
+                  <i class="fa-solid fa-bars text-bh-orange text-sm"></i>
+                  <h3 class="font-bold text-white text-xs sm:text-sm" data-i18n="qc_steel_title">3. وزن حديد التسليح (Poids d'Acier FeE500)</h3>
+                </div>
+                <span class="text-[10px] text-slate-400 font-mono">kg / Q</span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <label class="block text-[10px] text-slate-400 mb-1" data-i18n="qc_steel_dia">قطر السيخ (Diamètre) :</label>
+                  <select id="qcSteelDiameter" onchange="runQuickCalcSteel()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-2 text-white text-xs font-mono focus:border-bh-yellow focus:outline-none">
+                    <option value="6">Ø 6 mm (0.222 kg/m)</option>
+                    <option value="8">Ø 8 mm (0.395 kg/m)</option>
+                    <option value="10">Ø 10 mm (0.617 kg/m)</option>
+                    <option value="12" selected>Ø 12 mm (0.888 kg/m)</option>
+                    <option value="14">Ø 14 mm (1.208 kg/m)</option>
+                    <option value="16">Ø 16 mm (1.578 kg/m)</option>
+                    <option value="20">Ø 20 mm (2.466 kg/m)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-400 mb-1" data-i18n="qc_steel_len">الطول الإجمالي (Longueur en m) :</label>
+                  <input type="number" id="qcSteelLength" value="120" step="1" oninput="runQuickCalcSteel()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-2 text-white font-mono font-bold focus:border-bh-yellow focus:outline-none">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 bg-bh-bg p-2.5 rounded-xl border border-bh-border text-xs font-mono">
+                <div>
+                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_steel_weight">الوزن الإجمالي:</span>
+                  <span id="qcSteelWeightOutput" class="text-sm font-black text-bh-orange">106.56 kg</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_steel_quintals">بالقنطار (Quintaux):</span>
+                  <span id="qcSteelQuintalsOutput" class="text-sm font-black text-white">1.07 Q</span>
+                </div>
+              </div>
+
+              <button onclick="injectQuickValue('qcSteelWeightOutput')" class="w-full py-1.5 rounded-lg bg-bh-cardhover hover:bg-bh-orange/20 text-bh-orange border border-bh-border hover:border-bh-orange/40 text-xs font-bold transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-arrow-down-left-and-up-right-to-center text-[10px]"></i>
+                <span data-i18n="qc_btn_inject_steel">نقل الوزن إلى الآلة الحاسبة</span>
+              </button>
+            </div>
+
+            <!-- Tool 4: Calculation History Tape -->
+            <div class="bg-bh-card border border-bh-border rounded-2xl p-4 shadow-xl space-y-3">
+              <div class="flex items-center justify-between pb-2 border-b border-bh-border">
+                <div class="flex items-center gap-2">
+                  <i class="fa-solid fa-clock-rotate-left text-bh-yellow text-sm"></i>
+                  <h3 class="font-bold text-white text-xs sm:text-sm" data-i18n="qc_history_title">سجل العمليات الحسابية (Journal)</h3>
+                </div>
+                <button onclick="clearCalcHistory()" class="text-[10px] text-slate-400 hover:text-rose-400 transition" data-i18n="qc_btn_clear_history">
+                  <i class="fa-regular fa-trash-can mr-1"></i> مسح السجل
+                </button>
+              </div>
+
+              <div id="calcHistoryTapeContainer" class="max-h-48 overflow-y-auto space-y-1.5 pr-1 text-xs font-mono">
+                <!-- Populated dynamically via JS -->
+                <p class="text-[11px] text-slate-500 text-center py-4" data-i18n="qc_history_empty">لا توجد عمليات سابقة بعد</p>
+              </div>
+            </div>
+
+          </div>
+
         </div>
 
       </div>
-    </div>
 
-    <!-- ========================================================================= -->
-    <!-- TAB 3: DEVIS ESTIMATIF OFFICIEL (IMPRESSION A4) -->
-    <!-- ========================================================================= -->
-    <div id="tab-report" class="tab-content hidden">
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="mt-16 border-t border-bh-border bg-bh-bg/95 py-8 text-xs text-slate-400">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+          
+          <div class="flex items-center gap-3">
+            <img src="assets/batihub_logo.png" alt="BatiHub DZ" class="h-10 w-auto">
+            <div>
+              <div class="font-bold text-white text-sm flex items-center gap-2">
+                <span>BatiHub DZ</span>
+                <span class="text-bh-yellow text-xs">• BUILD • CONNECT • CREATE</span>
+              </div>
+              <div class="text-slate-400 text-xs font-bold" data-i18n="app_slogan">
+                كل خدمات البناء في مكان واحد
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center md:text-right space-y-1">
+            <p class="text-slate-300 font-medium">
+              <span data-i18n="dev_by">Conçu & Développé par</span> <strong class="text-bh-yellow font-bold">Mouhaned Guellif</strong>
+            </p>
+            <p class="text-slate-500 text-[11px]" data-i18n="footer_rights">BatiHub DZ &copy; 2026 • Plateforme Intégrée du Bâtiment & de la Construction en Algérie.</p>
+          </div>
+
+        </div>
+      </div>
+    </footer>
+
+  </div> <!-- End #appDashboard -->
+
+  <!-- ========================================================================= -->
+  <!-- MODAL 1: USER PROFILE & SETTINGS                                         -->
+  <!-- ========================================================================= -->
+  <div id="modalUserProfile" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bg-bh-card border border-bh-border rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 text-right relative" dir="rtl">
       
-      <div class="flex items-center justify-between pb-4 mb-4 border-b border-bh-border">
-        <div>
-          <h3 class="font-heading font-bold text-lg text-white" data-i18n="report_page_title">Devis Estimatif Préliminaire Officiel A4</h3>
-          <p class="text-xs text-slate-400" data-i18n="report_page_sub">Document formaté prêt pour l'impression A4, la signature ou l'exportation PDF.</p>
+      <!-- Close button -->
+      <button onclick="closeUserProfileModal()" class="absolute top-4 left-4 w-8 h-8 rounded-full bg-bh-bg hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <!-- Profile Header -->
+      <div class="flex items-center gap-4 border-b border-bh-border pb-4">
+        <div class="relative">
+          <img id="profileModalAvatar" src="assets/batihub_logo.png" alt="Avatar" class="w-16 h-16 rounded-full object-cover border-2 border-bh-yellow shadow-lg">
+          <span class="absolute bottom-0 left-0 w-4 h-4 rounded-full bg-emerald-400 border-2 border-bh-card" title="نشط الآن"></span>
         </div>
-        <div class="flex items-center gap-2">
-          <button onclick="window.print()" class="px-4 py-2 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-90 text-slate-950 font-bold text-xs rounded-xl shadow-lg flex items-center gap-1.5 transition">
-            <i class="fa-solid fa-print"></i> <span data-i18n="print_sheet_btn">Imprimer / Exporter en PDF</span>
+        <div class="space-y-0.5">
+          <h3 id="profileModalName" class="font-heading font-black text-lg text-white">مستخدم BatiHub DZ</h3>
+          <p id="profileModalEmail" class="text-xs text-slate-400 font-mono">user@gmail.com</p>
+          <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold mt-1">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span data-i18n="profile_verified">حساب مؤكد ومحمي عبر Gmail</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Language Switcher (Moved from Main Navbar) -->
+      <div class="space-y-2">
+        <label class="block text-xs font-bold text-slate-300" data-i18n="profile_lbl_language">لغة واجهة التطبيق :</label>
+        <div class="grid grid-cols-3 gap-2 text-xs">
+          <button id="pLangFR" onclick="setLanguage('fr')" class="py-2 px-3 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow text-slate-300 font-bold transition">
+            Français
+          </button>
+          <button id="pLangAR" onclick="setLanguage('ar')" class="py-2 px-3 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow text-slate-300 font-bold transition font-arabic">
+            العربية
+          </button>
+          <button id="pLangEN" onclick="setLanguage('en')" class="py-2 px-3 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow text-slate-300 font-bold transition">
+            English
           </button>
         </div>
       </div>
 
-      <!-- PRINTABLE A4 CONTAINER -->
-      <div id="printableReport" class="bg-white text-slate-900 p-8 sm:p-12 rounded-2xl shadow-2xl max-w-4xl mx-auto border border-slate-300">
-        
-        <!-- Document Header with BatiHub DZ Branding -->
-        <div class="border-b-2 border-slate-900 pb-5 mb-6">
-          <div class="flex items-center justify-between gap-4 mb-3">
-            <div class="w-36">
-              <img src="assets/batihub_logo.png" alt="BatiHub DZ Logo" class="max-h-16 w-auto object-contain">
-            </div>
+      <!-- Section: Security & Password -->
+      <div class="space-y-2 pt-2 border-t border-bh-border">
+        <label class="block text-xs font-bold text-slate-300" data-i18n="profile_lbl_security">الأمان والحماية :</label>
+        <button onclick="openChangePasswordModal()" class="w-full py-2.5 px-4 rounded-xl bg-bh-bg hover:bg-bh-cardhover border border-bh-border hover:border-bh-yellow/50 text-white text-xs font-bold transition flex items-center justify-between">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-key text-bh-yellow"></i>
+            <span data-i18n="profile_change_pwd">تغيير كلمة المرور الخاصة بحسابك</span>
+          </span>
+          <i class="fa-solid fa-chevron-left text-[11px] text-slate-400"></i>
+        </button>
+      </div>
 
-            <div class="text-center flex-1">
-              <h1 class="text-lg font-black text-slate-950 uppercase tracking-tight">BatiHub DZ • Plateforme BTP Algérie</h1>
-              <p class="text-xs font-bold text-amber-600 uppercase tracking-wider">BUILD • CONNECT • CREATE</p>
-              <p class="text-[11px] text-slate-600 font-bold" data-i18n="app_slogan">كل خدمات البناء في مكان واحد</p>
-            </div>
-
-            <div class="text-right text-xs">
-              <span class="block text-slate-500 text-[10px]" data-i18n="dev_by">Conçu & développé par:</span>
-              <span class="font-bold text-slate-900 text-xs">Mouhaned Guellif</span>
-              <span class="block text-[10px] text-slate-500 mt-1">Plateforme BatiHub DZ</span>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between pt-3 border-t border-slate-200 text-xs">
-            <div>
-              <span class="text-slate-500" data-i18n="doc_type_lbl">Document:</span>
-              <span class="font-bold text-slate-900 ml-1" data-i18n="doc_type_val">Devis Quantitatif & Estimatif Préliminaire</span>
-            </div>
-            <div>
-              <span class="text-slate-500">Réf:</span>
-              <span class="font-mono font-bold text-slate-900 ml-1" id="reportRefCode">BTH-2026-0089</span>
-            </div>
-            <div>
-              <span class="text-slate-500">Date:</span>
-              <span class="font-bold text-slate-900 ml-1" id="reportDate">19 Novembre 2026</span>
-            </div>
-          </div>
+      <!-- Section: Network & Real-time Connectivity -->
+      <div class="p-3 rounded-xl bg-bh-bg border border-bh-border flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-slate-300 font-semibold" data-i18n="profile_sync_active">التزامن الحي مع الإنترنت نشط</span>
         </div>
+        <span class="text-[10px] font-mono text-slate-400">BatiHub DZ v2.6</span>
+      </div>
 
-        <!-- Project Metadata Table -->
-        <div class="grid grid-cols-2 gap-4 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
-          <div>
-            <h4 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider mb-2 border-b border-slate-200 pb-1" data-i18n="rep_tech_title">Données Techniques du Projet</h4>
-            <div class="space-y-1">
-              <div class="flex justify-between"><span class="text-slate-600" data-i18n="lbl_land_area">Surface Totale Terrain:</span> <span class="font-bold text-slate-900 font-mono" id="repPlotArea">160 m²</span></div>
-              <div class="flex justify-between"><span class="text-slate-600" data-i18n="lbl_footprint_area">Emprise au Sol (RDC):</span> <span class="font-bold text-slate-900 font-mono" id="repFootprint">120 m²</span></div>
-              <div class="flex justify-between"><span class="text-slate-600" data-i18n="lbl_yard_area">Cour & Espaces Libres:</span> <span class="font-bold text-slate-900 font-mono" id="repYard">40 m²</span></div>
-              <div class="flex justify-between"><span class="text-slate-600" data-i18n="hero_built_area">Surface Totale Bâtie:</span> <span class="font-bold text-slate-900 font-mono" id="repTotalArea">120 m²</span></div>
-              <div class="flex justify-between"><span class="text-slate-600" data-i18n="lbl_floors_count">Nombre d'Étages:</span> <span class="font-bold text-slate-900" id="repFloors">RDC Seul</span></div>
-            </div>
-          </div>
-
-          <div>
-            <h4 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider mb-2 border-b border-slate-200 pb-1" data-i18n="rep_finish_title">Paramètres & Finitions</h4>
-            <div class="space-y-1">
-              <div class="flex justify-between"><span class="text-slate-600" data-i18n="sec2_title">Niveau de Finition:</span> <span class="font-bold text-amber-700" id="repFinishTier">Standard Résidentiel</span></div>
-              <div class="flex justify-between"><span class="text-slate-600" data-i18n="lbl_foundation_type">Type de Fondations:</span> <span class="font-bold text-slate-900" id="repFoundation">Semelles Isolées & Filantes</span></div>
-              <div class="flex justify-between"><span class="text-slate-600">Devise:</span> <span class="font-bold text-slate-900" id="repCurrency">Dinar Algérien (DZD)</span></div>
-              <div class="flex justify-between"><span class="text-slate-600" data-i18n="lbl_contingency">Marge Imprévus:</span> <span class="font-bold text-slate-900 font-mono" id="repContingency">10%</span></div>
-              <div class="flex justify-between"><span class="text-slate-600" data-i18n="rep_duration_lbl">Durée Estimée Travaux:</span> <span class="font-bold text-slate-900" id="repDuration">6 - 8 Mois</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Phase Schedule Table -->
-        <h4 class="font-bold text-slate-900 uppercase text-xs tracking-wider mb-2" data-i18n="rep_phases_title">Récapitulatif Financier par Phase</h4>
-        <table class="w-full text-left text-xs mb-6 border border-slate-300">
-          <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-300">
-            <tr>
-              <th class="py-2 px-3">N°</th>
-              <th class="py-2 px-3" data-i18n="th_description">Description de la Phase</th>
-              <th class="py-2 px-3 text-right">Poids (%)</th>
-              <th class="py-2 px-3 text-right" data-i18n="th_total">Montant Partiel</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-200" id="repPhaseTableBody">
-            <!-- Populated via JS -->
-          </tbody>
-          <tfoot class="bg-slate-100 font-bold border-t-2 border-slate-800">
-            <tr>
-              <td colspan="3" class="py-2.5 px-3 text-right text-sm" data-i18n="boq_grand_total_lbl">TOTAL GÉNÉRAL ESTIMÉ:</td>
-              <td class="py-2.5 px-3 text-right text-sm font-black text-slate-950 font-mono" id="repGrandTotal">0 DZD</td>
-            </tr>
-          </tfoot>
-        </table>
-
-        <!-- Quantities of Key Materials -->
-        <h4 class="font-bold text-slate-900 uppercase text-xs tracking-wider mb-2" data-i18n="rep_materials_title">Bordereau Prévisionnel des Matériaux</h4>
-        <div class="grid grid-cols-3 gap-3 mb-8 text-xs">
-          <div class="border border-slate-200 rounded p-2 bg-slate-50">
-            <span class="text-slate-500 block text-[10px]" data-i18n="card_cement_title">Ciment Portland CPJ 42.5:</span>
-            <span class="font-bold text-slate-900 font-mono" id="repCementDetail">0 Sacs (0 T)</span>
-          </div>
-          <div class="border border-slate-200 rounded p-2 bg-slate-50">
-            <span class="text-slate-500 block text-[10px]" data-i18n="card_steel_title">Acier à Béton FeE500:</span>
-            <span class="font-bold text-slate-900 font-mono" id="repSteelDetail">0 Quintaux (0 T)</span>
-          </div>
-          <div class="border border-slate-200 rounded p-2 bg-slate-50">
-            <span class="text-slate-500 block text-[10px]" data-i18n="card_bricks_title">Briques Terre Cuite (12 & 8 Trous):</span>
-            <span class="font-bold text-slate-900 font-mono" id="repBricksDetail">0 Pièces</span>
-          </div>
-          <div class="border border-slate-200 rounded p-2 bg-slate-50">
-            <span class="text-slate-500 block text-[10px]" data-i18n="card_sand_title">Sable de Rivière Lavé:</span>
-            <span class="font-bold text-slate-900 font-mono" id="repSandDetail">0 m³</span>
-          </div>
-          <div class="border border-slate-200 rounded p-2 bg-slate-50">
-            <span class="text-slate-500 block text-[10px]" data-i18n="card_gravel_title">Gravier Concassé (8/15 & 15/25):</span>
-            <span class="font-bold text-slate-900 font-mono" id="repGravelDetail">0 m³</span>
-          </div>
-          <div class="border border-slate-200 rounded p-2 bg-slate-50">
-            <span class="text-slate-500 block text-[10px]">Carrelage & Faïence:</span>
-            <span class="font-bold text-slate-900 font-mono" id="repTilesDetail">0 m²</span>
-          </div>
-        </div>
-
-        <!-- Endorsement & Validation Block -->
-        <div class="grid grid-cols-2 gap-8 pt-6 border-t-2 border-slate-300 text-xs text-center">
-          <div>
-            <p class="text-[11px] text-slate-500 uppercase tracking-wider mb-1" data-i18n="dev_by">Conçu & Développé par:</p>
-            <p class="font-bold text-slate-900 text-sm">Mouhaned Guellif</p>
-            <p class="text-[10px] text-slate-600">BatiHub DZ • Plateforme Intégrée BTP</p>
-            <div class="h-16 flex items-center justify-center my-1">
-              <span class="inline-block border border-dashed border-slate-300 rounded px-3 py-1 text-[10px] text-slate-400">
-                [ Cachet & Signature BatiHub DZ ]
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <p class="text-[11px] text-slate-500 uppercase tracking-wider mb-1" data-i18n="client_sign_lbl">Vérification & Validation Client:</p>
-            <p class="font-bold text-slate-900 text-sm" data-i18n="client_role_lbl">Maître d'Ouvrage / Client</p>
-            <p class="text-[10px] text-slate-600" data-i18n="client_mention_lbl">Mention manuscrite « Lu et Approuvé »</p>
-            <div class="h-16 flex items-center justify-center my-1">
-              <span class="inline-block border border-dashed border-slate-300 rounded px-3 py-1 text-[10px] text-slate-400">
-                [ Signature du Client ]
-              </span>
-            </div>
-          </div>
-        </div>
-
+      <!-- Section: Sign Out -->
+      <div class="pt-2 border-t border-bh-border">
+        <button onclick="handleSignOut()" class="w-full py-2.5 px-4 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          <span data-i18n="profile_signout">تسجيل الخروج من الحساب</span>
+        </button>
       </div>
 
     </div>
-
-  </main>
+  </div>
 
   <!-- ========================================================================= -->
-  <!-- 6. FOOTER -->
+  <!-- MODAL 2: CHANGE PASSWORD (WITH GMAIL OTP FALLBACK)                       -->
   <!-- ========================================================================= -->
-  <footer class="mt-16 border-t border-bh-border bg-bh-bg/95 py-8 text-xs text-slate-400">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-        
-        <div class="flex items-center gap-3">
-          <img src="assets/batihub_logo.png" alt="BatiHub DZ" class="h-10 w-auto">
-          <div>
-            <div class="font-bold text-white text-sm flex items-center gap-2">
-              <span>BatiHub DZ</span>
-              <span class="text-bh-yellow text-xs">• BUILD • CONNECT • CREATE</span>
-            </div>
-            <div class="text-slate-400 text-xs font-bold" data-i18n="app_slogan">
-              كل خدمات البناء في مكان واحد
-            </div>
-          </div>
+  <div id="modalChangePassword" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bg-bh-card border border-bh-border rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-right relative" dir="rtl">
+      
+      <!-- Close button -->
+      <button onclick="closeChangePasswordModal()" class="absolute top-4 left-4 w-8 h-8 rounded-full bg-bh-bg hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 border-b border-bh-border pb-3">
+        <div class="w-10 h-10 rounded-xl bg-bh-yellow/20 text-bh-yellow flex items-center justify-center text-lg">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <div>
+          <h3 class="font-heading font-black text-base text-white" data-i18n="pwd_modal_title">تغيير كلمة المرور</h3>
+          <p class="text-xs text-slate-400" id="pwdModalSubtitle">قم بتحديث كلمة المرور لحماية حسابك ومعلوماتك</p>
+        </div>
+      </div>
+
+      <!-- MODE A: STANDARD CHANGE PASSWORD (WITH CURRENT PASSWORD) -->
+      <div id="pwdModeStandard" class="space-y-3.5">
+        <div>
+          <label class="block text-xs text-slate-300 font-semibold mb-1" data-i18n="pwd_current_lbl">كلمة المرور الحالية :</label>
+          <input type="password" id="inputCurrentPassword" placeholder="••••••••" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-white text-xs focus:border-bh-yellow focus:outline-none font-mono">
         </div>
 
-        <div class="text-center md:text-right space-y-1">
-          <p class="text-slate-300 font-medium">
-            <span data-i18n="dev_by">Conçu & Développé par</span> <strong class="text-bh-yellow font-bold">Mouhaned Guellif</strong>
+        <div>
+          <label class="block text-xs text-slate-300 font-semibold mb-1" data-i18n="pwd_new_lbl">كلمة المرور الجديدة :</label>
+          <input type="password" id="inputNewPasswordDirect" placeholder="••••••••" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-white text-xs focus:border-bh-yellow focus:outline-none font-mono">
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-300 font-semibold mb-1" data-i18n="pwd_confirm_lbl">تأكيد كلمة المرور الجديدة :</label>
+          <input type="password" id="inputConfirmPasswordDirect" placeholder="••••••••" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-white text-xs focus:border-bh-yellow focus:outline-none font-mono">
+        </div>
+
+        <button onclick="handleSubmitChangePasswordDirect()" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-check"></i>
+          <span data-i18n="pwd_btn_save">حفظ كلمة المرور الجديدة</span>
+        </button>
+
+        <!-- Forgot Current Password Option -->
+        <div class="text-center pt-2 border-t border-bh-border">
+          <button onclick="switchToPwdModeOtp()" class="text-xs text-bh-yellow hover:underline" data-i18n="pwd_forgot_link">
+            نسيت كلمة المرور الحالية؟ إرسال رمز تحقق إلى بريدك Gmail
+          </button>
+        </div>
+      </div>
+
+      <!-- MODE B: FORGOT CURRENT PASSWORD -> GMAIL OTP VERIFICATION -->
+      <div id="pwdModeOtp" class="space-y-3.5 hidden">
+        <div class="p-3 rounded-xl bg-bh-bg border border-bh-border text-xs text-slate-300 space-y-1">
+          <p class="font-bold text-white flex items-center gap-1.5">
+            <i class="fa-solid fa-envelope text-bh-yellow"></i>
+            <span>التحقق عبر البريد الإلكتروني</span>
           </p>
-          <p class="text-slate-500 text-[11px]" data-i18n="footer_rights">BatiHub DZ &copy; 2026 • Plateforme Intégrée du Bâtiment & de la Construction en Algérie.</p>
+          <p class="text-[11px] text-slate-400">سيتم إرسال رمز أمان مكون من 6 أرقام إلى بريدك : <strong id="pwdOtpTargetEmail" class="text-bh-yellow font-mono">user@gmail.com</strong></p>
         </div>
 
+        <div id="pwdOtpRequestBlock">
+          <button id="btnSendChangePwdOtp" onclick="handleSendChangePwdOtp()" class="w-full py-2.5 bg-bh-cardhover hover:bg-slate-800 text-bh-yellow border border-bh-yellow/40 font-bold rounded-xl text-xs transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span data-i18n="pwd_btn_send_otp">إرسال رمز التحقق إلى Gmail</span>
+          </button>
+        </div>
+
+        <div id="pwdOtpVerifyBlock" class="space-y-3 hidden">
+          <div>
+            <label class="block text-xs text-slate-300 font-semibold mb-1" data-i18n="auth_lbl_reset_code">رمز التحقق (6 أرقام) :</label>
+            <input type="text" id="inputChangePwdOtp" maxlength="6" placeholder="123456" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-center text-bh-yellow font-mono font-bold tracking-widest text-base focus:border-bh-yellow focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs text-slate-300 font-semibold mb-1" data-i18n="pwd_new_lbl">كلمة المرور الجديدة :</label>
+            <input type="password" id="inputNewPasswordOtp" placeholder="••••••••" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-white text-xs focus:border-bh-yellow focus:outline-none font-mono">
+          </div>
+
+          <div>
+            <label class="block text-xs text-slate-300 font-semibold mb-1" data-i18n="pwd_confirm_lbl">تأكيد كلمة المرور الجديدة :</label>
+            <input type="password" id="inputConfirmPasswordOtp" placeholder="••••••••" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-white text-xs focus:border-bh-yellow focus:outline-none font-mono">
+          </div>
+
+          <button onclick="handleSubmitChangePasswordOtp()" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-check-double"></i>
+            <span data-i18n="pwd_btn_save">تأكيد الرمز وحفظ كلمة المرور الجديدة</span>
+          </button>
+        </div>
+
+        <div class="text-center pt-2 border-t border-bh-border">
+          <button onclick="switchToPwdModeStandard()" class="text-xs text-slate-400 hover:text-white" data-i18n="pwd_btn_back_standard">
+            ← الرجوع إلى الإدخال المباشر بكلمة المرور الحالية
+          </button>
+        </div>
       </div>
+
     </div>
-  </footer>
+  </div>
 
   <!-- Main JavaScript Logic -->
   <script src="app.js"></script>

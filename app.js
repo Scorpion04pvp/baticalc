@@ -11,6 +11,53 @@
 // =========================================================================
 const TRANSLATIONS = {
   fr: {
+    nav_scientific_calc: "Calculatrice Scientifique & BTP",
+    status_online: "Connecté à Internet",
+    status_offline: "Hors ligne",
+    btn_user_settings: "Paramètres & Profil",
+    calc_title: "Calculatrice Scientifique & Génie Civil",
+    calc_sub: "Outil professionnel haute précision pour ingénieurs, architectes & métreurs",
+    calc_live_ready: "Calcul en temps réel actif",
+    qc_surface_title: "1. Calcul Surface & Périmètre",
+    qc_length: "Longueur (L en m) :",
+    qc_width: "Largeur (W en m) :",
+    qc_area_res: "Surface totale :",
+    qc_perim_res: "Périmètre :",
+    qc_btn_inject_calc: "Transférer la surface à la calculatrice",
+    qc_concrete_title: "2. Volume de Béton & Ciment",
+    qc_dosage: "Dosage Ciment :",
+    qc_vol_res: "Volume béton :",
+    qc_cement_bags: "Sacs de ciment :",
+    qc_sand_vol: "Sable :",
+    qc_gravel_vol: "Gravier :",
+    qc_btn_inject_vol: "Transférer le volume à la calculatrice",
+    qc_steel_title: "3. Poids d'Acier FeE500",
+    qc_steel_dia: "Diamètre (mm) :",
+    qc_steel_len: "Longueur totale (m) :",
+    qc_steel_weight: "Poids total :",
+    qc_steel_quintals: "En Quintaux :",
+    qc_btn_inject_steel: "Transférer le poids à la calculatrice",
+    qc_history_title: "Journal des Calculs",
+    qc_btn_clear_history: "Effacer l'historique",
+    qc_history_empty: "Aucun calcul récent",
+    profile_title: "Profil Utilisateur",
+    profile_verified: "Compte Vérifié & Protégé via Gmail",
+    profile_lbl_language: "Langue de l'interface :",
+    profile_lbl_security: "Sécurité & Protection :",
+    profile_change_pwd: "Modifier le mot de passe",
+    profile_sync_active: "Synchronisation Internet en direct active",
+    profile_signout: "Se Déconnecter",
+    pwd_modal_title: "Changement de mot de passe",
+    pwd_current_lbl: "Mot de passe actuel :",
+    pwd_new_lbl: "Nouveau mot de passe :",
+    pwd_confirm_lbl: "Confirmer le nouveau mot de passe :",
+    pwd_forgot_link: "Mot de passe actuel oublié ? Envoyer un code à Gmail",
+    pwd_btn_save: "Enregistrer le mot de passe",
+    pwd_btn_send_otp: "Envoyer le code de vérification à Gmail",
+    pwd_btn_back_standard: "← Retour à la saisie du mot de passe actuel",
+    auth_lbl_saved_accounts: "Comptes enregistrés sur cet appareil (cliquer pour préremplir) :",
+    auth_remember_me: "Mémoriser mes identifiants sur cet appareil",
+
     app_slogan: "كل خدمات البناء في مكان واحد",
     dev_by: "Conçu & développé par:",
     auth_title: "Connexion à BatiHub DZ",
@@ -181,6 +228,53 @@ const TRANSLATIONS = {
     footer_rights: "BatiHub DZ © 2026 • Plateforme Intégrée du Bâtiment & de la Construction en Algérie."
   },
   ar: {
+    nav_scientific_calc: "آلة حاسبة علمية وهندسية",
+    status_online: "متصل بالإنترنت",
+    status_offline: "غير متصل بالإنترنت",
+    btn_user_settings: "الإعدادات والملف الشخصي",
+    calc_title: "الآلة الحاسبة العلمية والهندسية",
+    calc_sub: "أداة احترافية بدقة عالية للمهندسين المعماريين، الهندسة المدنية وخبراء البناء",
+    calc_live_ready: "تحديث لحظي ومستمر",
+    qc_surface_title: "1. حساب المساحة والمحيط (Surface & Périmètre)",
+    qc_length: "الطول (L en m) :",
+    qc_width: "العرض (W en m) :",
+    qc_area_res: "المساحة الإجمالية:",
+    qc_perim_res: "المحيط:",
+    qc_btn_inject_calc: "نقل المساحة إلى الآلة الحاسبة",
+    qc_concrete_title: "2. حجم الخرسانة وأكياس الإسمنت (Béton & Ciment)",
+    qc_dosage: "عيار الإسمنت (Dosage):",
+    qc_vol_res: "حجم الخرسانة:",
+    qc_cement_bags: "أكياس الإسمنت:",
+    qc_sand_vol: "الرمل (Sable):",
+    qc_gravel_vol: "الحصى (Gravier):",
+    qc_btn_inject_vol: "نقل الحجم إلى الآلة الحاسبة",
+    qc_steel_title: "3. وزن حديد التسليح (Poids d'Acier FeE500)",
+    qc_steel_dia: "قطر السيخ (Diamètre) :",
+    qc_steel_len: "الطول الإجمالي (Longueur en m) :",
+    qc_steel_weight: "الوزن الإجمالي:",
+    qc_steel_quintals: "بالقنطار (Quintaux):",
+    qc_btn_inject_steel: "نقل الوزن إلى الآلة الحاسبة",
+    qc_history_title: "سجل العمليات الحسابية (Journal)",
+    qc_btn_clear_history: "مسح السجل",
+    qc_history_empty: "لا توجد عمليات سابقة بعد",
+    profile_title: "الملف الشخصي للمستخدم",
+    profile_verified: "حساب مؤكد ومحمي عبر Gmail",
+    profile_lbl_language: "لغة واجهة التطبيق :",
+    profile_lbl_security: "الأمان والحماية :",
+    profile_change_pwd: "تغيير كلمة المرور الخاصة بحسابك",
+    profile_sync_active: "التزامن الحي مع الإنترنت نشط",
+    profile_signout: "تسجيل الخروج من الحساب",
+    pwd_modal_title: "تغيير كلمة المرور",
+    pwd_current_lbl: "كلمة المرور الحالية :",
+    pwd_new_lbl: "كلمة المرور الجديدة :",
+    pwd_confirm_lbl: "تأكيد كلمة المرور الجديدة :",
+    pwd_forgot_link: "نسيت كلمة المرور الحالية؟ إرسال رمز تحقق إلى بريدك Gmail",
+    pwd_btn_save: "حفظ وتأكيد كلمة المرور",
+    pwd_btn_send_otp: "إرسال رمز التحقق إلى Gmail",
+    pwd_btn_back_standard: "← الرجوع إلى الإدخال المباشر بكلمة المرور الحالية",
+    auth_lbl_saved_accounts: "الحسابات المحفوظة على هذا الجهاز (انقر للملء التلقائي) :",
+    auth_remember_me: "تذكر بيانات تسجيل الدخول على هذا الجهاز",
+
     app_slogan: "كل خدمات البناء في مكان واحد",
     dev_by: "إعداد وتطوير المهندس:",
     auth_title: "تسجيل الدخول إلى BatiHub DZ",
@@ -351,6 +445,53 @@ const TRANSLATIONS = {
     footer_rights: "BatiHub DZ © 2026 • المنصة المتكاملة للبناء والهندسة المعمارية في الجزائر."
   },
   en: {
+    nav_scientific_calc: "Scientific & Construction Calculator",
+    status_online: "Online",
+    status_offline: "Offline",
+    btn_user_settings: "Settings & Profile",
+    calc_title: "Scientific & Civil Engineering Calculator",
+    calc_sub: "High-precision professional tool for civil engineers, architects & builders",
+    calc_live_ready: "Real-time calculation active",
+    qc_surface_title: "1. Surface & Perimeter Calculation",
+    qc_length: "Length (L in m):",
+    qc_width: "Width (W in m):",
+    qc_area_res: "Total Area:",
+    qc_perim_res: "Perimeter:",
+    qc_btn_inject_calc: "Transfer area to calculator",
+    qc_concrete_title: "2. Concrete Volume & Cement Bags",
+    qc_dosage: "Cement Dosage:",
+    qc_vol_res: "Concrete Volume:",
+    qc_cement_bags: "Cement Bags:",
+    qc_sand_vol: "Sand:",
+    qc_gravel_vol: "Gravel:",
+    qc_btn_inject_vol: "Transfer volume to calculator",
+    qc_steel_title: "3. FeE500 Steel Rebar Weight",
+    qc_steel_dia: "Rebar Diameter (mm):",
+    qc_steel_len: "Total Length (m):",
+    qc_steel_weight: "Total Weight:",
+    qc_steel_quintals: "In Quintals:",
+    qc_btn_inject_steel: "Transfer weight to calculator",
+    qc_history_title: "Calculation Journal",
+    qc_btn_clear_history: "Clear History",
+    qc_history_empty: "No calculations yet",
+    profile_title: "User Profile",
+    profile_verified: "Verified & Protected via Gmail",
+    profile_lbl_language: "Interface Language:",
+    profile_lbl_security: "Security & Protection:",
+    profile_change_pwd: "Change Account Password",
+    profile_sync_active: "Live Internet synchronization active",
+    profile_signout: "Sign Out",
+    pwd_modal_title: "Change Password",
+    pwd_current_lbl: "Current Password:",
+    pwd_new_lbl: "New Password:",
+    pwd_confirm_lbl: "Confirm New Password:",
+    pwd_forgot_link: "Forgot current password? Send code to Gmail",
+    pwd_btn_save: "Save New Password",
+    pwd_btn_send_otp: "Send verification code to Gmail",
+    pwd_btn_back_standard: "← Back to current password input",
+    auth_lbl_saved_accounts: "Saved accounts on this device (click to autofill):",
+    auth_remember_me: "Remember my login on this device",
+
     app_slogan: "BUILD • CONNECT • CREATE",
     dev_by: "Designed & developed by:",
     auth_title: "Sign in to BatiHub DZ",
@@ -1038,7 +1179,19 @@ function handleVerifyOtp(e) {
     token: 'bth_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
     signedAt: new Date().toISOString()
   };
+  
   localStorage.setItem('batihub_user', JSON.stringify(activeSession));
+
+  // Save profile to device remembered list
+  const rememberCheck = document.getElementById('rememberMeCheck');
+  if (!rememberCheck || rememberCheck.checked) {
+    saveProfileToDeviceList(user.email, activeSession.name, avatarSvg);
+  }
+
+  // Show Dashboard
+  const appDashboard = document.getElementById('appDashboard');
+  if (appDashboard) appDashboard.classList.remove('hidden');
+
 
   // Update Header UI
   const nameDisplay = document.getElementById('userNameDisplay');
@@ -2057,6 +2210,7 @@ function getCategoryBadge(category, lang) {
 // 9. APPLICATION RENDERER
 // =========================================================================
 function renderApp() {
+  if (!document.getElementById('heroTotalCost')) return;
   const data = calculateProjectEstimates();
   const isAr = state.lang === 'ar';
   const isEn = state.lang === 'en';
@@ -2732,3 +2886,687 @@ function restoreAllDefaultPrices() {
     renderApp();
   }
 }
+
+
+// =========================================================================
+// 11. SAVED ACCOUNTS MANAGER (DEVICE STORAGE & 1-CLICK AUTOFILL)
+// =========================================================================
+function getSavedProfiles() {
+  try {
+    const list = localStorage.getItem('batihub_saved_profiles');
+    return list ? JSON.parse(list) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveProfileToDeviceList(email, name, avatar) {
+  let list = getSavedProfiles();
+  list = list.filter(p => p.email.toLowerCase() !== email.toLowerCase());
+  list.unshift({ email: email.toLowerCase(), name, avatar });
+  if (list.length > 5) list = list.slice(0, 5);
+  localStorage.setItem('batihub_saved_profiles', JSON.stringify(list));
+}
+
+function removeSavedProfile(email, e) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  let list = getSavedProfiles();
+  list = list.filter(p => p.email.toLowerCase() !== email.toLowerCase());
+  localStorage.setItem('batihub_saved_profiles', JSON.stringify(list));
+  renderSavedAccounts();
+}
+
+function selectSavedAccount(email) {
+  const emailInput = document.getElementById('loginEmail');
+  const pwdInput = document.getElementById('loginPassword');
+  if (emailInput) {
+    emailInput.value = email;
+    emailInput.classList.add('border-bh-yellow');
+    setTimeout(() => emailInput.classList.remove('border-bh-yellow'), 1200);
+  }
+  if (pwdInput) {
+    pwdInput.value = '';
+    pwdInput.focus();
+  }
+}
+
+function renderSavedAccounts() {
+  const container = document.getElementById('savedAccountsContainer');
+  const listEl = document.getElementById('savedAccountsList');
+  if (!container || !listEl) return;
+
+  const profiles = getSavedProfiles();
+  if (!profiles || profiles.length === 0) {
+    container.classList.add('hidden');
+    return;
+  }
+
+  container.classList.remove('hidden');
+  listEl.innerHTML = profiles.map(p => `
+    <div onclick="selectSavedAccount('${p.email}')" class="group flex items-center gap-2 p-1.5 pr-2.5 rounded-xl bg-bh-card hover:bg-slate-800 border border-bh-border hover:border-bh-yellow/50 cursor-pointer transition text-xs">
+      <img src="${p.avatar || 'assets/batihub_logo.png'}" class="w-6 h-6 rounded-full object-cover border border-bh-yellow">
+      <div class="text-left leading-tight">
+        <span class="font-bold text-white block text-[11px] truncate max-w-[110px]">${p.name || p.email}</span>
+        <span class="text-[9px] text-slate-400 font-mono block truncate max-w-[110px]">${p.email}</span>
+      </div>
+      <button type="button" onclick="removeSavedProfile('${p.email}', event)" title="إزالة من هذا الجهاز" class="text-slate-500 hover:text-rose-400 ml-1 p-0.5 rounded text-[10px] transition">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  `).join('');
+}
+
+// =========================================================================
+// 12. USER PROFILE & CHANGE PASSWORD MODAL LOGIC
+// =========================================================================
+function openUserProfileModal() {
+  const modal = document.getElementById('modalUserProfile');
+  if (!modal) return;
+
+  const saved = localStorage.getItem('batihub_user');
+  let user = { name: 'مستخدم BatiHub DZ', email: 'user@gmail.com', avatar: 'assets/batihub_logo.png' };
+  if (saved) {
+    try { user = JSON.parse(saved); } catch (e) {}
+  }
+
+  const nameEl = document.getElementById('profileModalName');
+  const emailEl = document.getElementById('profileModalEmail');
+  const avatarEl = document.getElementById('profileModalAvatar');
+
+  if (nameEl) nameEl.innerText = user.name || 'مستخدم BatiHub DZ';
+  if (emailEl) emailEl.innerText = user.email || 'user@gmail.com';
+  if (avatarEl) avatarEl.src = user.avatar || 'assets/batihub_logo.png';
+
+  // Highlight active language button in profile modal
+  ['FR', 'AR', 'EN'].forEach(code => {
+    const btn = document.getElementById(`pLang${code}`);
+    if (btn) {
+      if (code.toLowerCase() === state.lang) {
+        btn.classList.add('active-lang', 'border-bh-yellow', 'text-white');
+        btn.classList.remove('text-slate-300');
+      } else {
+        btn.classList.remove('active-lang', 'border-bh-yellow', 'text-white');
+        btn.classList.add('text-slate-300');
+      }
+    }
+  });
+
+  modal.classList.remove('hidden');
+}
+
+function closeUserProfileModal() {
+  const modal = document.getElementById('modalUserProfile');
+  if (modal) modal.classList.add('hidden');
+}
+
+let pendingChangePwdOtp = null;
+
+function openChangePasswordModal() {
+  closeUserProfileModal();
+  const modal = document.getElementById('modalChangePassword');
+  if (!modal) return;
+
+  ['inputCurrentPassword', 'inputNewPasswordDirect', 'inputConfirmPasswordDirect', 'inputChangePwdOtp', 'inputNewPasswordOtp', 'inputConfirmPasswordOtp'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  switchToPwdModeStandard();
+  modal.classList.remove('hidden');
+}
+
+function closeChangePasswordModal() {
+  const modal = document.getElementById('modalChangePassword');
+  if (modal) modal.classList.add('hidden');
+  pendingChangePwdOtp = null;
+}
+
+function switchToPwdModeStandard() {
+  document.getElementById('pwdModeStandard')?.classList.remove('hidden');
+  document.getElementById('pwdModeOtp')?.classList.add('hidden');
+}
+
+function switchToPwdModeOtp() {
+  const saved = localStorage.getItem('batihub_user');
+  let email = '';
+  if (saved) {
+    try { email = JSON.parse(saved).email; } catch (e) {}
+  }
+  const targetEmailEl = document.getElementById('pwdOtpTargetEmail');
+  if (targetEmailEl) targetEmailEl.innerText = email || 'user@gmail.com';
+
+  document.getElementById('pwdModeStandard')?.classList.add('hidden');
+  document.getElementById('pwdModeOtp')?.classList.remove('hidden');
+  document.getElementById('pwdOtpRequestBlock')?.classList.remove('hidden');
+  document.getElementById('pwdOtpVerifyBlock')?.classList.add('hidden');
+}
+
+async function handleSubmitChangePasswordDirect() {
+  const currentPwd = (document.getElementById('inputCurrentPassword')?.value || '').trim();
+  const newPwd = (document.getElementById('inputNewPasswordDirect')?.value || '').trim();
+  const confirmPwd = (document.getElementById('inputConfirmPasswordDirect')?.value || '').trim();
+  const isAr = state.lang === 'ar';
+
+  if (!currentPwd || !newPwd || !confirmPwd) {
+    alert(isAr ? 'يرجى ملء جميع الحقول المطلوبة' : 'Veuillez remplir tous les champs obligatoires.');
+    return;
+  }
+
+  if (newPwd.length < 6) {
+    alert(isAr ? 'يجب أن تتكون كلمة المرور الجديدة من 6 أحرف على الأقل' : 'Le nouveau mot de passe doit comporter au moins 6 caractères.');
+    return;
+  }
+
+  if (newPwd !== confirmPwd) {
+    alert(isAr ? 'كلمتا المرور الجديدتان غير متطابقتين' : 'Les deux nouveaux mots de passe ne correspondent pas.');
+    return;
+  }
+
+  const saved = localStorage.getItem('batihub_user');
+  if (!saved) return;
+  const activeSession = JSON.parse(saved);
+  const email = (activeSession.email || '').toLowerCase();
+
+  const accounts = getStoredAccounts();
+  const user = accounts[email];
+  if (!user) {
+    alert(isAr ? 'تعذر العثور على بيانات الحساب' : 'Compte introuvable dans la base sécurisée.');
+    return;
+  }
+
+  // Verify current password hash
+  const checkHash = await hashPassword(currentPwd, user.salt);
+  if (checkHash !== user.passwordHash) {
+    alert(isAr ? 'كلمة المرور الحالية غير صحيحة! إذا كنت قد نسيتها، اضغط على الرابط بالأسفل لإرسال رمز تحقق إلى بريدك Gmail.' : 'Mot de passe actuel incorrect !');
+    return;
+  }
+
+  // Update password with new salt and hash
+  const newSalt = generateSalt();
+  user.salt = newSalt;
+  user.passwordHash = await hashPassword(newPwd, newSalt);
+  accounts[email] = user;
+  saveStoredAccounts(accounts);
+
+  alert(isAr ? 'تم تغيير كلمة المرور بنجاح وحفظها بأمان!' : 'Mot de passe modifié avec succès !');
+  closeChangePasswordModal();
+}
+
+async function handleSendChangePwdOtp() {
+  const saved = localStorage.getItem('batihub_user');
+  if (!saved) return;
+  const activeSession = JSON.parse(saved);
+  const email = (activeSession.email || '').toLowerCase();
+  const isAr = state.lang === 'ar';
+
+  const btn = document.getElementById('btnSendChangePwdOtp');
+  const origHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> ${isAr ? 'جاري إرسال الرمز إلى بريدك...' : 'Envoi en cours...'}`;
+  }
+
+  const otpCode = generate6DigitOtp();
+  pendingChangePwdOtp = {
+    email: email,
+    code: otpCode,
+    expiresAt: Date.now() + 15 * 60 * 1000
+  };
+
+  const mailResult = await sendVerificationEmail(email, otpCode, 'reset');
+
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = origHtml;
+  }
+
+  if (!mailResult || !mailResult.success) {
+    alert(isAr ? 'تعذر إرسال رمز التحقق إلى بريدك الإلكتروني!' : 'Impossible d\'envoyer le code de vérification.');
+    return;
+  }
+
+  document.getElementById('pwdOtpRequestBlock')?.classList.add('hidden');
+  document.getElementById('pwdOtpVerifyBlock')?.classList.remove('hidden');
+
+  alert(isAr 
+    ? 'تم إرسال رمز التحقق بنجاح إلى Gmail! تفقد صندوق الوارد أو البريد غير المرغوب فيه (Spam).' 
+    : 'Code de vérification envoyé avec succès à votre Gmail !');
+}
+
+async function handleSubmitChangePasswordOtp() {
+  const code = (document.getElementById('inputChangePwdOtp')?.value || '').trim();
+  const newPwd = (document.getElementById('inputNewPasswordOtp')?.value || '').trim();
+  const confirmPwd = (document.getElementById('inputConfirmPasswordOtp')?.value || '').trim();
+  const isAr = state.lang === 'ar';
+
+  if (!pendingChangePwdOtp) {
+    alert(isAr ? 'انتهت صلاحية جلسة التحقق، يرجى إعادة المحاولة' : 'Session de vérification expirée.');
+    return;
+  }
+
+  if (Date.now() > pendingChangePwdOtp.expiresAt) {
+    alert(isAr ? 'انتهت صلاحية الرمز، يرجى طلب رمز جديد' : 'Le code a expiré.');
+    return;
+  }
+
+  if (code !== pendingChangePwdOtp.code) {
+    alert(isAr ? 'رمز التحقق غير صحيح، يرجى التأكد' : 'Code de vérification incorrect.');
+    return;
+  }
+
+  if (newPwd.length < 6) {
+    alert(isAr ? 'يجب أن تتكون كلمة المرور الجديدة من 6 أحرف على الأقل' : 'Le mot de passe doit comporter au moins 6 caractères.');
+    return;
+  }
+
+  if (newPwd !== confirmPwd) {
+    alert(isAr ? 'كلمتا المرور غير متطابقتين' : 'Les mots de passe ne correspondent pas.');
+    return;
+  }
+
+  const accounts = getStoredAccounts();
+  const user = accounts[pendingChangePwdOtp.email];
+  if (user) {
+    const newSalt = generateSalt();
+    user.salt = newSalt;
+    user.passwordHash = await hashPassword(newPwd, newSalt);
+    accounts[pendingChangePwdOtp.email] = user;
+    saveStoredAccounts(accounts);
+
+    alert(isAr ? 'تم تحديث كلمة المرور بنجاح! حسابك محمي بالكامل.' : 'Mot de passe mis à jour avec succès !');
+    pendingChangePwdOtp = null;
+    closeChangePasswordModal();
+  }
+}
+
+// =========================================================================
+// 13. SCIENTIFIC & CIVIL ENGINEERING CALCULATOR ENGINE
+// =========================================================================
+let calcExpr = '';
+let calcResult = '0';
+let calcAngleMode = 'DEG';
+let calcMemory = 0;
+let calcHasEvaluated = false;
+
+function getCalcHistory() {
+  try {
+    const h = localStorage.getItem('batihub_calc_history');
+    return h ? JSON.parse(h) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveCalcHistoryItem(expr, res) {
+  let list = getCalcHistory();
+  list.unshift({ expr, res, time: new Date().toLocaleTimeString() });
+  if (list.length > 20) list = list.slice(0, 20);
+  localStorage.setItem('batihub_calc_history', JSON.stringify(list));
+  renderCalcHistory();
+}
+
+function renderCalcHistory() {
+  const container = document.getElementById('calcHistoryTapeContainer');
+  if (!container) return;
+  const list = getCalcHistory();
+  if (list.length === 0) {
+    const isAr = state.lang === 'ar';
+    container.innerHTML = `<p class="text-[11px] text-slate-500 text-center py-4">${isAr ? 'لا توجد عمليات سابقة بعد' : 'Aucun calcul récent'}</p>`;
+    return;
+  }
+
+  container.innerHTML = list.map((item, idx) => `
+    <div onclick="restoreCalcHistoryItem(${idx})" class="p-2 rounded-xl bg-bh-bg hover:bg-slate-800 border border-bh-border hover:border-bh-yellow/40 cursor-pointer transition text-xs flex items-center justify-between group">
+      <div class="truncate max-w-[200px]">
+        <span class="text-slate-400 block text-[10px] truncate">${item.expr} =</span>
+        <span class="font-bold text-bh-yellow font-mono text-sm">${item.res}</span>
+      </div>
+      <span class="text-[9px] text-slate-500 font-mono group-hover:text-slate-300">${item.time}</span>
+    </div>
+  `).join('');
+}
+
+function restoreCalcHistoryItem(idx) {
+  const list = getCalcHistory();
+  const item = list[idx];
+  if (item) {
+    calcExpr = String(item.res);
+    calcResult = String(item.res);
+    calcHasEvaluated = true;
+    updateCalcDisplay();
+  }
+}
+
+function clearCalcHistory() {
+  localStorage.removeItem('batihub_calc_history');
+  renderCalcHistory();
+}
+
+function toggleCalcAngleMode() {
+  calcAngleMode = calcAngleMode === 'DEG' ? 'RAD' : 'DEG';
+  const badge1 = document.getElementById('calcAngleModeBadge');
+  const badge2 = document.getElementById('calcScreenAngleMode');
+  if (badge1) badge1.innerText = calcAngleMode;
+  if (badge2) badge2.innerText = calcAngleMode;
+}
+
+function updateCalcDisplay() {
+  const hist = document.getElementById('calcHistoryDisplay');
+  const main = document.getElementById('calcMainDisplay');
+  if (hist) hist.innerText = calcExpr || '';
+  if (main) main.innerText = calcResult || '0';
+}
+
+function calcInsert(char) {
+  if (calcHasEvaluated && /[0-9πe(]/.test(char)) {
+    calcExpr = '';
+  }
+  calcHasEvaluated = false;
+
+  calcExpr += char;
+  calcResult = calcExpr;
+  updateCalcDisplay();
+}
+
+function calcScientific(func) {
+  calcHasEvaluated = false;
+  switch (func) {
+    case 'sin':
+    case 'cos':
+    case 'tan':
+    case 'asin':
+    case 'acos':
+    case 'atan':
+    case 'log':
+    case 'ln':
+    case 'sqrt':
+      calcExpr += func + '(';
+      break;
+    case 'sqr':
+      calcExpr += '^2';
+      break;
+    case 'cube':
+      calcExpr += '^3';
+      break;
+    case 'inv':
+      calcExpr += '^(-1)';
+      break;
+    case 'abs':
+      calcExpr = `abs(${calcExpr || calcResult})`;
+      break;
+  }
+  calcResult = calcExpr;
+  updateCalcDisplay();
+}
+
+function calcBackspace() {
+  if (calcExpr.length > 0) {
+    calcExpr = calcExpr.slice(0, -1);
+    calcResult = calcExpr || '0';
+    updateCalcDisplay();
+  }
+}
+
+function calcClear() {
+  calcExpr = '';
+  calcResult = '0';
+  calcHasEvaluated = false;
+  updateCalcDisplay();
+}
+
+function calcClearAll() {
+  calcExpr = '';
+  calcResult = '0';
+  calcMemory = 0;
+  calcHasEvaluated = false;
+  const memFlag = document.getElementById('calcScreenMemoryFlag');
+  if (memFlag) memFlag.classList.add('hidden');
+  updateCalcDisplay();
+}
+
+function calcToggleSign() {
+  if (!calcExpr) {
+    if (calcResult !== '0') {
+      calcResult = String(-parseFloat(calcResult));
+      calcExpr = calcResult;
+    }
+  } else {
+    calcExpr = `-(${calcExpr})`;
+    calcResult = calcExpr;
+  }
+  updateCalcDisplay();
+}
+
+function calcMemoryOp(op) {
+  const currentVal = parseFloat(calcResult) || 0;
+  const memFlag = document.getElementById('calcScreenMemoryFlag');
+  switch (op) {
+    case 'MC':
+      calcMemory = 0;
+      if (memFlag) memFlag.classList.add('hidden');
+      break;
+    case 'MR':
+      calcInsert(String(calcMemory));
+      break;
+    case 'M+':
+      calcMemory += currentVal;
+      if (memFlag) memFlag.classList.remove('hidden');
+      break;
+    case 'M-':
+      calcMemory -= currentVal;
+      if (memFlag) memFlag.classList.remove('hidden');
+      break;
+    case 'MS':
+      calcMemory = currentVal;
+      if (memFlag) memFlag.classList.remove('hidden');
+      break;
+  }
+}
+
+function copyCalcResult() {
+  const text = calcResult || '0';
+  navigator.clipboard.writeText(text).then(() => {
+    alert(state.lang === 'ar' ? `تم نسخ النتيجة (${text}) إلى الحافظة!` : `Résultat (${text}) copié dans le presse-papiers !`);
+  });
+}
+
+function safeCalcEval(expr) {
+  if (!expr || !expr.trim()) return 0;
+
+  let sanitized = expr
+    .replace(/×/g, '*')
+    .replace(/÷/g, '/')
+    .replace(/−/g, '-')
+    .replace(/π/g, 'Math.PI')
+    .replace(/\be\b/g, 'Math.E')
+    .replace(/\^/g, '**');
+
+  const isDeg = calcAngleMode === 'DEG';
+  const toRad = isDeg ? '*(Math.PI/180)' : '';
+  const fromRad = isDeg ? '*(180/Math.PI)' : '';
+
+  sanitized = sanitized.replace(/sin\(([^)]+)\)/g, `Math.sin(($1)${toRad})`);
+  sanitized = sanitized.replace(/cos\(([^)]+)\)/g, `Math.cos(($1)${toRad})`);
+  sanitized = sanitized.replace(/tan\(([^)]+)\)/g, `Math.tan(($1)${toRad})`);
+
+  sanitized = sanitized.replace(/asin\(([^)]+)\)/g, `(Math.asin($1)${fromRad})`);
+  sanitized = sanitized.replace(/acos\(([^)]+)\)/g, `(Math.acos($1)${fromRad})`);
+  sanitized = sanitized.replace(/atan\(([^)]+)\)/g, `(Math.atan($1)${fromRad})`);
+
+  sanitized = sanitized.replace(/sqrt\(([^)]+)\)/g, 'Math.sqrt($1)');
+  sanitized = sanitized.replace(/log\(([^)]+)\)/g, 'Math.log10($1)');
+  sanitized = sanitized.replace(/ln\(([^)]+)\)/g, 'Math.log($1)');
+  sanitized = sanitized.replace(/abs\(([^)]+)\)/g, 'Math.abs($1)');
+
+  if (!/^[0-9+\-*/()., %*MathPIE\s]+$/.test(sanitized)) {
+    throw new Error('Caractères non autorisés');
+  }
+
+  const result = Function(`'use strict'; return (${sanitized});`)();
+  if (isNaN(result) || !isFinite(result)) {
+    throw new Error('Résultat non défini');
+  }
+
+  if (Math.abs(result) < 1e-12) return 0;
+  return Number(result.toFixed(8));
+}
+
+function calcEvaluate() {
+  if (!calcExpr) return;
+  try {
+    const rawRes = safeCalcEval(calcExpr);
+    saveCalcHistoryItem(calcExpr, rawRes);
+    calcResult = String(rawRes);
+    calcExpr = String(rawRes);
+    calcHasEvaluated = true;
+    updateCalcDisplay();
+  } catch (e) {
+    calcResult = 'Error';
+    updateCalcDisplay();
+  }
+}
+
+// Quick Civil Engineering Calculations
+function runQuickCalcSurface() {
+  const l = parseFloat(document.getElementById('qcLength')?.value) || 0;
+  const w = parseFloat(document.getElementById('qcWidth')?.value) || 0;
+  const area = l * w;
+  const perim = 2 * (l + w);
+
+  const outArea = document.getElementById('qcAreaOutput');
+  const outPerim = document.getElementById('qcPerimOutput');
+  if (outArea) outArea.innerText = `${area.toFixed(2)} m²`;
+  if (outPerim) outPerim.innerText = `${perim.toFixed(2)} m`;
+}
+
+function runQuickCalcConcrete() {
+  const l = parseFloat(document.getElementById('qcConcL')?.value) || 0;
+  const w = parseFloat(document.getElementById('qcConcW')?.value) || 0;
+  const h = parseFloat(document.getElementById('qcConcH')?.value) || 0;
+  const dosage = parseFloat(document.getElementById('qcConcDosage')?.value) || 350;
+
+  const vol = l * w * h;
+  const totalCementKg = vol * dosage;
+  const bags = Math.ceil(totalCementKg / 50);
+  const tonnes = totalCementKg / 1000;
+  const sandVol = vol * 0.4;
+  const gravelVol = vol * 0.8;
+
+  const isAr = state.lang === 'ar';
+  const outVol = document.getElementById('qcConcVolOutput');
+  const outBags = document.getElementById('qcBagsOutput');
+  const outSand = document.getElementById('qcSandOutput');
+  const outGravel = document.getElementById('qcGravelOutput');
+
+  if (outVol) outVol.innerText = `${vol.toFixed(2)} m³`;
+  if (outBags) outBags.innerText = `${bags} ${isAr ? 'كيس' : 'sacs'} (${tonnes.toFixed(1)}T)`;
+  if (outSand) outSand.innerText = `${sandVol.toFixed(2)} m³`;
+  if (outGravel) outGravel.innerText = `${gravelVol.toFixed(2)} m³`;
+}
+
+function runQuickCalcSteel() {
+  const dia = parseFloat(document.getElementById('qcSteelDiameter')?.value) || 12;
+  const len = parseFloat(document.getElementById('qcSteelLength')?.value) || 0;
+
+  const weightKg = (Math.pow(dia, 2) / 162) * len;
+  const quintals = weightKg / 100;
+
+  const outWeight = document.getElementById('qcSteelWeightOutput');
+  const outQ = document.getElementById('qcSteelQuintalsOutput');
+  if (outWeight) outWeight.innerText = `${weightKg.toFixed(2)} kg`;
+  if (outQ) outQ.innerText = `${quintals.toFixed(2)} Q`;
+}
+
+function injectQuickValue(elemId) {
+  const el = document.getElementById(elemId);
+  if (!el) return;
+  const match = el.innerText.match(/([0-9.]+)/);
+  if (match && match[1]) {
+    calcInsert(match[1]);
+  }
+}
+
+// =========================================================================
+// 14. REAL-TIME INTERNET CONNECTIVITY & LIVE CLOCK
+// =========================================================================
+function updateNetworkStatus() {
+  const isOnline = navigator.onLine;
+  const badge = document.getElementById('networkStatusBadge');
+  const text = document.getElementById('networkStatusText');
+  const dot = document.getElementById('networkStatusDot');
+
+  const dict = TRANSLATIONS[state.lang] || TRANSLATIONS.fr;
+
+  if (isOnline) {
+    if (badge) {
+      badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono";
+    }
+    if (dot) {
+      dot.className = "w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse";
+    }
+    if (text) {
+      text.innerText = dict.status_online || 'متصل بالإنترنت';
+    }
+  } else {
+    if (badge) {
+      badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[10px] font-mono";
+    }
+    if (dot) {
+      dot.className = "w-1.5 h-1.5 rounded-full bg-rose-400";
+    }
+    if (text) {
+      text.innerText = dict.status_offline || 'غير متصل بالإنترنت';
+    }
+  }
+}
+
+function updateLiveClock() {
+  const clockEl = document.getElementById('liveClockTime');
+  if (clockEl) {
+    const now = new Date();
+    clockEl.innerText = now.toTimeString().split(' ')[0];
+  }
+}
+
+// Global Keyboard Listener for Calculator
+window.addEventListener('keydown', (e) => {
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+  if (!document.getElementById('modalUserProfile')?.classList.contains('hidden')) return;
+  if (!document.getElementById('modalChangePassword')?.classList.contains('hidden')) return;
+
+  const key = e.key;
+  if (/[0-9]/.test(key)) {
+    calcInsert(key);
+  } else if (key === '+' || key === '-' || key === '*' || key === '/') {
+    calcInsert(key);
+  } else if (key === '.') {
+    calcInsert('.');
+  } else if (key === '(' || key === ')') {
+    calcInsert(key);
+  } else if (key === '^') {
+    calcInsert('^');
+  } else if (key === '%') {
+    calcInsert('%');
+  } else if (key === 'Enter' || key === '=') {
+    e.preventDefault();
+    calcEvaluate();
+  } else if (key === 'Backspace') {
+    calcBackspace();
+  } else if (key === 'Escape') {
+    calcClear();
+  }
+});
+
+// Setup online events and clock at load
+window.addEventListener('online', updateNetworkStatus);
+window.addEventListener('offline', updateNetworkStatus);
+setInterval(updateLiveClock, 1000);
+setTimeout(() => {
+  updateNetworkStatus();
+  updateLiveClock();
+  runQuickCalcSurface();
+  runQuickCalcConcrete();
+  runQuickCalcSteel();
+  renderCalcHistory();
+}, 200);
+

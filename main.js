@@ -127,7 +127,7 @@ ipcMain.handle('send-mail', async (event, { to, subject, html, text }) => {
     });
 
     const info = await transporter.sendMail({
-      from: `"${cfg.senderName || 'BatiHub DZ Support'}" <${email}>`,
+      from: `"${cfg.senderName || 'Support Bati Hub DZ'}" <${email}>`,
       to,
       subject,
       text: text || '',
