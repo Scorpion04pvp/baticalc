@@ -1133,7 +1133,7 @@ async function openMailSettingsModal() {
     try {
       const cfg = await window.electronMailAPI.getMailConfig();
       if (cfg) {
-        if (inputEmail) inputEmail.value = cfg.email || '';
+        if (inputEmail) inputEmail.value = cfg.email || 'mouhanedchegivara@gmail.com';
         if (inputPwd) inputPwd.value = cfg.appPassword || 'ehnrqlxlrwgdcipy';
       }
     } catch (e) {

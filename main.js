@@ -34,7 +34,7 @@ function loadMailConfig() {
     console.error('Error loading mail config:', e);
   }
   return {
-    email: '',
+    email: 'mouhanedchegivara@gmail.com',
     appPassword: 'ehnrqlxlrwgdcipy',
     senderName: 'BatiHub DZ Support'
   };
