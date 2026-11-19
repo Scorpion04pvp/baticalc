@@ -767,41 +767,52 @@ function togglePasswordVisibility(inputId, btn) {
   }
 }
 
-// Send Email via Electron IPC
+// Send Email via Electron IPC (Clean High-Deliverability Template)
 async function sendVerificationEmail(toEmail, code, type) {
   const isAr = state.lang === 'ar';
   const isEn = state.lang === 'en';
   const subject = type === 'register' 
-    ? `BatiHub DZ • Code: ${code} (تأكيد الحساب)`
-    : `BatiHub DZ • Code: ${code} (إعادة تعيين كلمة المرور)`;
+    ? `Bati Hub DZ - Code de confirmation: ${code}`
+    : `Bati Hub DZ - Code de réinitialisation: ${code}`;
 
-  const textBody = `BatiHub DZ Verification Code: ${code}\nرمز التأكيد الخاص بك هو: ${code}\nVotre code de confirmation BatiHub DZ est: ${code}\nCe code expire dans 15 minutes.`;
+  const textBody = `Bonjour,\n\nVotre code de vérification pour Bati Hub DZ est : ${code}\nرمز التأكيد الخاص بك في Bati Hub DZ هو: ${code}\n\nCe code est valable pendant 15 minutes.\n\nCordialement,\nL'équipe Bati Hub DZ`;
 
   const html = `
-    <div style="font-family: Arial, sans-serif; background-color: #07090f; color: #ffffff; padding: 25px; border-radius: 12px; max-width: 520px; margin: 0 auto; border: 1px solid #1c2638; direction: ${isAr ? 'rtl' : 'ltr'};">
-      <div style="text-align: center; margin-bottom: 20px;">
-        <h2 style="color: #ffa000; margin: 0; font-size: 24px;">BatiHub DZ</h2>
-        <p style="color: #94a3b8; font-size: 12px; margin-top: 4px;">BUILD • CONNECT • CREATE</p>
-      </div>
-      <div style="background-color: #0f1520; padding: 20px; border-radius: 8px; border: 1px solid #223048; text-align: center;">
-        <p style="font-size: 14px; color: #e2e8f0; margin-bottom: 12px;">
-          ${type === 'register' 
-            ? (isAr ? 'مرحباً بك في منصة BatiHub DZ! رمز تأكيد حسابك هو:' : 'Bienvenue sur la plateforme BatiHub DZ ! Votre code de vérification est :') 
-            : (isAr ? 'تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بحسابك في BatiHub DZ:' : 'Demande de réinitialisation de mot de passe BatiHub DZ :')}
-        </p>
-        <div style="display: inline-block; background: #07090e; color: #ffa000; font-size: 32px; font-weight: bold; letter-spacing: 8px; padding: 12px 24px; border-radius: 8px; border: 2px dashed #ffa000; font-family: monospace;">
-          ${code}
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="margin:0; padding:20px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background-color:#f8fafc; color:#1e293b;">
+      <div style="max-width:520px; margin:0 auto; background:#ffffff; border-radius:12px; padding:30px; border:1px solid #e2e8f0; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);">
+        
+        <div style="text-align:center; margin-bottom:24px;">
+          <h1 style="color:#f59e0b; margin:0; font-size:26px; font-weight:800; letter-spacing:-0.5px;">Bati Hub DZ</h1>
+          <p style="color:#64748b; font-size:13px; margin:4px 0 0 0;">Plateforme des Services de Construction en Algérie • كل خدمات البناء في مكان واحد</p>
         </div>
-        <p style="font-size: 11px; color: #94a3b8; margin-top: 15px;">
-          ${isAr 
-            ? 'هذا الرمز صالح لمدة 15 دقيقة. يرجى عدم مشاركته مع أي شخص للحفاظ على أمان حسابك.' 
-            : 'Ce code est valide pendant 15 minutes. Ne le partagez avec personne pour protéger votre compte.'}
-        </p>
+
+        <div style="background-color:#fffbeb; border:1px solid #fef3c7; border-radius:10px; padding:20px; text-align:center; margin-bottom:24px;">
+          <p style="margin:0 0 10px 0; font-size:14px; color:#92400e; font-weight:600;">
+            ${type === 'register' ? 'Votre code de confirmation / رمز التأكيد الخاص بك :' : 'Réinitialisation de mot de passe / رمز إعادة التعيين :'}
+          </p>
+          <div style="font-size:34px; font-weight:800; letter-spacing:8px; color:#d97706; font-family:'Courier New', monospace; padding:10px 0;">
+            ${code}
+          </div>
+          <p style="margin:10px 0 0 0; font-size:12px; color:#b45309;">
+            Valable pendant 15 minutes • صالح لمدة 15 دقيقة
+          </p>
+        </div>
+
+        <div style="direction:rtl; text-align:right; font-size:13px; color:#475569; line-height:1.6; border-top:1px solid #f1f5f9; padding-top:16px;">
+          <p style="margin:0 0 8px 0;">مرحباً بك في منصة <b>Bati Hub DZ</b>.</p>
+          <p style="margin:0;">أدخل هذا الرمز لتأكيد حسابك والانضمام للمنصة. يرجى عدم مشاركة هذا الرمز مع أي شخص لضمان أمان حسابك.</p>
+        </div>
+
+        <div style="margin-top:24px; padding-top:16px; border-top:1px solid #f1f5f9; text-align:center; font-size:11px; color:#94a3b8;">
+          Bati Hub DZ • Développé par Mouhaned Guellif
+        </div>
+
       </div>
-      <p style="text-align: center; font-size: 10px; color: #64748b; margin-top: 20px;">
-        BatiHub DZ Official Support • Developed by Mouhaned Guellif
-      </p>
-    </div>
+    </body>
+    </html>
   `;
 
   if (window.electronMailAPI && typeof window.electronMailAPI.sendMail === 'function') {
