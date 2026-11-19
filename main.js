@@ -274,6 +274,13 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  // Start Embedded Mobile & Web API Server (enables phone connection on local Wi-Fi)
+  try {
+    require('./server.js');
+  } catch (err) {
+    console.log('[Mobile Server Info]:', err.message);
+  }
+
   createWindow();
 
   app.on('activate', function () {

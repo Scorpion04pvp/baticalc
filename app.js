@@ -821,6 +821,18 @@ async function initAccountsDatabase() {
   } catch (e) {}
 
   const merged = Object.assign({}, localAccounts, diskAccounts);
+
+  // Sync with Web & Mobile API when not running inside Electron
+  if (!window.electronDB) {
+    try {
+      const resp = await fetch('/api/accounts');
+      if (resp.ok) {
+        const cloudAccounts = await resp.json();
+        Object.assign(merged, cloudAccounts);
+      }
+    } catch (e) {}
+  }
+
   GLOBAL_ACCOUNTS_CACHE = merged;
 
   try {
@@ -896,6 +908,15 @@ function saveStoredAccounts(accounts) {
     } catch (e) {
       console.error('Disk save error:', e);
     }
+  } else {
+    // Sync with Web & Mobile API
+    try {
+      fetch('/api/accounts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(accounts)
+      }).catch(() => {});
+    } catch (e) {}
   }
 }
 
@@ -1060,7 +1081,24 @@ async function sendVerificationEmail(toEmail, code, type) {
     }
   }
 
-  return { success: false, error: 'خدمة البريد الإلكتروني غير متاحة في بيئة الويب' };
+  // Web & Mobile API Fallback (runs when accessed on mobile phone or web browser)
+  try {
+    const resp = await fetch('/api/send-mail', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: toEmail,
+        subject: subject,
+        text: textBody,
+        html: html
+      })
+    });
+    const data = await resp.json();
+    return data;
+  } catch (webErr) {
+    console.error('Web mail fallback error:', webErr);
+    return { success: false, error: 'تعذر الاتصال بخادم إرسال البريد، يرجى التأكد من اتصال الإنترنت' };
+  }
 }
 
 // 1. REGISTER FLOW
@@ -3735,4 +3773,54 @@ setTimeout(() => {
   runQuickCalcSteel();
   renderCalcHistory();
 }, 200);
+
+// =========================================================================
+// 14. PWA MOBILE APP ENGINE & INSTALLATION PROMPT
+// =========================================================================
+if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then((reg) => console.log('[PWA] Service Worker registered with scope:', reg.scope))
+      .catch((err) => console.log('[PWA] Service Worker registration failed:', err));
+  });
+}
+
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const banner = document.getElementById('pwaInstallPromptBanner');
+  const btn = document.getElementById('btnMobileInstallPwa');
+  if (banner) banner.classList.remove('hidden');
+  if (btn) btn.classList.remove('hidden');
+});
+
+function promptInstallPwa() {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        dismissPwaBanner();
+      }
+      deferredInstallPrompt = null;
+    });
+  } else {
+    const isAr = state.lang === 'ar';
+    alert(isAr 
+      ? 'لتثبيت التطبيق على هاتفك المحمول:\n1. اضغط على زر خيارات المتصفح (⋮) في الأعلى أو الأسفل.\n2. اختر "تثبيت التطبيق" أو "إضافة إلى الشاشة الرئيسية" (Installer l\'application).\n3. سيظهر تطبيق BatiHub DZ كأيقونة مستقلة على شاشة هاتفك!'
+      : 'Pour installer l\'application sur votre téléphone :\n1. Ouvrez le menu de votre navigateur (⋮).\n2. Appuyez sur "Installer l\'application" ou "Ajouter à l\'écran d\'accueil".\n3. L\'icône BatiHub DZ apparaîtra directement sur votre écran !');
+  }
+}
+
+function dismissPwaBanner() {
+  const banner = document.getElementById('pwaInstallPromptBanner');
+  if (banner) banner.classList.add('hidden');
+}
+
+function toggleLanguageQuick() {
+  const currentLang = state.lang || 'ar';
+  const nextLang = currentLang === 'ar' ? 'fr' : (currentLang === 'fr' ? 'en' : 'ar');
+  setLanguage(nextLang);
+}
+
 

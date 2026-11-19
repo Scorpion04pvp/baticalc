@@ -1,11 +1,11 @@
 services:
   - type: web
-    name: baticalc
-    runtime: static
-    buildCommand: ""
-    staticPublishPath: "."
-    pullRequestPreviewsEnabled: true
-    headers:
-      - path: /*
-        name: Cache-Control
-        value: public, max-age=3600
+    name: batihub-dz
+    runtime: node
+    plan: free
+    buildCommand: "npm install --production"
+    startCommand: "node server.js"
+    envVars:
+      - key: PORT
+        value: 10000
+

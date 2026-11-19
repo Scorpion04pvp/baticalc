@@ -69,8 +69,34 @@ body {
 }
 
 /* =========================================================================
-   YELLOW SPLASH LOADING SCREEN (CLEAN LUXURY - NO GRID SQUARES)
+   MOBILE RESPONSIVE & PWA APP TWEAKS
    ========================================================================= */
+.safe-area-bottom {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+@media (max-width: 768px) {
+  /* Prevent auto-zoom on mobile Safari */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 15px !important;
+  }
+
+  /* Compact padding on mobile */
+  .p-mobile-compact {
+    padding: 0.75rem !important;
+  }
+}
+
 #splashScreen {
   position: fixed;
   inset: 0;

@@ -2,8 +2,18 @@
 <html lang="fr" dir="ltr" id="htmlRoot">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>BatiHub DZ - Build • Connect • Create | All Construction Services</title>
+  
+  <!-- PWA & Mobile Meta Tags -->
+  <meta name="theme-color" content="#07090e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BatiHub DZ">
+  <meta name="application-name" content="BatiHub DZ">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
   
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="assets/batihub_logo.png">
@@ -515,7 +525,7 @@
     </section>
 
     <!-- MAIN CONTENT -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 md:pb-8">
 
       <!-- ========================================================================= -->
       <!-- TAB: CALCULATRICE SCIENTIFIQUE & GÉNIE CIVIL                               -->
@@ -1040,6 +1050,48 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- MOBILE BOTTOM NAVIGATION BAR (VISIBLE ONLY ON MOBILE DEVICES) -->
+  <nav id="mobileBottomNav" class="fixed bottom-0 left-0 right-0 z-40 bg-[#0c1017]/95 backdrop-blur-xl border-t border-bh-border px-3 py-1.5 flex items-center justify-around md:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.7)] safe-area-bottom">
+    <button type="button" onclick="switchTab('tab-scientific-calculator')" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-3 rounded-xl text-bh-yellow transition active:scale-90">
+      <i class="fa-solid fa-calculator text-lg"></i>
+      <span class="text-[10px] font-bold mt-0.5 tracking-tight" data-i18n="m_nav_calc">الحاسبة</span>
+    </button>
+
+    <button type="button" onclick="openUserProfileModal()" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-3 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
+      <i class="fa-solid fa-user-gear text-lg"></i>
+      <span class="text-[10px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_profile">حسابي</span>
+    </button>
+
+    <button type="button" onclick="toggleLanguageQuick()" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-3 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
+      <i class="fa-solid fa-globe text-lg"></i>
+      <span class="text-[10px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_lang">اللغة</span>
+    </button>
+
+    <button type="button" id="btnMobileInstallPwa" onclick="promptInstallPwa()" class="hidden mobile-nav-item flex flex-col items-center justify-center py-1 px-3 rounded-xl text-amber-400 transition active:scale-90">
+      <i class="fa-solid fa-mobile-screen-button text-lg animate-bounce text-bh-yellow"></i>
+      <span class="text-[10px] font-bold mt-0.5 tracking-tight text-bh-yellow" data-i18n="m_nav_install">تثبيت</span>
+    </button>
+  </nav>
+
+  <!-- MOBILE PWA INSTALL PROMPT TOAST BANNER -->
+  <div id="pwaInstallPromptBanner" class="fixed bottom-16 left-3 right-3 z-50 p-3 bg-gradient-to-r from-[#141c2c] to-[#0f1520] border border-bh-yellow/50 rounded-2xl shadow-2xl flex items-center justify-between gap-3 hidden md:hidden transition-all duration-300">
+    <div class="flex items-center gap-2.5 min-w-0">
+      <img src="assets/batihub_logo.png" alt="BatiHub DZ" class="w-9 h-9 rounded-xl object-contain bg-bh-bg p-1 border border-bh-yellow/40 shrink-0">
+      <div class="min-w-0">
+        <p class="text-xs font-bold text-white truncate" data-i18n="pwa_banner_title">تطبيق BatiHub DZ للهاتف</p>
+        <p class="text-[10px] text-slate-300 truncate" data-i18n="pwa_banner_desc">ثبّت التطبيق على شاشة هاتفك الرئيسية بنقرة واحدة</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-1.5 shrink-0">
+      <button type="button" onclick="promptInstallPwa()" class="px-3 py-1.5 bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold rounded-xl text-[11px] shadow-md active:scale-95 transition">
+        <span data-i18n="pwa_btn_install">تثبيت</span>
+      </button>
+      <button type="button" onclick="dismissPwaBanner()" class="text-slate-400 hover:text-white p-1 text-sm">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
     </div>
   </div>
 

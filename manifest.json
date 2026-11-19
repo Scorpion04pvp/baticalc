@@ -1,0 +1,31 @@
+{
+  "name": "BatiHub DZ - كل خدمات البناء في مكان واحد",
+  "short_name": "BatiHub DZ",
+  "description": "المنصة الجزائرية المتكاملة لخدمات البناء والهندسة المعمارية وحساب التكاليف",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#07090e",
+  "theme_color": "#ffa000",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/batihub_logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
