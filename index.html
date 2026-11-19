@@ -25,10 +25,10 @@
         extend: {
           colors: {
             bh: {
-              bg: '#0b0e14',
-              card: '#121824',
-              cardhover: '#162032',
-              border: '#1e293b',
+              bg: '#07090e',
+              card: '#0f1520',
+              cardhover: '#141c2c',
+              border: '#1c2638',
               yellow: '#ffa000',
               yellowbright: '#ffc107',
               orange: '#ff6d00',
@@ -60,7 +60,7 @@
 <body class="bg-bh-bg text-slate-100 font-sans antialiased min-h-screen selection:bg-bh-yellow selection:text-slate-950">
 
   <!-- ========================================================================= -->
-  <!-- 1. YELLOW / CONSTRUCTION GOLD SPLASH LOADING SCREEN ("لودينق صفيرة شوي") -->
+  <!-- 1. YELLOW SPLASH LOADING SCREEN (CLEAN LUXURY - NO GRID SQUARES, NO SKIP) -->
   <!-- ========================================================================= -->
   <div id="splashScreen">
     <div class="flex flex-col items-center justify-center p-6 text-center max-w-md w-full">
@@ -79,7 +79,7 @@
           <span class="text-bh-orange">•</span>
           <span>CREATE</span>
         </div>
-        <p class="text-xs text-bh-yellow font-arabic font-bold tracking-wide">
+        <p class="text-xs text-bh-yellow font-arabic font-bold tracking-wide" data-i18n="app_slogan">
           كل خدمات البناء في مكان واحد
         </p>
       </div>
@@ -95,7 +95,7 @@
           <div id="splashProgressBar" class="splash-progress-bar"></div>
         </div>
 
-        <div class="flex items-center justify-between w-full max-w-[280px] text-[11px] font-mono text-slate-400 mt-1">
+        <div class="flex items-center justify-between w-full max-w-[270px] text-[11px] font-mono text-slate-400 mt-1">
           <span id="splashStatusText" class="truncate pr-2">Chargement du système...</span>
           <span id="splashPercentText" class="font-bold text-bh-yellow">0%</span>
         </div>
@@ -105,36 +105,112 @@
         Developed by <span class="text-bh-yellow font-semibold">Mouhaned Guellif</span>
       </div>
 
-      <button onclick="dismissSplash()" class="mt-4 text-[10px] text-slate-500 hover:text-bh-yellow transition underline">
-        Passer le chargement (Skip)
-      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 2. REAL GOOGLE / GMAIL SIGN-IN AUTH GATE SCREEN -->
+  <!-- ========================================================================= -->
+  <div id="authGateScreen" class="auth-hide">
+    <div class="auth-card max-w-md w-full p-8 text-center space-y-6">
+      
+      <!-- Header Logo & Welcome -->
+      <div class="flex flex-col items-center">
+        <img src="assets/batihub_logo.png" alt="BatiHub DZ" class="w-36 h-auto object-contain mb-3 drop-shadow-lg">
+        <h2 class="text-xl font-heading font-black text-white" data-i18n="auth_title">Connexion à BatiHub DZ</h2>
+        <p class="text-xs text-slate-400 mt-1" data-i18n="auth_subtitle">Accédez à votre espace professionnel et vos calculs de projets</p>
+      </div>
+
+      <!-- Language selector inside login modal -->
+      <div class="flex justify-center gap-2 text-xs">
+        <button onclick="setLanguage('fr')" class="px-2.5 py-1 rounded-md bg-bh-card border border-bh-border text-slate-300 hover:text-white font-bold">Français</button>
+        <button onclick="setLanguage('ar')" class="px-2.5 py-1 rounded-md bg-bh-card border border-bh-border text-slate-300 hover:text-white font-bold font-arabic">العربية</button>
+        <button onclick="setLanguage('en')" class="px-2.5 py-1 rounded-md bg-bh-card border border-bh-border text-slate-300 hover:text-white font-bold">English</button>
+      </div>
+
+      <!-- Primary Action: Real Google One-Click Auth -->
+      <div class="space-y-3">
+        <button id="btnGoogleAuth" onclick="signInWithGooglePopup()" class="google-btn w-full py-3 px-4 rounded-xl flex items-center justify-center gap-3 text-xs shadow-md">
+          <svg class="w-5 h-5" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24Z"/>
+            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15Z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"/>
+          </svg>
+          <span data-i18n="auth_google_btn">Continuer avec Google (Gmail)</span>
+        </button>
+      </div>
+
+      <!-- Divider -->
+      <div class="relative flex items-center justify-center">
+        <div class="border-t border-bh-border w-full"></div>
+        <span class="bg-bh-card px-3 text-[10px] text-slate-500 uppercase tracking-wider font-semibold" data-i18n="auth_or_text">ou saisissez votre Gmail</span>
+      </div>
+
+      <!-- Direct Gmail Address Input -->
+      <form id="gmailLoginForm" onsubmit="handleDirectGmailLogin(event)" class="space-y-3 text-left">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-300 mb-1" data-i18n="auth_email_lbl">Adresse Gmail :</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+              <i class="fa-solid fa-envelope"></i>
+            </span>
+            <input type="email" id="inputGmailAddress" required placeholder="votre.nom@gmail.com" class="w-full bg-bh-bg border border-bh-border rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-300 mb-1" data-i18n="auth_name_lbl">Votre Nom / Entreprise :</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+              <i class="fa-solid fa-user"></i>
+            </span>
+            <input type="text" id="inputUserName" required placeholder="Ex: Mohamed BTP" class="w-full bg-bh-bg border border-bh-border rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow">
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          <span data-i18n="auth_submit_btn">Se Connecter & Accéder</span>
+        </button>
+      </form>
+
+      <p class="text-[10px] text-slate-500" data-i18n="auth_footer_note">
+        Connexion sécurisée BatiHub DZ • Vos données de calculs sont enregistrées localement sur votre appareil.
+      </p>
 
     </div>
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 2. MAIN APPLICATION HEADER -->
+  <!-- 3. MAIN APPLICATION HEADER -->
   <!-- ========================================================================= -->
   <header class="border-b border-bh-border bg-bh-bg/95 backdrop-blur-md sticky top-0 z-40 shadow-2xl">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
-      <!-- Top Institutional / Dev Bar -->
+      <!-- Top Info Strip (Removed the PC badge as requested) -->
       <div class="py-2 border-b border-bh-border/70 flex flex-wrap items-center justify-between text-xs gap-3">
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-bh-yellow animate-ping"></span>
-          <span class="font-bold text-slate-200 tracking-wide text-[11px]">BatiHub DZ • Algérie</span>
+          <span class="font-bold text-slate-200 tracking-wide text-[11px]">BatiHub DZ</span>
           <span class="text-slate-600">|</span>
-          <span class="text-bh-yellow font-arabic font-bold text-[11px]">كل خدمات البناء في مكان واحد</span>
+          <span class="text-bh-yellow font-bold text-[11px]" data-i18n="app_slogan">كل خدمات البناء في مكان واحد</span>
         </div>
 
         <div class="flex items-center gap-3 text-[11px]">
           <span class="text-slate-400">
-            Conçu & développé par: <strong class="text-bh-yellow">Mouhaned Guellif</strong>
+            <span data-i18n="dev_by">Conçu & développé par:</span> <strong class="text-bh-yellow">Mouhaned Guellif</strong>
           </span>
           <div class="h-4 w-px bg-bh-border hidden sm:block"></div>
-          <span class="hidden sm:inline-flex items-center gap-1 bg-bh-card border border-bh-border px-2 py-0.5 rounded text-[10px] text-slate-300 font-mono">
-            <i class="fa-solid fa-desktop text-bh-yellow"></i> Version Bureau (PC)
-          </span>
+          
+          <!-- User Profile Display Pill -->
+          <div id="userProfilePill" class="flex items-center gap-2 bg-bh-card border border-bh-border px-2.5 py-1 rounded-xl">
+            <img id="userAvatarImg" src="assets/batihub_logo.png" alt="Avatar" class="w-5 h-5 rounded-full object-cover border border-bh-yellow">
+            <span id="userNameDisplay" class="font-bold text-slate-200 text-xs">Utilisateur</span>
+            <button onclick="handleSignOut()" title="Déconnexion" class="text-slate-400 hover:text-rose-400 transition ml-1 text-xs">
+              <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -142,8 +218,8 @@
       <div class="py-3 flex flex-wrap items-center justify-between gap-3">
         
         <!-- Logo & Brand Header -->
-        <div class="flex items-center gap-3">
-          <img src="assets/batihub_logo.png" alt="BatiHub DZ Logo" class="h-11 sm:h-12 w-auto object-contain cursor-pointer hover:scale-105 transition" onclick="switchTab('tab-calculator')">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('tab-calculator')">
+          <img src="assets/batihub_logo.png" alt="BatiHub DZ Logo" class="h-11 sm:h-12 w-auto object-contain hover:scale-105 transition">
           <div class="hidden sm:block">
             <h1 class="font-heading font-black text-xl text-white tracking-tight flex items-center gap-1.5">
               <span>Bati<span class="text-transparent bg-clip-text bg-gradient-to-r from-bh-yellow to-bh-orange">Hub</span></span>
@@ -158,14 +234,14 @@
           
           <!-- LANGUAGE SWITCHER (FR / AR / EN) -->
           <div class="flex items-center rounded-xl bg-bh-card border border-bh-border p-1 shadow-inner text-xs">
-            <button id="langFR" class="lang-btn active-lang px-2.5 py-1 rounded-lg font-bold transition">
-              🇫🇷 FR
+            <button id="langFR" onclick="setLanguage('fr')" class="lang-btn active-lang px-2.5 py-1 rounded-lg font-bold transition">
+              Français
             </button>
-            <button id="langAR" class="lang-btn px-2.5 py-1 rounded-lg font-bold transition text-slate-400 hover:text-white">
-              🇩🇿 عـربي
+            <button id="langAR" onclick="setLanguage('ar')" class="lang-btn px-2.5 py-1 rounded-lg font-bold transition text-slate-400 hover:text-white font-arabic">
+              العربية
             </button>
-            <button id="langEN" class="lang-btn px-2.5 py-1 rounded-lg font-bold transition text-slate-400 hover:text-white">
-              🇬🇧 EN
+            <button id="langEN" onclick="setLanguage('en')" class="lang-btn px-2.5 py-1 rounded-lg font-bold transition text-slate-400 hover:text-white">
+              English
             </button>
           </div>
 
@@ -195,12 +271,12 @@
                 <span class="text-[10px] text-slate-400" data-i18n="preset_1_sub">Terrain 160m², Bâti 120m², 1 Niveau</span>
               </button>
               <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 flex flex-col gap-0.5 preset-opt" data-preset="family_r1">
-                <span class="font-bold text-sky-400" data-i18n="preset_2_title">2. Maison Familiale R+1 (240 m²)</span>
-                <span class="text-[10px] text-slate-400" data-i18n="preset_2_sub">Terrain 180m², Bâti 120m², 2 Niveaux (RDC + R+1)</span>
+                <span class="font-bold text-sky-400" data-i18n="preset_2_title">2. Maison Familiale R+1 (240 m²)</span >
+                <span class="text-[10px] text-slate-400" data-i18n="preset_2_sub">Terrain 180m², Bâti 120m², 2 Niveaux</span>
               </button>
               <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 flex flex-col gap-0.5 preset-opt" data-preset="luxury_r2">
                 <span class="font-bold text-bh-orange" data-i18n="preset_3_title">3. Villa Moderne avec Décor R+2 (360 m²)</span>
-                <span class="text-[10px] text-slate-400" data-i18n="preset_3_sub">Terrain 250m², Bâti 120m², Finitions Haut Standing, 3 Niveaux</span>
+                <span class="text-[10px] text-slate-400" data-i18n="preset_3_sub">Terrain 250m², Bâti 120m², Finitions Haut Standing</span>
               </button>
               <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 flex flex-col gap-0.5 preset-opt" data-preset="residential_building">
                 <span class="font-bold text-emerald-400" data-i18n="preset_4_title">4. Petit Immeuble Résidentiel R+3 (600 m²)</span>
@@ -218,25 +294,13 @@
         </div>
       </div>
 
-      <!-- Navigation Tabs (Corresponding to the Banner's Pillars) -->
+      <!-- Navigation Tabs (CLEANED UP - EMPTY PLACEHOLDER TABS REMOVED) -->
       <div class="flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-bh-border pt-2 pb-1 text-xs">
         <button class="nav-tab active-tab" data-tab="tab-calculator">
-          <i class="fa-solid fa-calculator mr-1 text-slate-950"></i><span data-i18n="nav_calculator">Calculateur de Coûts & Matériaux</span>
+          <i class="fa-solid fa-calculator mr-1"></i><span data-i18n="nav_calculator">Calculateur de Coûts & Matériaux</span>
         </button>
         <button class="nav-tab" data-tab="tab-boq">
           <i class="fa-solid fa-list-check mr-1 text-bh-yellow"></i><span data-i18n="nav_boq">Bordereau Détaillé (BOQ)</span>
-        </button>
-        <button class="nav-tab" data-tab="tab-services">
-          <i class="fa-solid fa-user-tie mr-1 text-bh-yellow"></i><span data-i18n="nav_services">Services Professionnels</span>
-        </button>
-        <button class="nav-tab" data-tab="tab-marketplace">
-          <i class="fa-solid fa-cart-shopping mr-1 text-bh-yellow"></i><span data-i18n="nav_marketplace">Marketplace BTP</span>
-        </button>
-        <button class="nav-tab" data-tab="tab-jobs">
-          <i class="fa-solid fa-briefcase mr-1 text-bh-yellow"></i><span data-i18n="nav_jobs">Offres & Emplois</span>
-        </button>
-        <button class="nav-tab" data-tab="tab-3d">
-          <i class="fa-solid fa-cube mr-1 text-bh-yellow"></i><span data-i18n="nav_3d">Modélisation 3D</span>
         </button>
         <button class="nav-tab" data-tab="tab-report">
           <i class="fa-solid fa-file-signature mr-1 text-bh-yellow"></i><span data-i18n="nav_report">Devis Officiel A4</span>
@@ -247,40 +311,16 @@
   </header>
 
   <!-- ========================================================================= -->
-  <!-- 3. OFFICIAL BANNER SHOWCASE & HERO PILLARS -->
+  <!-- 4. OFFICIAL BANNER EMBEDDED -->
   <!-- ========================================================================= -->
   <section id="heroBannerContainer" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
-    
-    <!-- Banner Card with Glow & Direct Action Overlay -->
-    <div class="relative rounded-2xl overflow-hidden border border-bh-border shadow-2xl bg-bh-card group">
+    <div class="relative rounded-2xl overflow-hidden border border-bh-border shadow-2xl bg-bh-card">
       <img src="assets/batihub_banner.jpg" alt="BatiHub DZ Banner" class="w-full h-auto object-cover max-h-72 sm:max-h-80 md:max-h-96">
-      
-      <!-- Gradient overlay on bottom to anchor quick cards -->
-      <div class="absolute inset-0 bg-gradient-to-t from-bh-bg via-transparent to-transparent opacity-80 pointer-events-none"></div>
-
-      <!-- Quick interactive banner action strip -->
-      <div class="absolute bottom-3 inset-x-3 hidden sm:flex items-center justify-between bg-bh-card/90 backdrop-blur-md border border-bh-border rounded-xl p-2.5 text-xs">
-        <div class="flex items-center gap-2">
-          <img src="assets/batihub_logo.png" alt="Logo" class="h-6 w-auto">
-          <span class="font-bold text-white text-xs">BatiHub DZ Ecosystem</span>
-          <span class="text-slate-500">•</span>
-          <span class="text-bh-yellow text-[11px] font-arabic font-bold">كل خدمات البناء في مكان واحد</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <button onclick="switchTab('tab-calculator')" class="px-2.5 py-1 bg-bh-yellow hover:bg-bh-orange text-slate-950 font-bold rounded-lg text-[11px] transition">
-            Calculer un Projet
-          </button>
-          <button onclick="switchTab('tab-services')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-lg text-[11px] transition">
-            Trouver un Pro
-          </button>
-        </div>
-      </div>
     </div>
-
   </section>
 
   <!-- ========================================================================= -->
-  <!-- 4. MAIN APP CONTENT CONTAINER -->
+  <!-- 5. MAIN CONTENT -->
   <!-- ========================================================================= -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
@@ -365,7 +405,7 @@
     </section>
 
     <!-- ========================================================================= -->
-    <!-- TAB 1: CALCULATEUR DE COÛTS & MATÉRIAUX (THE FLAGSHIP ESTIMATOR) -->
+    <!-- TAB 1: CALCULATEUR DE COÛTS & MATÉRIAUX -->
     <!-- ========================================================================= -->
     <div id="tab-calculator" class="tab-content active-content">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -401,7 +441,7 @@
                   <input type="range" id="sliderLandArea" min="50" max="1000" step="5" value="160" class="w-full accent-bh-yellow">
                   <input type="number" id="inputLandArea" min="30" max="5000" value="160" class="w-24 bg-bh-bg border border-bh-border rounded-lg px-2.5 py-1 text-xs font-mono font-bold text-center text-white focus:outline-none focus:border-bh-yellow">
                 </div>
-                <span class="text-[10px] text-slate-500" data-i18n="hint_land_area">Surface totale de la parcelle cadastrale (مساحة الأرض الإجمالية)</span>
+                <span class="text-[10px] text-slate-500" data-i18n="hint_land_area">Surface totale de la parcelle cadastrale</span>
               </div>
 
               <!-- Built Footprint Area -->
@@ -417,18 +457,18 @@
                   <input type="range" id="sliderFootprintArea" min="40" max="600" step="5" value="120" class="w-full accent-emerald-400">
                   <input type="number" id="inputFootprintArea" min="30" max="3000" value="120" class="w-24 bg-bh-bg border border-bh-border rounded-lg px-2.5 py-1 text-xs font-mono font-bold text-center text-white focus:outline-none focus:border-emerald-400">
                 </div>
-                <span class="text-[10px] text-slate-500" data-i18n="hint_footprint_area">Surface couverte au rez-de-chaussée (مساحة المبنى في الأرضية)</span>
+                <span class="text-[10px] text-slate-500" data-i18n="hint_footprint_area">Surface couverte au rez-de-chaussée</span>
               </div>
 
-              <!-- Free Yard / Setback Area (Calculated) -->
+              <!-- Free Yard Area (Calculated) -->
               <div class="bg-bh-bg border border-bh-border rounded-xl p-3 flex items-center justify-between text-xs">
                 <div>
                   <span class="font-bold text-slate-200 block" data-i18n="lbl_yard_area">Cour & Espaces Libres:</span>
-                  <span class="text-[10px] text-slate-400" data-i18n="hint_yard_area">Jardin, cour intérieure et allée (مساحة الفراغات)</span>
+                  <span class="text-[10px] text-slate-400" data-i18n="hint_yard_area">Jardin, cour intérieure et allée</span>
                 </div>
                 <div class="text-right">
                   <span class="text-sm font-heading font-black text-teal-400 font-mono" id="calcYardAreaVal">40 m²</span>
-                  <span class="text-[10px] text-slate-500 block" id="calcYardPercentVal">(25% du terrain)</span>
+                  <span class="text-[10px] text-slate-500 block" id="calcYardPercentVal">(25%)</span>
                 </div>
               </div>
 
@@ -437,9 +477,9 @@
                 <div class="flex items-center justify-between text-xs font-semibold mb-2">
                   <label class="text-slate-200 flex items-center gap-1.5">
                     <i class="fa-solid fa-layer-group text-bh-orange text-xs"></i>
-                    <span data-i18n="lbl_floors_count">Nombre d'Étages (عدد الطوابق)</span>
+                    <span data-i18n="lbl_floors_count">Nombre d'Étages</span>
                   </label>
-                  <span class="text-bh-orange font-bold" id="labelFloorsVal">Rez-de-chaussée seul (RDC)</span>
+                  <span class="text-bh-orange font-bold" id="labelFloorsVal">RDC</span>
                 </div>
                 
                 <div class="grid grid-cols-5 gap-1.5" id="floorButtonsGroup">
@@ -508,7 +548,7 @@
                     <div>
                       <div class="flex items-center gap-2">
                         <span class="font-bold text-sm text-white" data-i18n="tier_standard_title">Maison Résidentielle Standard</span>
-                        <span class="text-[10px] font-bold bg-slate-800 text-slate-300 px-2 py-0.5 rounded">منزل عادي</span>
+                        <span class="text-[10px] font-bold bg-slate-800 text-slate-300 px-2 py-0.5 rounded" data-i18n="tier_standard_badge">Standard</span>
                       </div>
                       <p class="text-xs text-slate-400 mt-0.5" data-i18n="tier_standard_desc">Finitions classiques durables: Carrelage monocuisson, plâtre traditionnel, menuiserie aluminium standard, sanitaires classiques.</p>
                     </div>
@@ -531,7 +571,7 @@
                     <div>
                       <div class="flex items-center gap-2">
                         <span class="font-bold text-sm text-white" data-i18n="tier_decorated_title">Villa Moderne avec Décor & Moulures</span>
-                        <span class="text-[10px] font-bold bg-bh-yellow/20 text-bh-yellow px-2 py-0.5 rounded">منزل بديكور وزخرفة</span>
+                        <span class="text-[10px] font-bold bg-bh-yellow/20 text-bh-yellow px-2 py-0.5 rounded" data-i18n="tier_decorated_badge">Haut Standing</span>
                       </div>
                       <p class="text-xs text-slate-400 mt-0.5" data-i18n="tier_decorated_desc">Faux plafonds BA13 avec gorge lumineuse LED, grès cérame 60x60, peinture décorative (stucco/carénia), aluminium à rupture de pont thermique.</p>
                     </div>
@@ -554,7 +594,7 @@
                     <div>
                       <div class="flex items-center gap-2">
                         <span class="font-bold text-sm text-white" data-i18n="tier_shell_title">Gros Œuvre / Carcasse Seule</span>
-                        <span class="text-[10px] font-bold bg-bh-orange/20 text-bh-orange px-2 py-0.5 rounded">هيكل فقط (Gros Œuvres)</span>
+                        <span class="text-[10px] font-bold bg-bh-orange/20 text-bh-orange px-2 py-0.5 rounded" data-i18n="tier_shell_badge">Structure Seule</span>
                       </div>
                       <p class="text-xs text-slate-400 mt-0.5" data-i18n="tier_shell_desc">Fondations, poteaux-poutres béton armé, dalles hourdis, double cloison brique et étanchéité terrasse (sans finitions intérieures).</p>
                     </div>
@@ -590,7 +630,7 @@
 
           </div>
 
-          <!-- 3. DIRECT MATERIAL UNIT PRICES CONTROLS (HIGH PRIORITY USER FEATURE) -->
+          <!-- 3. DIRECT MATERIAL UNIT PRICES CONTROLS -->
           <div class="bg-bh-card border border-bh-border rounded-2xl p-5 shadow-xl">
             <div class="flex items-center justify-between pb-3 mb-4 border-b border-bh-border">
               <div class="flex items-center gap-2.5">
@@ -611,7 +651,7 @@
               <!-- Cement -->
               <div class="flex items-center justify-between p-2 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow transition">
                 <div>
-                  <span class="font-bold text-slate-200 block" data-i18n="price_cement_name">Sac de Ciment 50kg (كيس إسمنت)</span>
+                  <span class="font-bold text-slate-200 block" data-i18n="price_cement_name">Sac de Ciment 50kg</span>
                   <span class="text-[10px] text-slate-500">CPJ-CEM II 42.5 (Sac 50kg)</span>
                 </div>
                 <div class="w-28 flex items-center gap-1">
@@ -623,7 +663,7 @@
               <!-- Rebar Steel -->
               <div class="flex items-center justify-between p-2 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow transition">
                 <div>
-                  <span class="font-bold text-slate-200 block" data-i18n="price_steel_name">Acier / Quintal (قنطار حديد)</span>
+                  <span class="font-bold text-slate-200 block" data-i18n="price_steel_name">Acier / Quintal</span>
                   <span class="text-[10px] text-slate-500">Rond à béton FeE500 (100 kg)</span>
                 </div>
                 <div class="w-28 flex items-center gap-1">
@@ -635,7 +675,7 @@
               <!-- Sand -->
               <div class="flex items-center justify-between p-2 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow transition">
                 <div>
-                  <span class="font-bold text-slate-200 block" data-i18n="price_sand_name">Sable au m³ (متر مكعب رمل)</span>
+                  <span class="font-bold text-slate-200 block" data-i18n="price_sand_name">Sable au m³</span>
                   <span class="text-[10px] text-slate-500">Sable lavé pour béton & mortier</span>
                 </div>
                 <div class="w-28 flex items-center gap-1">
@@ -647,7 +687,7 @@
               <!-- Gravel -->
               <div class="flex items-center justify-between p-2 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow transition">
                 <div>
-                  <span class="font-bold text-slate-200 block" data-i18n="price_gravel_name">Gravier au m³ (متر مكعب حصى)</span>
+                  <span class="font-bold text-slate-200 block" data-i18n="price_gravel_name">Gravier au m³</span>
                   <span class="text-[10px] text-slate-500">Granulats concassés 8/15 & 15/25</span>
                 </div>
                 <div class="w-28 flex items-center gap-1">
@@ -659,7 +699,7 @@
               <!-- Brick 12 Holes -->
               <div class="flex items-center justify-between p-2 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow transition">
                 <div>
-                  <span class="font-bold text-slate-200 block" data-i18n="price_brick12_name">Brique 12 Trous (حبة آجر 12)</span>
+                  <span class="font-bold text-slate-200 block" data-i18n="price_brick12_name">Brique 12 Trous</span>
                   <span class="text-[10px] text-slate-500">À la pièce (Murs extérieurs)</span>
                 </div>
                 <div class="w-28 flex items-center gap-1">
@@ -671,7 +711,7 @@
               <!-- Brick 8 Holes -->
               <div class="flex items-center justify-between p-2 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow transition">
                 <div>
-                  <span class="font-bold text-slate-200 block" data-i18n="price_brick8_name">Brique 8 Trous (حبة آجر 8)</span>
+                  <span class="font-bold text-slate-200 block" data-i18n="price_brick8_name">Brique 8 Trous</span>
                   <span class="text-[10px] text-slate-500">À la pièce (Cloisons intérieures)</span>
                 </div>
                 <div class="w-28 flex items-center gap-1">
@@ -683,7 +723,7 @@
               <!-- Foundation Stones -->
               <div class="flex items-center justify-between p-2 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow transition">
                 <div>
-                  <span class="font-bold text-slate-200 block" data-i18n="price_stones_name">Moellons au m³ (حجارة الأساسات)</span>
+                  <span class="font-bold text-slate-200 block" data-i18n="price_stones_name">Moellons au m³</span>
                   <span class="text-[10px] text-slate-500">Pierres hérisson pour fondations</span>
                 </div>
                 <div class="w-28 flex items-center gap-1">
@@ -695,7 +735,7 @@
               <!-- Shell Labor -->
               <div class="flex items-center justify-between p-2 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow transition">
                 <div>
-                  <span class="font-bold text-slate-200 block" data-i18n="price_labor_name">Main d'œuvre Gros Œuvre / m² (أجرة البناء)</span>
+                  <span class="font-bold text-slate-200 block" data-i18n="price_labor_name">Main d'œuvre Gros Œuvre / m²</span>
                   <span class="text-[10px] text-slate-500">Coffrage, ferraillage, coulage</span>
                 </div>
                 <div class="w-28 flex items-center gap-1">
@@ -712,7 +752,7 @@
         <!-- RIGHT PANEL: DETAILED QUANTITIES & VISUAL ANALYTICS (7 COLS) -->
         <div class="lg:col-span-7 space-y-6">
 
-          <!-- 4. REQUIRED MATERIALS QUANTITIES & COSTS (USER DEMAND) -->
+          <!-- 4. REQUIRED MATERIALS QUANTITIES & COSTS -->
           <div class="bg-bh-card border border-bh-border rounded-2xl p-5 shadow-xl">
             <div class="flex items-center justify-between pb-3 mb-4 border-b border-bh-border">
               <div class="flex items-center gap-2.5">
@@ -738,7 +778,7 @@
                       <i class="fa-solid fa-cubes-stacked"></i>
                     </div>
                     <div>
-                      <h4 class="font-bold text-sm text-white" data-i18n="card_cement_title">Ciment Portland (الإسمنت)</h4>
+                      <h4 class="font-bold text-sm text-white" data-i18n="card_cement_title">Ciment Portland</h4>
                       <span class="text-[10px] text-slate-400">CPJ-CEM II 42.5</span>
                     </div>
                   </div>
@@ -768,7 +808,7 @@
                       <i class="fa-solid fa-bars-staggered"></i>
                     </div>
                     <div>
-                      <h4 class="font-bold text-sm text-white" data-i18n="card_steel_title">Acier pour Béton (حديد التسليح)</h4>
+                      <h4 class="font-bold text-sm text-white" data-i18n="card_steel_title">Acier pour Béton</h4>
                       <span class="text-[10px] text-slate-400">FeE500 Haute Adhérence</span>
                     </div>
                   </div>
@@ -798,7 +838,7 @@
                       <i class="fa-solid fa-shapes"></i>
                     </div>
                     <div>
-                      <h4 class="font-bold text-sm text-white" data-i18n="card_bricks_title">Briques en Terre Cuite (الآجر)</h4>
+                      <h4 class="font-bold text-sm text-white" data-i18n="card_bricks_title">Briques en Terre Cuite</h4>
                       <span class="text-[10px] text-slate-400">12 Trous & 8 Trous</span>
                     </div>
                   </div>
@@ -828,8 +868,8 @@
                       <i class="fa-solid fa-water"></i>
                     </div>
                     <div>
-                      <h4 class="font-bold text-sm text-white" data-i18n="card_sand_title">Sable de Rivière Lavé (الرمل)</h4>
-                      <span class="text-[10px] text-slate-400">Pour béton et enduits</span>
+                      <h4 class="font-bold text-sm text-white" data-i18n="card_sand_title">Sable de Rivière Lavé</h4>
+                      <span class="text-[10px] text-slate-400">Béton & mortiers</span>
                     </div>
                   </div>
                   <span class="text-xs font-mono font-bold text-bh-yellow" id="calcSandVol">0 m³</span>
@@ -858,7 +898,7 @@
                       <i class="fa-solid fa-gem"></i>
                     </div>
                     <div>
-                      <h4 class="font-bold text-sm text-white" data-i18n="card_gravel_title">Gravier Concassé (الحصى)</h4>
+                      <h4 class="font-bold text-sm text-white" data-i18n="card_gravel_title">Gravier Concassé</h4>
                       <span class="text-[10px] text-slate-400">Agrégats 8/15 & 15/25</span>
                     </div>
                   </div>
@@ -888,7 +928,7 @@
                       <i class="fa-solid fa-layer-group"></i>
                     </div>
                     <div>
-                      <h4 class="font-bold text-sm text-white" data-i18n="card_hourdis_title">Hourdis & Moellons (الهوردي والدبش)</h4>
+                      <h4 class="font-bold text-sm text-white" data-i18n="card_hourdis_title">Hourdis & Moellons</h4>
                       <span class="text-[10px] text-slate-400">Corps creux 16+4 & Hérisson</span>
                     </div>
                   </div>
@@ -1060,390 +1100,7 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- TAB 3: SERVICES PROFESSIONNELS BTP -->
-    <!-- ========================================================================= -->
-    <div id="tab-services" class="tab-content hidden">
-      <div class="bg-bh-card border border-bh-border rounded-2xl p-5 shadow-xl space-y-6">
-        <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-bh-border">
-          <div>
-            <h3 class="font-heading font-bold text-lg text-white flex items-center gap-2">
-              <i class="fa-solid fa-user-shield text-bh-yellow"></i>
-              <span>Annuaire des Professionnels & Bureaux d'Études Agréés</span>
-            </h3>
-            <p class="text-xs text-slate-400">Architectes, Ingénieurs Génie Civil, Topographes et Artisans qualifiés en Algérie</p>
-          </div>
-          <span class="px-3 py-1 rounded-xl bg-bh-yellow/20 text-bh-yellow font-bold text-xs border border-bh-yellow/30">
-            58 Wilayas d'Algérie
-          </span>
-        </div>
-
-        <!-- Pro Services Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          
-          <div class="bg-bh-bg border border-bh-border rounded-xl p-4 hover:border-bh-yellow transition">
-            <div class="flex items-center gap-3 mb-3">
-              <div class="w-10 h-10 rounded-xl bg-bh-yellow/20 text-bh-yellow flex items-center justify-center text-lg">
-                <i class="fa-solid fa-compass-drafting"></i>
-              </div>
-              <div>
-                <h4 class="font-bold text-sm text-white">Bureau d'Études d'Architecture</h4>
-                <span class="text-[10px] text-slate-400">Conception 2D/3D, Permis de Construire</span>
-              </div>
-            </div>
-            <p class="text-xs text-slate-300 mb-3">Plans architecturaux complets, modélisation 3D photoréaliste et dépôt de permis de construire conforme aux règles d'urbanisme.</p>
-            <div class="pt-2 border-t border-bh-border flex items-center justify-between text-xs">
-              <span class="text-bh-yellow font-bold">À partir de 150 DZD/m²</span>
-              <button onclick="alert('Demande de contact transmise au réseau BatiHub DZ !')" class="px-3 py-1 bg-bh-yellow hover:bg-bh-orange text-slate-950 font-bold rounded-lg text-xs transition">Contacter</button>
-            </div>
-          </div>
-
-          <div class="bg-bh-bg border border-bh-border rounded-xl p-4 hover:border-bh-yellow transition">
-            <div class="flex items-center gap-3 mb-3">
-              <div class="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-lg">
-                <i class="fa-solid fa-hard-hat"></i>
-              </div>
-              <div>
-                <h4 class="font-bold text-sm text-white">Ingénieur Génie Civil & Suivi</h4>
-                <span class="text-[10px] text-slate-400">Étude Béton Armé & Parasismique (RPA)</span>
-              </div>
-            </div>
-            <p class="text-xs text-slate-300 mb-3">Calcul des structures en béton armé, ferraillage poteaux-poutres, plans de coffrage et suivi rigoureux sur chantier.</p>
-            <div class="pt-2 border-t border-bh-border flex items-center justify-between text-xs">
-              <span class="text-sky-400 font-bold">À partir de 120 DZD/m²</span>
-              <button onclick="alert('Demande de contact transmise au réseau BatiHub DZ !')" class="px-3 py-1 bg-bh-yellow hover:bg-bh-orange text-slate-950 font-bold rounded-lg text-xs transition">Contacter</button>
-            </div>
-          </div>
-
-          <div class="bg-bh-bg border border-bh-border rounded-xl p-4 hover:border-bh-yellow transition">
-            <div class="flex items-center gap-3 mb-3">
-              <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
-                <i class="fa-solid fa-trowel"></i>
-              </div>
-              <div>
-                <h4 class="font-bold text-sm text-white">Entreprise Gros Œuvre & Maçonnerie</h4>
-                <span class="text-[10px] text-slate-400">Équipes de Maçons & Charpentiers</span>
-              </div>
-            </div>
-            <p class="text-xs text-slate-300 mb-3">Réalisation complète des fondations, coulage béton toupie/pompe, montage briques et pose planchers hourdis avec engagement de délai.</p>
-            <div class="pt-2 border-t border-bh-border flex items-center justify-between text-xs">
-              <span class="text-emerald-400 font-bold">~ 9,500 DZD/m²</span>
-              <button onclick="alert('Demande de contact transmise au réseau BatiHub DZ !')" class="px-3 py-1 bg-bh-yellow hover:bg-bh-orange text-slate-950 font-bold rounded-lg text-xs transition">Contacter</button>
-            </div>
-          </div>
-
-          <div class="bg-bh-bg border border-bh-border rounded-xl p-4 hover:border-bh-yellow transition">
-            <div class="flex items-center gap-3 mb-3">
-              <div class="w-10 h-10 rounded-xl bg-bh-orange/20 text-bh-orange flex items-center justify-center text-lg">
-                <i class="fa-solid fa-map-location-dot"></i>
-              </div>
-              <div>
-                <h4 class="font-bold text-sm text-white">Géomètre Topographe Expert</h4>
-                <span class="text-[10px] text-slate-400">Bornage, Implantation & Nivellement</span>
-              </div>
-            </div>
-            <p class="text-xs text-slate-300 mb-3">Levé topographique GPS différentiel, calcul des cotes altimétriques, piquetage des fouilles et délimitation de parcelles.</p>
-            <div class="pt-2 border-t border-bh-border flex items-center justify-between text-xs">
-              <span class="text-bh-orange font-bold">Devis sur mesure</span>
-              <button onclick="alert('Demande de contact transmise au réseau BatiHub DZ !')" class="px-3 py-1 bg-bh-yellow hover:bg-bh-orange text-slate-950 font-bold rounded-lg text-xs transition">Contacter</button>
-            </div>
-          </div>
-
-          <div class="bg-bh-bg border border-bh-border rounded-xl p-4 hover:border-bh-yellow transition">
-            <div class="flex items-center gap-3 mb-3">
-              <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg">
-                <i class="fa-solid fa-bolt"></i>
-              </div>
-              <div>
-                <h4 class="font-bold text-sm text-white">Électricité Bâtiment & Domotique</h4>
-                <span class="text-[10px] text-slate-400">Câblage, Tableaux & Spots LED</span>
-              </div>
-            </div>
-            <p class="text-xs text-slate-300 mb-3">Installation des réseaux électriques triphasé/monophasé, tableaux de protection divisionnaires, et éclairages modernes intégrés.</p>
-            <div class="pt-2 border-t border-bh-border flex items-center justify-between text-xs">
-              <span class="text-purple-400 font-bold">~ 2,400 DZD/m²</span>
-              <button onclick="alert('Demande de contact transmise au réseau BatiHub DZ !')" class="px-3 py-1 bg-bh-yellow hover:bg-bh-orange text-slate-950 font-bold rounded-lg text-xs transition">Contacter</button>
-            </div>
-          </div>
-
-          <div class="bg-bh-bg border border-bh-border rounded-xl p-4 hover:border-bh-yellow transition">
-            <div class="flex items-center gap-3 mb-3">
-              <div class="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-lg">
-                <i class="fa-solid fa-faucet-drip"></i>
-              </div>
-              <div>
-                <h4 class="font-bold text-sm text-white">Plomberie & Chauffage Central</h4>
-                <span class="text-[10px] text-slate-400">Multicouche, PPR, Radiateurs & Sanitaires</span>
-              </div>
-            </div>
-            <p class="text-xs text-slate-300 mb-3">Installation réseaux d'alimentation eau chaude/froide, évacuation PVC ventilée, plancher chauffant et chaudières murales.</p>
-            <div class="pt-2 border-t border-bh-border flex items-center justify-between text-xs">
-              <span class="text-teal-400 font-bold">~ 2,800 DZD/m²</span>
-              <button onclick="alert('Demande de contact transmise au réseau BatiHub DZ !')" class="px-3 py-1 bg-bh-yellow hover:bg-bh-orange text-slate-950 font-bold rounded-lg text-xs transition">Contacter</button>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- ========================================================================= -->
-    <!-- TAB 4: MARKETPLACE BTP (MATÉRIAUX & ENGINS) -->
-    <!-- ========================================================================= -->
-    <div id="tab-marketplace" class="tab-content hidden">
-      <div class="bg-bh-card border border-bh-border rounded-2xl p-5 shadow-xl space-y-6">
-        <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-bh-border">
-          <div>
-            <h3 class="font-heading font-bold text-lg text-white flex items-center gap-2">
-              <i class="fa-solid fa-cart-shopping text-bh-yellow"></i>
-              <span>Marketplace BTP Algérie • Matériaux & Engins</span>
-            </h3>
-            <p class="text-xs text-slate-400">Fournisseurs directs de ciment, fer, briques, céramique et location d'engins lourds</p>
-          </div>
-          <div class="flex items-center gap-2 text-xs">
-            <button class="px-3 py-1 bg-bh-yellow text-slate-950 font-bold rounded-lg">Tous les Produits</button>
-            <button class="px-3 py-1 bg-bh-bg text-slate-400 hover:text-white rounded-lg border border-bh-border">Location d'Engins</button>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          
-          <div class="bg-bh-bg border border-bh-border rounded-xl p-4 hover:border-bh-yellow transition">
-            <div class="flex items-start justify-between mb-2">
-              <div>
-                <span class="text-[10px] uppercase font-bold text-bh-yellow bg-bh-yellow/10 px-2 py-0.5 rounded">Cimenterie GICA / Lafarge</span>
-                <h4 class="font-bold text-sm text-white mt-1">Ciment Sac 50kg CPJ 42.5</h4>
-              </div>
-              <span class="text-sm font-bold font-mono text-bh-yellow">680 DZD</span>
-            </div>
-            <p class="text-xs text-slate-400 mb-3">Ciment haute résistance certifié pour béton armé et fondations. Livraison par camion semi-remorque ou enlèvement dépôt.</p>
-            <div class="flex items-center justify-between text-xs pt-2 border-t border-bh-border">
-              <span class="text-emerald-400 text-[11px]"><i class="fa-solid fa-truck mr-1"></i> Dispo en gros</span>
-              <button onclick="alert('Commande enregistrée dans votre panier BatiHub DZ !')" class="px-3 py-1 bg-bh-card hover:bg-slate-700 text-slate-200 border border-bh-border font-bold rounded-lg text-xs">Commander</button>
-            </div>
-          </div>
-
-          <div class="bg-bh-bg border border-bh-border rounded-xl p-4 hover:border-bh-yellow transition">
-            <div class="flex items-start justify-between mb-2">
-              <div>
-                <span class="text-[10px] uppercase font-bold text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded">Sider El Hadjar / Tosyali</span>
-                <h4 class="font-bold text-sm text-white mt-1">Fer à Béton FeE500 (Quintal)</h4>
-              </div>
-              <span class="text-sm font-bold font-mono text-sky-400">12,800 DZD</span>
-            </div>
-            <p class="text-xs text-slate-400 mb-3">Ronds crantés haute adhérence calibres T8, T10, T12, T14, T16. Vente au quintal ou à la tonne certifiée avec certificat d'analyse.</p>
-            <div class="flex items-center justify-between text-xs pt-2 border-t border-bh-border">
-              <span class="text-emerald-400 text-[11px]"><i class="fa-solid fa-certificate mr-1"></i> Norme NA 442</span>
-              <button onclick="alert('Commande enregistrée dans votre panier BatiHub DZ !')" class="px-3 py-1 bg-bh-card hover:bg-slate-700 text-slate-200 border border-bh-border font-bold rounded-lg text-xs">Commander</button>
-            </div>
-          </div>
-
-          <div class="bg-bh-bg border border-bh-border rounded-xl p-4 hover:border-bh-yellow transition">
-            <div class="flex items-start justify-between mb-2">
-              <div>
-                <span class="text-[10px] uppercase font-bold text-bh-orange bg-bh-orange/10 px-2 py-0.5 rounded">Briqueterie Industrielle</span>
-                <h4 class="font-bold text-sm text-white mt-1">Briques 12 Trous (Palette)</h4>
-              </div>
-              <span class="text-sm font-bold font-mono text-bh-orange">40 DZD / pc</span>
-            </div>
-            <p class="text-xs text-slate-400 mb-3">Briques cuites au four tunnel, isolation thermique supérieure pour double cloison avec lame d'air. Résistance à la compression élevée.</p>
-            <div class="flex items-center justify-between text-xs pt-2 border-t border-bh-border">
-              <span class="text-slate-400 text-[11px]">Conditionnement: Palette</span>
-              <button onclick="alert('Commande enregistrée dans votre panier BatiHub DZ !')" class="px-3 py-1 bg-bh-card hover:bg-slate-700 text-slate-200 border border-bh-border font-bold rounded-lg text-xs">Commander</button>
-            </div>
-          </div>
-
-          <div class="bg-bh-bg border border-bh-border rounded-xl p-4 hover:border-bh-yellow transition">
-            <div class="flex items-start justify-between mb-2">
-              <div>
-                <span class="text-[10px] uppercase font-bold text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded">Engins & Matériel BTP</span>
-                <h4 class="font-bold text-sm text-white mt-1">Toupie à Béton avec Pompe (Mixer)</h4>
-              </div>
-              <span class="text-sm font-bold font-mono text-teal-400">18,000 DZD /j</span>
-            </div>
-            <p class="text-xs text-slate-400 mb-3">Location journalière avec chauffeur qualifié pour coulage des dalles et fondations. Portée flèche jusqu'à 36 mètres.</p>
-            <div class="flex items-center justify-between text-xs pt-2 border-t border-bh-border">
-              <span class="text-bh-yellow text-[11px]"><i class="fa-solid fa-clock mr-1"></i> Réservation 48h</span>
-              <button onclick="alert('Demande de location transmise !')" class="px-3 py-1 bg-bh-card hover:bg-slate-700 text-slate-200 border border-bh-border font-bold rounded-lg text-xs">Réserver</button>
-            </div>
-          </div>
-
-          <div class="bg-bh-bg border border-bh-border rounded-xl p-4 hover:border-bh-yellow transition">
-            <div class="flex items-start justify-between mb-2">
-              <div>
-                <span class="text-[10px] uppercase font-bold text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded">Engins & Terrassement</span>
-                <h4 class="font-bold text-sm text-white mt-1">Pelle Hydraulique sur Chenilles</h4>
-              </div>
-              <span class="text-sm font-bold font-mono text-teal-400">22,000 DZD /j</span>
-            </div>
-            <p class="text-xs text-slate-400 mb-3">Terrassement en pleine masse, fouilles en rigoles pour semelles et évacuation de déblais par camion benne 16m³.</p>
-            <div class="flex items-center justify-between text-xs pt-2 border-t border-bh-border">
-              <span class="text-bh-yellow text-[11px]"><i class="fa-solid fa-clock mr-1"></i> Disponible immédiatement</span>
-              <button onclick="alert('Demande de location transmise !')" class="px-3 py-1 bg-bh-card hover:bg-slate-700 text-slate-200 border border-bh-border font-bold rounded-lg text-xs">Réserver</button>
-            </div>
-          </div>
-
-          <div class="bg-bh-bg border border-bh-border rounded-xl p-4 hover:border-bh-yellow transition">
-            <div class="flex items-start justify-between mb-2">
-              <div>
-                <span class="text-[10px] uppercase font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">Céramique & Revêtements</span>
-                <h4 class="font-bold text-sm text-white mt-1">Grès Cérame Rectifié 60x60</h4>
-              </div>
-              <span class="text-sm font-bold font-mono text-purple-400">3,800 DZD / m²</span>
-            </div>
-            <p class="text-xs text-slate-400 mb-3">Carreaux grand format poli miroir 1er choix, haute résistance à l'usure, idéal pour salon contemporain et villa moderne.</p>
-            <div class="flex items-center justify-between text-xs pt-2 border-t border-bh-border">
-              <span class="text-slate-400 text-[11px]">En stock: 500+ m²</span>
-              <button onclick="alert('Commande enregistrée dans votre panier BatiHub DZ !')" class="px-3 py-1 bg-bh-card hover:bg-slate-700 text-slate-200 border border-bh-border font-bold rounded-lg text-xs">Commander</button>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- ========================================================================= -->
-    <!-- TAB 5: OFFRES & EMPLOIS BTP -->
-    <!-- ========================================================================= -->
-    <div id="tab-jobs" class="tab-content hidden">
-      <div class="bg-bh-card border border-bh-border rounded-2xl p-5 shadow-xl space-y-6">
-        <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-bh-border">
-          <div>
-            <h3 class="font-heading font-bold text-lg text-white flex items-center gap-2">
-              <i class="fa-solid fa-briefcase text-bh-yellow"></i>
-              <span>Offres d'Emploi, Sous-traitance & Appels d'Offres BTP</span>
-            </h3>
-            <p class="text-xs text-slate-400">Opportunités professionnelles et consultations de projets de construction en Algérie</p>
-          </div>
-          <button onclick="alert('Formulaire de publication de projet ouvert !')" class="px-3.5 py-1.5 bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold rounded-xl text-xs transition">
-            + Publier un Projet / Offre
-          </button>
-        </div>
-
-        <div class="space-y-3">
-          
-          <div class="bg-bh-bg border border-bh-border rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:border-bh-yellow transition">
-            <div>
-              <div class="flex items-center gap-2 mb-1">
-                <span class="bg-bh-yellow/20 text-bh-yellow border border-bh-yellow/30 text-[10px] font-bold px-2 py-0.5 rounded">Projet Particulier</span>
-                <span class="text-slate-400 text-xs"><i class="fa-solid fa-location-dot mr-1 text-bh-orange"></i> Alger (Chéraga)</span>
-                <span class="text-slate-500 text-xs">• Il y a 2 jours</span>
-              </div>
-              <h4 class="font-bold text-sm text-white">Sous-traitance Gros Œuvre pour Villa R+2 (Surface 380 m²)</h4>
-              <p class="text-xs text-slate-400 mt-0.5">Recherche équipe de maçons qualifiés avec expérience pour réalisation de la structure complète, ferraillage et dalles.</p>
-            </div>
-            <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 pt-2 md:pt-0 border-bh-border">
-              <span class="font-mono font-bold text-sm text-bh-yellow">3,600,000 DZD</span>
-              <button onclick="alert('Candidature transmise au maître d\'ouvrage !')" class="px-4 py-1.5 bg-bh-yellow hover:bg-bh-orange text-slate-950 font-bold text-xs rounded-lg transition">Postuler</button>
-            </div>
-          </div>
-
-          <div class="bg-bh-bg border border-bh-border rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:border-bh-yellow transition">
-            <div>
-              <div class="flex items-center gap-2 mb-1">
-                <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-2 py-0.5 rounded">Offre d'Emploi</span>
-                <span class="text-slate-400 text-xs"><i class="fa-solid fa-location-dot mr-1 text-bh-orange"></i> Oran</span>
-                <span class="text-slate-500 text-xs">• Il y a 3 jours</span>
-              </div>
-              <h4 class="font-bold text-sm text-white">Conducteur de Travaux / Ingénieur Suivi de Chantier</h4>
-              <p class="text-xs text-slate-400 mt-0.5">Entreprise générale de bâtiment recrute ingénieur génie civil avec 3 ans d'expérience minimum dans la gestion de chantiers résidentiels.</p>
-            </div>
-            <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 pt-2 md:pt-0 border-bh-border">
-              <span class="font-mono font-bold text-sm text-emerald-400">90,000 - 130,000 DZD / mois</span>
-              <button onclick="alert('CV transmis à l\'employeur !')" class="px-4 py-1.5 bg-bh-yellow hover:bg-bh-orange text-slate-950 font-bold text-xs rounded-lg transition">Postuler</button>
-            </div>
-          </div>
-
-          <div class="bg-bh-bg border border-bh-border rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:border-bh-yellow transition">
-            <div>
-              <div class="flex items-center gap-2 mb-1">
-                <span class="bg-purple-500/20 text-purple-400 border border-purple-500/30 text-[10px] font-bold px-2 py-0.5 rounded">Lot Finitions</span>
-                <span class="text-slate-400 text-xs"><i class="fa-solid fa-location-dot mr-1 text-bh-orange"></i> Constantine (Ali Mendjeli)</span>
-                <span class="text-slate-500 text-xs">• Il y a 4 jours</span>
-              </div>
-              <h4 class="font-bold text-sm text-white">Pose Carrelage & Faïence pour Immeuble Résidentiel (12 Appartements)</h4>
-              <p class="text-xs text-slate-400 mt-0.5">Métré total de 1,450 m² de carrelage au sol et faïence murale. Fourniture colle assurée par le promoteur.</p>
-            </div>
-            <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 pt-2 md:pt-0 border-bh-border">
-              <span class="font-mono font-bold text-sm text-purple-400">850 DZD / m²</span>
-              <button onclick="alert('Candidature transmise au maître d\'ouvrage !')" class="px-4 py-1.5 bg-bh-yellow hover:bg-bh-orange text-slate-950 font-bold text-xs rounded-lg transition">Postuler</button>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- ========================================================================= -->
-    <!-- TAB 6: MODÉLISATION 3D & ARCHITECTURE -->
-    <!-- ========================================================================= -->
-    <div id="tab-3d" class="tab-content hidden">
-      <div class="bg-bh-card border border-bh-border rounded-2xl p-5 shadow-xl space-y-6">
-        <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-bh-border">
-          <div>
-            <h3 class="font-heading font-bold text-lg text-white flex items-center gap-2">
-              <i class="fa-solid fa-cubes text-bh-yellow"></i>
-              <span>Galerie de Modélisation 3D & Plans Architecturaux</span>
-            </h3>
-            <p class="text-xs text-slate-400">Visualisation 3D, plans de distribution intérieure et rendus photoréalistes pour projets algériens</p>
-          </div>
-          <button onclick="alert('Service de modélisation 3D personnalisé ouvert !')" class="px-3.5 py-1.5 bg-bh-yellow hover:bg-bh-orange text-slate-950 font-bold text-xs rounded-xl transition">
-            Demander un Modèle 3D sur Mesure
-          </button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-          
-          <div class="bg-bh-bg border border-bh-border rounded-xl overflow-hidden hover:border-bh-yellow transition group">
-            <div class="h-44 bg-gradient-to-tr from-slate-900 to-slate-800 relative flex items-center justify-center p-4">
-              <i class="fa-solid fa-cube text-5xl text-bh-yellow/30 group-hover:scale-110 transition duration-300"></i>
-              <span class="absolute top-3 left-3 bg-bh-yellow/20 text-bh-yellow border border-bh-yellow/40 text-[10px] font-bold px-2 py-0.5 rounded">R+1 Contemporain</span>
-            </div>
-            <div class="p-4 space-y-2">
-              <h4 class="font-bold text-sm text-white">Villa Contemporaine 200 m²</h4>
-              <p class="text-xs text-slate-400">Design épuré avec baies vitrées thermiques, double hauteur sous plafond au séjour et terrasse accessible.</p>
-              <div class="pt-2 border-t border-bh-border flex items-center justify-between text-xs">
-                <span class="text-slate-300">Surface: 240 m²</span>
-                <button onclick="alert('Plans d\'étage disponibles sur BatiHub DZ !')" class="text-bh-yellow hover:underline font-bold">Voir Plans</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-bh-bg border border-bh-border rounded-xl overflow-hidden hover:border-bh-yellow transition group">
-            <div class="h-44 bg-gradient-to-tr from-slate-900 to-slate-800 relative flex items-center justify-center p-4">
-              <i class="fa-solid fa-building-columns text-5xl text-bh-orange/30 group-hover:scale-110 transition duration-300"></i>
-              <span class="absolute top-3 left-3 bg-bh-orange/20 text-bh-orange border border-bh-orange/40 text-[10px] font-bold px-2 py-0.5 rounded">Néo-Mauresque</span>
-            </div>
-            <div class="p-4 space-y-2">
-              <h4 class="font-bold text-sm text-white">Villa Mauresque Moderne 280 m²</h4>
-              <p class="text-xs text-slate-400">Alliant l'architecture traditionnelle algérienne (moucharabieh, arcatures) au confort moderne et isolation performante.</p>
-              <div class="pt-2 border-t border-bh-border flex items-center justify-between text-xs">
-                <span class="text-slate-300">Surface: 320 m²</span>
-                <button onclick="alert('Plans d\'étage disponibles sur BatiHub DZ !')" class="text-bh-yellow hover:underline font-bold">Voir Plans</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-bh-bg border border-bh-border rounded-xl overflow-hidden hover:border-bh-yellow transition group">
-            <div class="h-44 bg-gradient-to-tr from-slate-900 to-slate-800 relative flex items-center justify-center p-4">
-              <i class="fa-solid fa-city text-5xl text-emerald-400/30 group-hover:scale-110 transition duration-300"></i>
-              <span class="absolute top-3 left-3 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-bold px-2 py-0.5 rounded">Immeuble Urbain</span>
-            </div>
-            <div class="p-4 space-y-2">
-              <h4 class="font-bold text-sm text-white">Immeuble R+4 Urbain 600 m²</h4>
-              <p class="text-xs text-slate-400">Rez-de-chaussée commercial, 8 appartements F3/F4 et sous-sol avec places de stationnement sécurisées.</p>
-              <div class="pt-2 border-t border-bh-border flex items-center justify-between text-xs">
-                <span class="text-slate-300">Surface: 600 m²</span>
-                <button onclick="alert('Plans d\'étage disponibles sur BatiHub DZ !')" class="text-bh-yellow hover:underline font-bold">Voir Plans</button>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- ========================================================================= -->
-    <!-- TAB 7: DEVIS ESTIMATIF OFFICIEL (IMPRESSION A4) -->
+    <!-- TAB 3: DEVIS ESTIMATIF OFFICIEL (IMPRESSION A4) -->
     <!-- ========================================================================= -->
     <div id="tab-report" class="tab-content hidden">
       
@@ -1472,11 +1129,11 @@
             <div class="text-center flex-1">
               <h1 class="text-lg font-black text-slate-950 uppercase tracking-tight">BatiHub DZ • Plateforme BTP Algérie</h1>
               <p class="text-xs font-bold text-amber-600 uppercase tracking-wider">BUILD • CONNECT • CREATE</p>
-              <p class="text-[11px] text-slate-600 font-arabic font-bold">كل خدمات البناء في مكان واحد</p>
+              <p class="text-[11px] text-slate-600 font-bold" data-i18n="app_slogan">كل خدمات البناء في مكان واحد</p>
             </div>
 
             <div class="text-right text-xs">
-              <span class="block text-slate-500 text-[10px]">Développé par:</span>
+              <span class="block text-slate-500 text-[10px]" data-i18n="dev_by">Conçu & développé par:</span>
               <span class="font-bold text-slate-900 text-xs">Mouhaned Guellif</span>
               <span class="block text-[10px] text-slate-500 mt-1">Plateforme BatiHub DZ</span>
             </div>
@@ -1484,8 +1141,8 @@
 
           <div class="flex items-center justify-between pt-3 border-t border-slate-200 text-xs">
             <div>
-              <span class="text-slate-500">Document:</span>
-              <span class="font-bold text-slate-900 ml-1">Devis Quantitatif & Estimatif Préliminaire</span>
+              <span class="text-slate-500" data-i18n="doc_type_lbl">Document:</span>
+              <span class="font-bold text-slate-900 ml-1" data-i18n="doc_type_val">Devis Quantitatif & Estimatif Préliminaire</span>
             </div>
             <div>
               <span class="text-slate-500">Réf:</span>
@@ -1501,37 +1158,37 @@
         <!-- Project Metadata Table -->
         <div class="grid grid-cols-2 gap-4 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
           <div>
-            <h4 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider mb-2 border-b border-slate-200 pb-1">Données Techniques du Projet</h4>
+            <h4 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider mb-2 border-b border-slate-200 pb-1" data-i18n="rep_tech_title">Données Techniques du Projet</h4>
             <div class="space-y-1">
-              <div class="flex justify-between"><span class="text-slate-600">Surface Totale Terrain:</span> <span class="font-bold text-slate-900 font-mono" id="repPlotArea">160 m²</span></div>
-              <div class="flex justify-between"><span class="text-slate-600">Emprise au Sol (RDC):</span> <span class="font-bold text-slate-900 font-mono" id="repFootprint">120 m²</span></div>
-              <div class="flex justify-between"><span class="text-slate-600">Cour & Espaces Libres:</span> <span class="font-bold text-slate-900 font-mono" id="repYard">40 m²</span></div>
-              <div class="flex justify-between"><span class="text-slate-600">Surface Totale Bâtie (Plancher):</span> <span class="font-bold text-slate-900 font-mono" id="repTotalArea">120 m²</span></div>
-              <div class="flex justify-between"><span class="text-slate-600">Nombre d'Étages:</span> <span class="font-bold text-slate-900" id="repFloors">RDC Seul</span></div>
+              <div class="flex justify-between"><span class="text-slate-600" data-i18n="lbl_land_area">Surface Totale Terrain:</span> <span class="font-bold text-slate-900 font-mono" id="repPlotArea">160 m²</span></div>
+              <div class="flex justify-between"><span class="text-slate-600" data-i18n="lbl_footprint_area">Emprise au Sol (RDC):</span> <span class="font-bold text-slate-900 font-mono" id="repFootprint">120 m²</span></div>
+              <div class="flex justify-between"><span class="text-slate-600" data-i18n="lbl_yard_area">Cour & Espaces Libres:</span> <span class="font-bold text-slate-900 font-mono" id="repYard">40 m²</span></div>
+              <div class="flex justify-between"><span class="text-slate-600" data-i18n="hero_built_area">Surface Totale Bâtie:</span> <span class="font-bold text-slate-900 font-mono" id="repTotalArea">120 m²</span></div>
+              <div class="flex justify-between"><span class="text-slate-600" data-i18n="lbl_floors_count">Nombre d'Étages:</span> <span class="font-bold text-slate-900" id="repFloors">RDC Seul</span></div>
             </div>
           </div>
 
           <div>
-            <h4 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider mb-2 border-b border-slate-200 pb-1">Paramètres & Finitions</h4>
+            <h4 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider mb-2 border-b border-slate-200 pb-1" data-i18n="rep_finish_title">Paramètres & Finitions</h4>
             <div class="space-y-1">
-              <div class="flex justify-between"><span class="text-slate-600">Niveau de Finition:</span> <span class="font-bold text-amber-700" id="repFinishTier">Standard Résidentiel</span></div>
-              <div class="flex justify-between"><span class="text-slate-600">Type de Fondations:</span> <span class="font-bold text-slate-900" id="repFoundation">Semelles Isolées & Filantes</span></div>
-              <div class="flex justify-between"><span class="text-slate-600">Devise Appliquée:</span> <span class="font-bold text-slate-900" id="repCurrency">Dinar Algérien (DZD)</span></div>
-              <div class="flex justify-between"><span class="text-slate-600">Marge Imprévus:</span> <span class="font-bold text-slate-900 font-mono" id="repContingency">10% Inclus</span></div>
-              <div class="flex justify-between"><span class="text-slate-600">Durée Estimée Travaux:</span> <span class="font-bold text-slate-900" id="repDuration">6 - 8 Mois</span></div>
+              <div class="flex justify-between"><span class="text-slate-600" data-i18n="sec2_title">Niveau de Finition:</span> <span class="font-bold text-amber-700" id="repFinishTier">Standard Résidentiel</span></div>
+              <div class="flex justify-between"><span class="text-slate-600" data-i18n="lbl_foundation_type">Type de Fondations:</span> <span class="font-bold text-slate-900" id="repFoundation">Semelles Isolées & Filantes</span></div>
+              <div class="flex justify-between"><span class="text-slate-600">Devise:</span> <span class="font-bold text-slate-900" id="repCurrency">Dinar Algérien (DZD)</span></div>
+              <div class="flex justify-between"><span class="text-slate-600" data-i18n="lbl_contingency">Marge Imprévus:</span> <span class="font-bold text-slate-900 font-mono" id="repContingency">10%</span></div>
+              <div class="flex justify-between"><span class="text-slate-600" data-i18n="rep_duration_lbl">Durée Estimée Travaux:</span> <span class="font-bold text-slate-900" id="repDuration">6 - 8 Mois</span></div>
             </div>
           </div>
         </div>
 
         <!-- Phase Schedule Table -->
-        <h4 class="font-bold text-slate-900 uppercase text-xs tracking-wider mb-2">Récapitulatif Financier par Phase</h4>
+        <h4 class="font-bold text-slate-900 uppercase text-xs tracking-wider mb-2" data-i18n="rep_phases_title">Récapitulatif Financier par Phase</h4>
         <table class="w-full text-left text-xs mb-6 border border-slate-300">
           <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-300">
             <tr>
               <th class="py-2 px-3">N°</th>
-              <th class="py-2 px-3">Description de la Phase</th>
+              <th class="py-2 px-3" data-i18n="th_description">Description de la Phase</th>
               <th class="py-2 px-3 text-right">Poids (%)</th>
-              <th class="py-2 px-3 text-right">Montant Partiel</th>
+              <th class="py-2 px-3 text-right" data-i18n="th_total">Montant Partiel</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-200" id="repPhaseTableBody">
@@ -1539,37 +1196,37 @@
           </tbody>
           <tfoot class="bg-slate-100 font-bold border-t-2 border-slate-800">
             <tr>
-              <td colspan="3" class="py-2.5 px-3 text-right text-sm">TOTAL GÉNÉRAL ESTIMÉ:</td>
+              <td colspan="3" class="py-2.5 px-3 text-right text-sm" data-i18n="boq_grand_total_lbl">TOTAL GÉNÉRAL ESTIMÉ:</td>
               <td class="py-2.5 px-3 text-right text-sm font-black text-slate-950 font-mono" id="repGrandTotal">0 DZD</td>
             </tr>
           </tfoot>
         </table>
 
         <!-- Quantities of Key Materials -->
-        <h4 class="font-bold text-slate-900 uppercase text-xs tracking-wider mb-2">Bordereau Prévisionnel des Matériaux</h4>
+        <h4 class="font-bold text-slate-900 uppercase text-xs tracking-wider mb-2" data-i18n="rep_materials_title">Bordereau Prévisionnel des Matériaux</h4>
         <div class="grid grid-cols-3 gap-3 mb-8 text-xs">
           <div class="border border-slate-200 rounded p-2 bg-slate-50">
-            <span class="text-slate-500 block text-[10px]">Ciment Portland CPJ 42.5:</span>
+            <span class="text-slate-500 block text-[10px]" data-i18n="card_cement_title">Ciment Portland CPJ 42.5:</span>
             <span class="font-bold text-slate-900 font-mono" id="repCementDetail">0 Sacs (0 T)</span>
           </div>
           <div class="border border-slate-200 rounded p-2 bg-slate-50">
-            <span class="text-slate-500 block text-[10px]">Acier à Béton FeE500:</span>
+            <span class="text-slate-500 block text-[10px]" data-i18n="card_steel_title">Acier à Béton FeE500:</span>
             <span class="font-bold text-slate-900 font-mono" id="repSteelDetail">0 Quintaux (0 T)</span>
           </div>
           <div class="border border-slate-200 rounded p-2 bg-slate-50">
-            <span class="text-slate-500 block text-[10px]">Briques Terre Cuite (12 & 8 Trous):</span>
+            <span class="text-slate-500 block text-[10px]" data-i18n="card_bricks_title">Briques Terre Cuite (12 & 8 Trous):</span>
             <span class="font-bold text-slate-900 font-mono" id="repBricksDetail">0 Pièces</span>
           </div>
           <div class="border border-slate-200 rounded p-2 bg-slate-50">
-            <span class="text-slate-500 block text-[10px]">Sable de Rivière Lavé:</span>
+            <span class="text-slate-500 block text-[10px]" data-i18n="card_sand_title">Sable de Rivière Lavé:</span>
             <span class="font-bold text-slate-900 font-mono" id="repSandDetail">0 m³</span>
           </div>
           <div class="border border-slate-200 rounded p-2 bg-slate-50">
-            <span class="text-slate-500 block text-[10px]">Gravier Concassé (8/15 & 15/25):</span>
+            <span class="text-slate-500 block text-[10px]" data-i18n="card_gravel_title">Gravier Concassé (8/15 & 15/25):</span>
             <span class="font-bold text-slate-900 font-mono" id="repGravelDetail">0 m³</span>
           </div>
           <div class="border border-slate-200 rounded p-2 bg-slate-50">
-            <span class="text-slate-500 block text-[10px]">Carrelage & Céramique:</span>
+            <span class="text-slate-500 block text-[10px]">Carrelage & Faïence:</span>
             <span class="font-bold text-slate-900 font-mono" id="repTilesDetail">0 m²</span>
           </div>
         </div>
@@ -1577,7 +1234,7 @@
         <!-- Endorsement & Validation Block -->
         <div class="grid grid-cols-2 gap-8 pt-6 border-t-2 border-slate-300 text-xs text-center">
           <div>
-            <p class="text-[11px] text-slate-500 uppercase tracking-wider mb-1">Conçu & Développé par:</p>
+            <p class="text-[11px] text-slate-500 uppercase tracking-wider mb-1" data-i18n="dev_by">Conçu & Développé par:</p>
             <p class="font-bold text-slate-900 text-sm">Mouhaned Guellif</p>
             <p class="text-[10px] text-slate-600">BatiHub DZ • Plateforme Intégrée BTP</p>
             <div class="h-16 flex items-center justify-center my-1">
@@ -1588,9 +1245,9 @@
           </div>
 
           <div>
-            <p class="text-[11px] text-slate-500 uppercase tracking-wider mb-1">Vérification & Validation Client:</p>
-            <p class="font-bold text-slate-900 text-sm">Maître d'Ouvrage / Client</p>
-            <p class="text-[10px] text-slate-600">Mention manuscrite « Lu et Approuvé »</p>
+            <p class="text-[11px] text-slate-500 uppercase tracking-wider mb-1" data-i18n="client_sign_lbl">Vérification & Validation Client:</p>
+            <p class="font-bold text-slate-900 text-sm" data-i18n="client_role_lbl">Maître d'Ouvrage / Client</p>
+            <p class="text-[10px] text-slate-600" data-i18n="client_mention_lbl">Mention manuscrite « Lu et Approuvé »</p>
             <div class="h-16 flex items-center justify-center my-1">
               <span class="inline-block border border-dashed border-slate-300 rounded px-3 py-1 text-[10px] text-slate-400">
                 [ Signature du Client ]
@@ -1606,7 +1263,7 @@
   </main>
 
   <!-- ========================================================================= -->
-  <!-- 5. FOOTER -->
+  <!-- 6. FOOTER -->
   <!-- ========================================================================= -->
   <footer class="mt-16 border-t border-bh-border bg-bh-bg/95 py-8 text-xs text-slate-400">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1619,7 +1276,7 @@
               <span>BatiHub DZ</span>
               <span class="text-bh-yellow text-xs">• BUILD • CONNECT • CREATE</span>
             </div>
-            <div class="text-slate-400 text-xs font-arabic font-bold">
+            <div class="text-slate-400 text-xs font-bold" data-i18n="app_slogan">
               كل خدمات البناء في مكان واحد
             </div>
           </div>
@@ -1627,9 +1284,9 @@
 
         <div class="text-center md:text-right space-y-1">
           <p class="text-slate-300 font-medium">
-            Conçu & Développé par <strong class="text-bh-yellow font-bold">Mouhaned Guellif</strong>
+            <span data-i18n="dev_by">Conçu & Développé par</span> <strong class="text-bh-yellow font-bold">Mouhaned Guellif</strong>
           </p>
-          <p class="text-slate-500 text-[11px]">BatiHub DZ &copy; 2026 • Plateforme Intégrée du Bâtiment & de la Construction en Algérie.</p>
+          <p class="text-slate-500 text-[11px]" data-i18n="footer_rights">BatiHub DZ &copy; 2026 • Plateforme Intégrée du Bâtiment & de la Construction en Algérie.</p>
         </div>
 
       </div>
