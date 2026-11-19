@@ -109,16 +109,16 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 2. REAL GOOGLE / GMAIL SIGN-IN AUTH GATE SCREEN -->
+  <!-- 2. REAL GMAIL SECURE AUTHENTICATION SYSTEM (LOGIN, REGISTER, OTP, RESET)  -->
   <!-- ========================================================================= -->
   <div id="authGateScreen" class="auth-hide">
-    <div class="auth-card max-w-md w-full p-8 text-center space-y-6">
+    <div class="auth-card max-w-lg w-full p-6 sm:p-8 text-center space-y-5">
       
-      <!-- Header Logo & Welcome -->
+      <!-- Header Logo & Brand -->
       <div class="flex flex-col items-center">
-        <img src="assets/batihub_logo.png" alt="BatiHub DZ" class="w-36 h-auto object-contain mb-3 drop-shadow-lg">
-        <h2 class="text-xl font-heading font-black text-white" data-i18n="auth_title">Connexion à BatiHub DZ</h2>
-        <p class="text-xs text-slate-400 mt-1" data-i18n="auth_subtitle">Accédez à votre espace professionnel et vos calculs de projets</p>
+        <img src="assets/batihub_logo.png" alt="BatiHub DZ" class="w-32 h-auto object-contain mb-2 drop-shadow-lg">
+        <h2 class="text-xl font-heading font-black text-white" id="authScreenHeaderTitle">BatiHub DZ • Espace Sécurisé</h2>
+        <p class="text-xs text-slate-400 mt-0.5" id="authScreenHeaderSubtitle">Système d'authentification professionnelle lié à votre adresse Gmail</p>
       </div>
 
       <!-- Language selector inside login modal -->
@@ -128,57 +128,337 @@
         <button onclick="setLanguage('en')" class="px-2.5 py-1 rounded-md bg-bh-card border border-bh-border text-slate-300 hover:text-white font-bold">English</button>
       </div>
 
-      <!-- Primary Action: Real Google One-Click Auth -->
-      <div class="space-y-3">
-        <button id="btnGoogleAuth" onclick="signInWithGooglePopup()" class="google-btn w-full py-3 px-4 rounded-xl flex items-center justify-center gap-3 text-xs shadow-md">
-          <svg class="w-5 h-5" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
-            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24Z"/>
-            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15Z"/>
-            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"/>
-          </svg>
-          <span data-i18n="auth_google_btn">Continuer avec Google (Gmail)</span>
+      <!-- Auth Mode Tabs: Login vs Register -->
+      <div id="authModeTabsContainer" class="grid grid-cols-2 p-1 bg-bh-bg border border-bh-border rounded-xl text-xs font-bold">
+        <button id="btnTabLogin" onclick="switchAuthView('login')" class="py-2 rounded-lg transition active-auth-tab">
+          <i class="fa-solid fa-right-to-bracket mr-1"></i> <span data-i18n="auth_tab_login">تسجيل الدخول</span>
+        </button>
+        <button id="btnTabRegister" onclick="switchAuthView('register')" class="py-2 rounded-lg transition text-slate-400 hover:text-white">
+          <i class="fa-solid fa-user-plus mr-1"></i> <span data-i18n="auth_tab_register">إنشاء حساب جديد</span>
         </button>
       </div>
 
-      <!-- Divider -->
-      <div class="relative flex items-center justify-center">
-        <div class="border-t border-bh-border w-full"></div>
-        <span class="bg-bh-card px-3 text-[10px] text-slate-500 uppercase tracking-wider font-semibold" data-i18n="auth_or_text">ou saisissez votre Gmail</span>
+      <!-- ============================================== -->
+      <!-- VIEW 1: LOGIN (تسجيل الدخول)                   -->
+      <!-- ============================================== -->
+      <div id="viewLogin" class="space-y-4 text-left">
+        <form onsubmit="handleUserLogin(event)" class="space-y-3.5">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1" data-i18n="auth_lbl_gmail">عنوان بريد Gmail :</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                <i class="fa-solid fa-envelope"></i>
+              </span>
+              <input type="email" id="loginEmail" required placeholder="votre.nom@gmail.com" class="w-full bg-bh-bg border border-bh-border rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono">
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-[11px] font-semibold text-slate-300" data-i18n="auth_lbl_password">كلمة المرور :</label>
+              <button type="button" onclick="switchAuthView('forgot')" class="text-[11px] text-bh-yellow hover:underline" data-i18n="auth_link_forgot">نسيت كلمة المرور؟</button>
+            </div>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                <i class="fa-solid fa-lock"></i>
+              </span>
+              <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full bg-bh-bg border border-bh-border rounded-xl pl-9 pr-10 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono">
+              <button type="button" onclick="togglePasswordVisibility('loginPassword', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            <span data-i18n="auth_btn_signin">تسجيل الدخول</span>
+          </button>
+        </form>
+
+        <div class="text-center pt-2">
+          <span class="text-xs text-slate-400" data-i18n="auth_prompt_no_account">ليس لديك حساب؟</span>
+          <button onclick="switchAuthView('register')" class="text-xs font-bold text-bh-yellow hover:underline ml-1" data-i18n="auth_link_create_one">إنشاء حساب جديد الآن</button>
+        </div>
       </div>
 
-      <!-- Direct Gmail Address Input -->
-      <form id="gmailLoginForm" onsubmit="handleDirectGmailLogin(event)" class="space-y-3 text-left">
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-300 mb-1" data-i18n="auth_email_lbl">Adresse Gmail :</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-              <i class="fa-solid fa-envelope"></i>
-            </span>
-            <input type="email" id="inputGmailAddress" required placeholder="votre.nom@gmail.com" class="w-full bg-bh-bg border border-bh-border rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono">
+      <!-- ============================================== -->
+      <!-- VIEW 2: REGISTER (إنشاء حساب جديد)             -->
+      <!-- ============================================== -->
+      <div id="viewRegister" class="hidden space-y-4 text-left">
+        <form onsubmit="handleUserRegister(event)" class="space-y-3">
+          
+          <!-- First Name & Last Name in 2 columns -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-300 mb-1" data-i18n="auth_lbl_first_name">الاسم :</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                  <i class="fa-solid fa-user"></i>
+                </span>
+                <input type="text" id="regFirstName" required placeholder="Ex: Mohamed" class="w-full bg-bh-bg border border-bh-border rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-300 mb-1" data-i18n="auth_lbl_last_name">اللقب :</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                  <i class="fa-solid fa-id-card"></i>
+                </span>
+                <input type="text" id="regLastName" required placeholder="Ex: Guellif" class="w-full bg-bh-bg border border-bh-border rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow">
+              </div>
+            </div>
           </div>
+
+          <!-- Date of Birth & Email -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-300 mb-1" data-i18n="auth_lbl_dob">تاريخ الميلاد :</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                  <i class="fa-solid fa-calendar-days"></i>
+                </span>
+                <input type="date" id="regDob" required class="w-full bg-bh-bg border border-bh-border rounded-xl pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-bh-yellow">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-300 mb-1" data-i18n="auth_lbl_gmail">بريد Gmail الخاص بك :</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                  <i class="fa-solid fa-envelope"></i>
+                </span>
+                <input type="email" id="regEmail" required placeholder="nom@gmail.com" class="w-full bg-bh-bg border border-bh-border rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono">
+              </div>
+            </div>
+          </div>
+
+          <!-- Password & Confirm Password -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-300 mb-1" data-i18n="auth_lbl_password">كلمة المرور :</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                  <i class="fa-solid fa-lock"></i>
+                </span>
+                <input type="password" id="regPassword" required minlength="6" placeholder="6 أحرف على الأقل" class="w-full bg-bh-bg border border-bh-border rounded-xl pl-9 pr-9 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono">
+                <button type="button" onclick="togglePasswordVisibility('regPassword', this)" class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-500 hover:text-slate-300">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-300 mb-1" data-i18n="auth_lbl_confirm_password">تأكيد كلمة المرور :</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                  <i class="fa-solid fa-shield-check"></i>
+                </span>
+                <input type="password" id="regConfirmPassword" required minlength="6" placeholder="أعد إدخال كلمة المرور" class="w-full bg-bh-bg border border-bh-border rounded-xl pl-9 pr-9 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono">
+                <button type="button" onclick="togglePasswordVisibility('regConfirmPassword', this)" class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-500 hover:text-slate-300">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-2.5 rounded-xl bg-bh-yellow/10 border border-bh-yellow/20 text-[11px] text-amber-200 flex items-start gap-2">
+            <i class="fa-solid fa-circle-info text-bh-yellow mt-0.5"></i>
+            <span data-i18n="auth_note_otp">سيتم إرسال رمز تحقق مكوّن من 6 أرقام إلى بريدك الإلكتروني لتأكيد ملكية الحساب وحمايته.</span>
+          </div>
+
+          <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span data-i18n="auth_btn_signup">تأكيد وإنشاء الحساب (إرسال رمز التحقق)</span>
+          </button>
+        </form>
+
+        <div class="text-center pt-1">
+          <span class="text-xs text-slate-400" data-i18n="auth_prompt_has_account">لديك حساب بالفعل؟</span>
+          <button onclick="switchAuthView('login')" class="text-xs font-bold text-bh-yellow hover:underline ml-1" data-i18n="auth_link_signin_now">تسجيل الدخول الآن</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- VIEW 3: OTP VERIFICATION (تأكيد رمز التحقق)   -->
+      <!-- ============================================== -->
+      <div id="viewOtp" class="hidden space-y-4 text-center">
+        <div class="w-14 h-14 mx-auto rounded-full bg-bh-yellow/15 border border-bh-yellow/30 flex items-center justify-center text-bh-yellow text-2xl animate-pulse">
+          <i class="fa-solid fa-envelope-open-text"></i>
         </div>
 
         <div>
-          <label class="block text-[11px] font-semibold text-slate-300 mb-1" data-i18n="auth_name_lbl">Votre Nom / Entreprise :</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-              <i class="fa-solid fa-user"></i>
-            </span>
-            <input type="text" id="inputUserName" required placeholder="Ex: Mohamed BTP" class="w-full bg-bh-bg border border-bh-border rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow">
-          </div>
+          <h3 class="text-base font-bold text-white" data-i18n="auth_title_otp">تأكيد بريدك الإلكتروني</h3>
+          <p class="text-xs text-slate-400 mt-1">
+            <span data-i18n="auth_sub_otp">أدخل الرمز المكوّن من 6 أرقام المرسل إلى:</span>
+            <strong id="otpTargetEmail" class="text-bh-yellow block font-mono mt-0.5">user@gmail.com</strong>
+          </p>
         </div>
 
-        <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2">
-          <i class="fa-solid fa-right-to-bracket"></i>
-          <span data-i18n="auth_submit_btn">Se Connecter & Accéder</span>
+        <!-- Dev / Simulation OTP helper banner -->
+        <div id="otpSimulationBanner" class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-300 text-left">
+          <div class="flex items-center justify-between font-bold mb-1">
+            <span class="flex items-center gap-1.5"><i class="fa-solid fa-bell"></i> <span data-i18n="auth_otp_preview_title">رمز التحقق المولد :</span></span>
+            <span id="simulatedOtpDisplay" class="font-mono text-base bg-bh-bg px-2.5 py-0.5 rounded border border-bh-yellow text-bh-yellow font-black tracking-widest cursor-pointer" onclick="copySimulatedOtp()" title="انقر لنسخ الرمز">------</span>
+          </div>
+          <p class="text-[10px] text-slate-400" data-i18n="auth_otp_preview_desc">
+            انقر على الرمز أعلاه لنسخه ولصقه مباشرة. (إذا قمت بربط كلمة مرور التطبيقات في إعدادات Gmail فسيصلك الرمز في صندوق بريدك الحقيقي).
+          </p>
+        </div>
+
+        <form onsubmit="handleVerifyOtp(event)" class="space-y-4">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1.5" data-i18n="auth_lbl_enter_otp">أدخل الرمز المكون من 6 أرقام :</label>
+            <input type="text" id="inputOtpCode" maxlength="6" pattern="[0-9]{6}" required placeholder="000000" class="w-48 mx-auto text-center bg-bh-bg border-2 border-bh-yellow/60 rounded-xl py-2.5 text-2xl font-mono font-black text-white tracking-[0.5em] focus:outline-none focus:border-bh-yellow shadow-inner">
+          </div>
+
+          <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-circle-check"></i>
+            <span data-i18n="auth_btn_verify_otp">تأكيد الرمز والدخول إلى BatiHub DZ</span>
+          </button>
+        </form>
+
+        <div class="flex items-center justify-between text-xs pt-1 text-slate-400">
+          <button type="button" id="btnResendOtp" onclick="handleResendOtp()" class="hover:text-bh-yellow text-[11px] flex items-center gap-1">
+            <i class="fa-solid fa-rotate-right"></i> <span data-i18n="auth_btn_resend_otp">إعادة إرسال الرمز</span> <span id="resendTimerText" class="font-mono text-bh-yellow ml-1"></span>
+          </button>
+          <button type="button" onclick="switchAuthView('register')" class="hover:text-white text-[11px]" data-i18n="auth_link_change_info">تعديل البيانات</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- VIEW 4: FORGOT PASSWORD (استرجاع كلمة المرور)  -->
+      <!-- ============================================== -->
+      <div id="viewForgotPassword" class="hidden space-y-4 text-left">
+        <div>
+          <h3 class="text-base font-bold text-white text-center" data-i18n="auth_title_forgot">استرجاع كلمة المرور</h3>
+          <p class="text-xs text-slate-400 text-center mt-1" data-i18n="auth_sub_forgot">أدخل بريدك الإلكتروني Gmail المسجل لإرسال رمز إعادة التعيين</p>
+        </div>
+
+        <!-- Step 1: Send reset code -->
+        <div id="forgotStepRequest" class="space-y-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1" data-i18n="auth_lbl_gmail">بريد Gmail المسجل :</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                <i class="fa-solid fa-envelope"></i>
+              </span>
+              <input type="email" id="forgotEmail" required placeholder="nom@gmail.com" class="w-full bg-bh-bg border border-bh-border rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono">
+            </div>
+          </div>
+
+          <button type="button" onclick="handleSendPasswordResetCode()" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span data-i18n="auth_btn_send_reset_code">إرسال رمز إعادة التعيين</span>
+          </button>
+        </div>
+
+        <!-- Step 2: Enter code & new password -->
+        <div id="forgotStepReset" class="hidden space-y-3">
+          <div id="forgotSimulationBanner" class="p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-300">
+            <span data-i18n="auth_otp_preview_title">رمز إعادة التعيين :</span>
+            <strong id="simulatedForgotOtpDisplay" class="font-mono text-bh-yellow ml-1 font-bold cursor-pointer" onclick="copySimulatedForgotOtp()">------</strong>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1" data-i18n="auth_lbl_reset_code">رمز التحقق (6 أرقام) :</label>
+            <input type="text" id="forgotOtpCode" maxlength="6" required placeholder="000000" class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-xs text-white text-center font-mono tracking-widest font-bold focus:outline-none focus:border-bh-yellow">
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1" data-i18n="auth_lbl_new_password">كلمة المرور الجديدة :</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                <i class="fa-solid fa-key"></i>
+              </span>
+              <input type="password" id="forgotNewPassword" required minlength="6" placeholder="كلمة المرور الجديدة" class="w-full bg-bh-bg border border-bh-border rounded-xl pl-9 pr-9 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono">
+              <button type="button" onclick="togglePasswordVisibility('forgotNewPassword', this)" class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-500 hover:text-slate-300">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1" data-i18n="auth_lbl_confirm_new_password">تأكيد كلمة المرور الجديدة :</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                <i class="fa-solid fa-shield-check"></i>
+              </span>
+              <input type="password" id="forgotConfirmNewPassword" required minlength="6" placeholder="أعد إدخال كلمة المرور" class="w-full bg-bh-bg border border-bh-border rounded-xl pl-9 pr-9 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono">
+              <button type="button" onclick="togglePasswordVisibility('forgotConfirmNewPassword', this)" class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-500 hover:text-slate-300">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="button" onclick="handleConfirmPasswordReset()" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-check"></i>
+            <span data-i18n="auth_btn_save_new_password">حفظ كلمة المرور الجديدة والدخول</span>
+          </button>
+        </div>
+
+        <div class="text-center pt-2">
+          <button type="button" onclick="switchAuthView('login')" class="text-xs text-slate-400 hover:text-bh-yellow flex items-center justify-center gap-1 mx-auto">
+            <i class="fa-solid fa-arrow-left"></i> <span data-i18n="auth_btn_back_to_login">العودة إلى تسجيل الدخول</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer & Gmail SMTP Setup Trigger -->
+      <div class="pt-2 border-t border-bh-border/70 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
+        <span>BatiHub DZ • Données cryptées & sécurisées</span>
+        <button onclick="openMailSettingsModal()" class="text-bh-yellow hover:underline flex items-center gap-1 font-semibold">
+          <i class="fa-solid fa-gear"></i> <span data-i18n="auth_btn_smtp_settings">إعدادات ربط Gmail الحقيقي</span>
         </button>
-      </form>
+      </div>
 
-      <p class="text-[10px] text-slate-500" data-i18n="auth_footer_note">
-        Connexion sécurisée BatiHub DZ • Vos données de calculs sont enregistrées localement sur votre appareil.
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: GMAIL REAL SMTP CONFIGURATION (ربط بجيمايل لإرسال الرسائل الحقيقية)  -->
+  <!-- ========================================================================= -->
+  <div id="modalMailSettings" class="fixed inset-0 z-[10000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-bh-card border border-bh-border rounded-2xl max-w-md w-full p-6 text-left space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-bh-border pb-3">
+        <h3 class="font-heading font-bold text-white text-base flex items-center gap-2">
+          <i class="fa-brands fa-google text-bh-yellow"></i>
+          <span data-i18n="smtp_modal_title">ربط بريد Gmail لإرسال الرسائل الحقيقية</span>
+        </h3>
+        <button onclick="closeMailSettingsModal()" class="text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-300 leading-relaxed" data-i18n="smtp_modal_desc">
+        لإرسال رموز التحقق الحقيقية تلقائياً من حساب Gmail الخاص بك إلى الزبائن، يرجى إدخال عنوان Gmail وكلمة مرور التطبيقات (App Password) المكونة من 16 حرفاً من حساب Google.
       </p>
 
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1" data-i18n="smtp_lbl_email">بريد Gmail للمرسل :</label>
+          <input type="email" id="smtpInputEmail" placeholder="votre.compte@gmail.com" class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-white font-mono focus:border-bh-yellow outline-none">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1" data-i18n="smtp_lbl_app_pwd">كلمة مرور التطبيق (16 حرفاً) :</label>
+          <input type="password" id="smtpInputAppPassword" placeholder="xxxx xxxx xxxx xxxx" class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-white font-mono focus:border-bh-yellow outline-none">
+          <span class="text-[10px] text-slate-400 block mt-1" data-i18n="smtp_hint_app_pwd">
+            يتم توليدها من: Google Account &gt; Security &gt; 2-Step Verification &gt; App Passwords.
+          </span>
+        </div>
+      </div>
+
+      <div id="smtpStatusMessage" class="text-xs p-2.5 rounded-lg hidden"></div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-bh-border">
+        <button type="button" onclick="testSmtpConnection()" class="px-3.5 py-2 rounded-xl bg-bh-bg border border-bh-border text-slate-300 hover:text-white font-bold text-xs transition">
+          <i class="fa-solid fa-plug mr-1"></i> <span data-i18n="smtp_btn_test">اختبار الاتصال</span>
+        </button>
+        <button type="button" onclick="saveSmtpSettings()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold text-xs shadow-lg transition">
+          <i class="fa-solid fa-floppy-disk mr-1"></i> <span data-i18n="smtp_btn_save">حفظ الإعدادات</span>
+        </button>
+      </div>
     </div>
   </div>
 

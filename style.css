@@ -157,24 +157,20 @@ body {
 }
 
 .auth-card {
-  background: rgba(15, 21, 32, 0.92);
+  background: rgba(15, 21, 32, 0.95);
   border: 1px solid #223048;
   border-radius: 1.5rem;
   box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.8), 0 0 35px -5px rgba(255, 160, 0, 0.15);
   backdrop-filter: blur(16px);
+  max-height: 92vh;
+  overflow-y: auto;
 }
 
-.google-btn {
-  background: #ffffff;
-  color: #1f2937;
-  font-weight: 700;
-  border: 1px solid #e5e7eb;
-  transition: all 0.2s ease;
-}
-.google-btn:hover {
-  background: #f8fafc;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  transform: translateY(-1px);
+.active-auth-tab {
+  background: linear-gradient(135deg, #ffa000, #ff6d00) !important;
+  color: #06080c !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 10px rgba(255, 109, 0, 0.35);
 }
 
 /* =========================================================================
