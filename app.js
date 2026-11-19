@@ -735,6 +735,18 @@ let pendingRegistration = null;
 let pendingPasswordReset = null;
 let resendIntervalTimer = null;
 
+function getPendingRegistration() {
+  if (pendingRegistration) return pendingRegistration;
+  try {
+    const raw = localStorage.getItem('batihub_pending_reg');
+    if (raw) {
+      pendingRegistration = JSON.parse(raw);
+      return pendingRegistration;
+    }
+  } catch (e) {}
+  return null;
+}
+
 // Helper: Secure password hashing with SHA-256 and salt
 async function hashPassword(password, salt) {
   const enc = new TextEncoder();
@@ -790,23 +802,100 @@ function decryptVaultData(enc) {
   }
 }
 
-function getStoredAccounts() {
+let GLOBAL_ACCOUNTS_CACHE = null;
+
+async function initAccountsDatabase() {
+  let diskAccounts = {};
+  if (window.electronDB && window.electronDB.getAccounts) {
+    try {
+      diskAccounts = (await window.electronDB.getAccounts()) || {};
+    } catch (e) {
+      console.warn('Error reading accounts from disk:', e);
+    }
+  }
+
+  let localAccounts = {};
   try {
     const raw = localStorage.getItem('batihub_registered_accounts');
-    if (!raw) return {};
-    return decryptVaultData(raw);
-  } catch (e) {
-    return {};
+    if (raw) localAccounts = decryptVaultData(raw) || {};
+  } catch (e) {}
+
+  const merged = Object.assign({}, localAccounts, diskAccounts);
+  GLOBAL_ACCOUNTS_CACHE = merged;
+
+  try {
+    const raw = JSON.stringify(merged);
+    const encrypted = encryptVaultData(raw);
+    localStorage.setItem('batihub_registered_accounts', encrypted);
+  } catch (e) {}
+
+  if (window.electronDB && window.electronDB.saveAccounts) {
+    try {
+      window.electronDB.saveAccounts(merged);
+    } catch (e) {}
   }
+
+  // Sync saved device profiles from disk
+  if (window.electronDB && window.electronDB.getSavedProfiles) {
+    try {
+      const diskProfiles = (await window.electronDB.getSavedProfiles()) || [];
+      const localProfiles = getSavedProfiles();
+      const combined = [...localProfiles];
+      diskProfiles.forEach(dp => {
+        if (!combined.some(lp => lp.email.toLowerCase() === dp.email.toLowerCase())) {
+          combined.push(dp);
+        }
+      });
+      localStorage.setItem('batihub_saved_profiles', JSON.stringify(combined));
+    } catch (e) {}
+  }
+
+  // Sync active session if local is empty
+  if (!localStorage.getItem('batihub_user') && window.electronDB && window.electronDB.getActiveSession) {
+    try {
+      const diskSession = await window.electronDB.getActiveSession();
+      if (diskSession && diskSession.email) {
+        localStorage.setItem('batihub_user', JSON.stringify(diskSession));
+      }
+    } catch (e) {}
+  }
+
+  return merged;
+}
+
+function getStoredAccounts() {
+  if (GLOBAL_ACCOUNTS_CACHE && Object.keys(GLOBAL_ACCOUNTS_CACHE).length > 0) {
+    return GLOBAL_ACCOUNTS_CACHE;
+  }
+  try {
+    const raw = localStorage.getItem('batihub_registered_accounts');
+    if (raw) {
+      const dec = decryptVaultData(raw);
+      if (dec && Object.keys(dec).length > 0) {
+        GLOBAL_ACCOUNTS_CACHE = dec;
+        return dec;
+      }
+    }
+  } catch (e) {}
+  return GLOBAL_ACCOUNTS_CACHE || {};
 }
 
 function saveStoredAccounts(accounts) {
+  GLOBAL_ACCOUNTS_CACHE = accounts;
   try {
     const raw = JSON.stringify(accounts);
     const encrypted = encryptVaultData(raw);
     localStorage.setItem('batihub_registered_accounts', encrypted);
   } catch (e) {
     console.error('Storage error:', e);
+  }
+
+  if (window.electronDB && window.electronDB.saveAccounts) {
+    try {
+      window.electronDB.saveAccounts(accounts);
+    } catch (e) {
+      console.error('Disk save error:', e);
+    }
   }
 }
 
@@ -1058,6 +1147,9 @@ async function handleUserRegister(e) {
     otpCode,
     expiresAt: Date.now() + 15 * 60 * 1000
   };
+  try {
+    localStorage.setItem('batihub_pending_reg', JSON.stringify(pendingRegistration));
+  } catch (e) {}
 
   // Update OTP View (Email target, NO code displayed)
   const targetEmailEl = document.getElementById('otpTargetEmail');
@@ -1107,6 +1199,9 @@ async function handleResendOtp() {
   const newCode = generate6DigitOtp();
   pendingRegistration.otpCode = newCode;
   pendingRegistration.expiresAt = Date.now() + 15 * 60 * 1000;
+  try {
+    localStorage.setItem('batihub_pending_reg', JSON.stringify(pendingRegistration));
+  } catch (e) {}
 
   const mailResult = await sendVerificationEmail(pendingRegistration.email, newCode, 'register');
 
@@ -1128,114 +1223,130 @@ async function handleResendOtp() {
 }
 
 // 2. VERIFY OTP FLOW
+let isVerifyingOtp = false;
 async function handleVerifyOtp(e) {
   if (e && e.preventDefault) e.preventDefault();
+  if (isVerifyingOtp) return;
+  isVerifyingOtp = true;
+
   const rawInput = document.getElementById('inputOtpCode')?.value || '';
   const inputCode = rawInput.replace(/\D/g, '').trim();
   const isAr = state.lang === 'ar';
-
-  const reg = getPendingRegistration();
-  if (!reg) {
-    alert(isAr ? 'انتهت صلاحية الجلسة، يرجى ملء استمارة التسجيل مرة أخرى' : 'Session expirée. Veuillez recommencer l\'inscription.');
-    switchAuthView('register');
-    return;
-  }
-
-  if (Date.now() > reg.expiresAt) {
-    alert(isAr ? 'انتهت صلاحية هذا الرمز (15 دقيقة). يرجى طلب رمز جديد بالضغط على "إعادة إرسال الرمز".' : 'Ce code a expiré. Veuillez en demander un nouveau.');
-    return;
-  }
-
-  if (!inputCode || inputCode.length !== 6) {
-    alert(isAr ? 'يرجى إدخال رمز التحقق المكون من 6 أرقام كاملاً' : 'Veuillez saisir le code complet à 6 chiffres.');
-    return;
-  }
-
-  if (inputCode !== String(reg.otpCode).trim()) {
-    alert(isAr ? 'رمز التحقق غير صحيح، يرجى التأكد من الرمز المدخل وإعادة المحاولة' : 'Code de vérification incorrect. Veuillez vérifier.');
-    return;
-  }
-
   const submitBtn = document.getElementById('btnSubmitOtp');
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> ${isAr ? 'جاري تأكيد وإنشاء الحساب...' : 'Création du compte en cours...'}`;
-  }
+  const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
 
-  // Account confirmed & verified!
-  const accounts = getStoredAccounts();
-  const initial = ((reg.firstName || 'B').charAt(0)).toUpperCase();
-  const avatarSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="32" fill="%23ffa000"/><text x="50%" y="55%" text-anchor="middle" dominant-baseline="middle" fill="%2306080c" font-family="sans-serif" font-size="28" font-weight="bold">${initial}</text></svg>`;
+  try {
+    const reg = getPendingRegistration();
+    if (!reg) {
+      alert(isAr ? 'انتهت صلاحية الجلسة، يرجى ملء استمارة التسجيل مرة أخرى' : 'Session expirée. Veuillez recommencer l\'inscription.');
+      switchAuthView('register');
+      return;
+    }
 
-  const userRecord = {
-    id: 'usr_' + Date.now(),
-    firstName: reg.firstName,
-    lastName: reg.lastName,
-    fullName: reg.fullName,
-    dob: reg.dob,
-    email: reg.email,
-    passwordHash: reg.passwordHash,
-    salt: reg.salt,
-    isVerified: true,
-    avatar: avatarSvg,
-    createdAt: new Date().toISOString()
-  };
+    if (Date.now() > reg.expiresAt) {
+      alert(isAr ? 'انتهت صلاحية هذا الرمز (15 دقيقة). يرجى طلب رمز جديد بالضغط على "إعادة إرسال الرمز".' : 'Ce code a expiré. Veuillez en demander un nouveau.');
+      return;
+    }
 
-  accounts[reg.email] = userRecord;
-  saveStoredAccounts(accounts);
+    if (!inputCode || inputCode.length !== 6) {
+      alert(isAr ? 'يرجى إدخال رمز التحقق المكون من 6 أرقام كاملاً' : 'Veuillez saisir le code complet à 6 chiffres.');
+      return;
+    }
 
-  // Set active session
-  const activeSession = {
-    name: userRecord.fullName || userRecord.email,
-    email: userRecord.email,
-    avatar: avatarSvg,
-    token: 'bth_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
-    signedAt: new Date().toISOString()
-  };
-  localStorage.setItem('batihub_user', JSON.stringify(activeSession));
-  if (window.electronDB && window.electronDB.saveActiveSession) {
-    window.electronDB.saveActiveSession(activeSession);
-  }
+    if (inputCode !== String(reg.otpCode).trim()) {
+      alert(isAr ? 'رمز التحقق غير صحيح، يرجى التأكد من الرمز المدخل وإعادة المحاولة' : 'Code de vérification incorrect. Veuillez vérifier.');
+      return;
+    }
 
-  // Save profile to device remembered list
-  saveProfileToDeviceList(userRecord.email, activeSession.name, avatarSvg);
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> ${isAr ? 'جاري تأكيد وإنشاء الحساب...' : 'Création du compte en cours...'}`;
+    }
 
-  // Clear pending registration
-  pendingRegistration = null;
-  localStorage.removeItem('batihub_pending_reg');
+    // Account confirmed & verified!
+    const accounts = getStoredAccounts();
+    const initial = ((reg.firstName || 'B').charAt(0)).toUpperCase();
+    const avatarSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="32" fill="%23ffa000"/><text x="50%" y="55%" text-anchor="middle" dominant-baseline="middle" fill="%2306080c" font-family="sans-serif" font-size="28" font-weight="bold">${initial}</text></svg>`;
 
-  // Update Header UI
-  const nameDisplay = document.getElementById('userNameDisplay');
-  const avatarImg = document.getElementById('userAvatarImg');
-  if (nameDisplay) nameDisplay.innerText = activeSession.name;
-  if (avatarImg) avatarImg.src = avatarSvg;
+    const userRecord = {
+      id: 'usr_' + Date.now(),
+      firstName: reg.firstName,
+      lastName: reg.lastName,
+      fullName: reg.fullName,
+      dob: reg.dob,
+      email: reg.email,
+      passwordHash: reg.passwordHash,
+      salt: reg.salt,
+      isVerified: true,
+      avatar: avatarSvg,
+      createdAt: new Date().toISOString()
+    };
 
-  // Show Dashboard
-  const appDashboard = document.getElementById('appDashboard');
-  if (appDashboard) appDashboard.classList.remove('hidden');
+    accounts[reg.email] = userRecord;
+    saveStoredAccounts(accounts);
 
-  // Dismiss auth gate
-  const authGate = document.getElementById('authGateScreen');
-  if (authGate) {
-    authGate.classList.add('auth-hide');
-    setTimeout(() => {
-      authGate.style.display = 'none';
-    }, 450);
-  }
+    // Set active session
+    const activeSession = {
+      name: userRecord.fullName || userRecord.email,
+      email: userRecord.email,
+      avatar: avatarSvg,
+      token: 'bth_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
+      signedAt: new Date().toISOString()
+    };
+    localStorage.setItem('batihub_user', JSON.stringify(activeSession));
+    if (window.electronDB && window.electronDB.saveActiveSession) {
+      window.electronDB.saveActiveSession(activeSession);
+    }
 
-  // Confetti celebration
-  if (typeof confetti === 'function') {
-    confetti({
-      particleCount: 100,
-      spread: 80,
-      origin: { y: 0.6 },
-      colors: ['#ffa000', '#ff6d00', '#ffc107', '#ffffff']
-    });
-  }
+    // Save profile to device remembered list
+    saveProfileToDeviceList(userRecord.email, activeSession.name, avatarSvg);
 
-  if (submitBtn) {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span data-i18n="auth_btn_verify_otp">${isAr ? 'تم تأكيد الحساب بنجاح!' : 'Compte confirmé avec succès !'}</span>`;
+    // Clear pending registration
+    pendingRegistration = null;
+    localStorage.removeItem('batihub_pending_reg');
+
+    // Update Header UI
+    const nameDisplay = document.getElementById('userNameDisplay');
+    const avatarImg = document.getElementById('userAvatarImg');
+    if (nameDisplay) nameDisplay.innerText = activeSession.name;
+    if (avatarImg) avatarImg.src = avatarSvg;
+
+    // Show Dashboard
+    const appDashboard = document.getElementById('appDashboard');
+    if (appDashboard) appDashboard.classList.remove('hidden');
+
+    // Dismiss auth gate
+    const authGate = document.getElementById('authGateScreen');
+    if (authGate) {
+      authGate.classList.add('auth-hide');
+      setTimeout(() => {
+        authGate.style.display = 'none';
+      }, 450);
+    }
+
+    // Confetti celebration
+    if (typeof confetti === 'function') {
+      confetti({
+        particleCount: 100,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ['#ffa000', '#ff6d00', '#ffc107', '#ffffff']
+      });
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span data-i18n="auth_btn_verify_otp">${isAr ? 'تم تأكيد الحساب بنجاح!' : 'Compte confirmé avec succès !'}</span>`;
+    }
+  } catch (err) {
+    console.error('Error in handleVerifyOtp:', err);
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnHtml;
+    }
+    alert(isAr ? `حدث خطأ أثناء تأكيد الرمز: ${err.message}` : `Erreur lors de la vérification : ${err.message}`);
+  } finally {
+    isVerifyingOtp = false;
   }
 }
 
@@ -2648,7 +2759,12 @@ function switchTab(tabId) {
 // =========================================================================
 // 10. EVENT BINDINGS & APP BOOTSTRAP
 // =========================================================================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    await initAccountsDatabase();
+  } catch (err) {
+    console.error('Failed to initialize accounts database:', err);
+  }
 
   // Start yellow splash screen loader
   initSplashScreen();

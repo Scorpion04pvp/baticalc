@@ -1,4 +1,6 @@
 ﻿node_modules/
 mail_config.json
-
 mail_activity.log
+batihub_accounts_db.json
+batihub_*.json
+
