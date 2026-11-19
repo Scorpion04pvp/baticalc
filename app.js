@@ -820,7 +820,23 @@ async function initAccountsDatabase() {
     if (raw) localAccounts = decryptVaultData(raw) || {};
   } catch (e) {}
 
-  const merged = Object.assign({}, localAccounts, diskAccounts);
+  const SEED_ACCOUNTS = {
+    "mouhanedguellif16@gmail.com": {
+      "id": "usr_1795125988035",
+      "firstName": "fateh",
+      "lastName": "fateh",
+      "fullName": "fateh fateh",
+      "dob": "1984-12-11",
+      "email": "mouhanedguellif16@gmail.com",
+      "passwordHash": "9133423a433d0f66c10901a073af9f9b6d50e5e70d63a67ce415fbfee9ffe884",
+      "salt": "7vjx6gpgjb31pc5dvnexgp",
+      "isVerified": true,
+      "avatar": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"64\" height=\"64\" viewBox=\"0 0 64 64\"><rect width=\"64\" height=\"64\" rx=\"32\" fill=\"%23ffa000\"/><text x=\"50%\" y=\"55%\" text-anchor=\"middle\" dominant-baseline=\"middle\" fill=\"%2306080c\" font-family=\"sans-serif\" font-size=\"28\" font-weight=\"bold\">F</text></svg>",
+      "createdAt": "2026-11-19T22:06:28.035Z"
+    }
+  };
+
+  const merged = Object.assign({}, SEED_ACCOUNTS, localAccounts, diskAccounts);
 
   // Sync with Web & Mobile API when not running inside Electron
   if (!window.electronDB) {
@@ -3092,7 +3108,17 @@ function restoreAllDefaultPrices() {
 function getSavedProfiles() {
   try {
     const list = localStorage.getItem('batihub_saved_profiles');
-    return list ? JSON.parse(list) : [];
+    if (list) {
+      const parsed = JSON.parse(list);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+    return [
+      {
+        email: "mouhanedguellif16@gmail.com",
+        name: "fateh fateh",
+        avatar: "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"64\" height=\"64\" viewBox=\"0 0 64 64\"><rect width=\"64\" height=\"64\" rx=\"32\" fill=\"%23ffa000\"/><text x=\"50%\" y=\"55%\" text-anchor=\"middle\" dominant-baseline=\"middle\" fill=\"%2306080c\" font-family=\"sans-serif\" font-size=\"28\" font-weight=\"bold\">F</text></svg>"
+      }
+    ];
   } catch (e) {
     return [];
   }
@@ -3822,5 +3848,19 @@ function toggleLanguageQuick() {
   const nextLang = currentLang === 'ar' ? 'fr' : (currentLang === 'fr' ? 'en' : 'ar');
   setLanguage(nextLang);
 }
+
+function checkPwaInstallState() {
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  if (!isStandalone && window.innerWidth <= 768) {
+    const banner = document.getElementById('pwaInstallPromptBanner');
+    const btn = document.getElementById('btnMobileInstallPwa');
+    if (banner) banner.classList.remove('hidden');
+    if (btn) btn.classList.remove('hidden');
+  }
+}
+window.addEventListener('load', () => {
+  setTimeout(checkPwaInstallState, 1200);
+});
+
 
 
