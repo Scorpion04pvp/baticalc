@@ -320,13 +320,13 @@
           </div>
         </div>
 
-        <form onsubmit="handleVerifyOtp(event)" class="space-y-4">
+        <form id="formOtpVerify" onsubmit="handleVerifyOtp(event)" class="space-y-4">
           <div>
             <label class="block text-[11px] font-semibold text-slate-300 mb-1.5" data-i18n="auth_lbl_enter_otp">أدخل الرمز المكون من 6 أرقام :</label>
-            <input type="text" id="inputOtpCode" maxlength="6" pattern="[0-9]{6}" required placeholder="000000" class="w-48 mx-auto text-center bg-bh-bg border-2 border-bh-yellow/60 rounded-xl py-2.5 text-2xl font-mono font-black text-white tracking-[0.5em] focus:outline-none focus:border-bh-yellow shadow-inner">
+            <input type="text" id="inputOtpCode" maxlength="8" autocomplete="one-time-code" inputmode="numeric" required placeholder="000000" class="w-48 mx-auto text-center bg-bh-bg border-2 border-bh-yellow/60 rounded-xl py-2.5 text-2xl font-mono font-black text-white tracking-[0.4em] focus:outline-none focus:border-bh-yellow shadow-inner">
           </div>
 
-          <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2">
+          <button type="submit" id="btnSubmitOtp" onclick="handleVerifyOtp(event)" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
             <i class="fa-solid fa-circle-check"></i>
             <span data-i18n="auth_btn_verify_otp">تأكيد الرمز والدخول إلى BatiHub DZ</span>
           </button>

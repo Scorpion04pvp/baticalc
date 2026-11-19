@@ -1128,47 +1128,60 @@ async function handleResendOtp() {
 }
 
 // 2. VERIFY OTP FLOW
-function handleVerifyOtp(e) {
+async function handleVerifyOtp(e) {
   if (e && e.preventDefault) e.preventDefault();
-  const inputCode = (document.getElementById('inputOtpCode')?.value || '').trim();
+  const rawInput = document.getElementById('inputOtpCode')?.value || '';
+  const inputCode = rawInput.replace(/\D/g, '').trim();
   const isAr = state.lang === 'ar';
 
-  if (!pendingRegistration) {
-    alert(isAr ? 'انتهت صلاحية الجلسة، يرجى التسجيل مرة أخرى' : 'Session expirée. Veuillez recommencer l\'inscription.');
+  const reg = getPendingRegistration();
+  if (!reg) {
+    alert(isAr ? 'انتهت صلاحية الجلسة، يرجى ملء استمارة التسجيل مرة أخرى' : 'Session expirée. Veuillez recommencer l\'inscription.');
     switchAuthView('register');
     return;
   }
 
-  if (Date.now() > pendingRegistration.expiresAt) {
-    alert(isAr ? 'انتهت صلاحية هذا الرمز (15 دقيقة). يرجى طلب رمز جديد.' : 'Ce code a expiré. Veuillez en demander un nouveau.');
+  if (Date.now() > reg.expiresAt) {
+    alert(isAr ? 'انتهت صلاحية هذا الرمز (15 دقيقة). يرجى طلب رمز جديد بالضغط على "إعادة إرسال الرمز".' : 'Ce code a expiré. Veuillez en demander un nouveau.');
     return;
   }
 
-  if (inputCode !== pendingRegistration.otpCode) {
+  if (!inputCode || inputCode.length !== 6) {
+    alert(isAr ? 'يرجى إدخال رمز التحقق المكون من 6 أرقام كاملاً' : 'Veuillez saisir le code complet à 6 chiffres.');
+    return;
+  }
+
+  if (inputCode !== String(reg.otpCode).trim()) {
     alert(isAr ? 'رمز التحقق غير صحيح، يرجى التأكد من الرمز المدخل وإعادة المحاولة' : 'Code de vérification incorrect. Veuillez vérifier.');
     return;
   }
 
+  const submitBtn = document.getElementById('btnSubmitOtp');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> ${isAr ? 'جاري تأكيد وإنشاء الحساب...' : 'Création du compte en cours...'}`;
+  }
+
   // Account confirmed & verified!
   const accounts = getStoredAccounts();
-  const initial = (pendingRegistration.firstName.charAt(0) || 'B').toUpperCase();
+  const initial = ((reg.firstName || 'B').charAt(0)).toUpperCase();
   const avatarSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="32" fill="%23ffa000"/><text x="50%" y="55%" text-anchor="middle" dominant-baseline="middle" fill="%2306080c" font-family="sans-serif" font-size="28" font-weight="bold">${initial}</text></svg>`;
 
   const userRecord = {
     id: 'usr_' + Date.now(),
-    firstName: pendingRegistration.firstName,
-    lastName: pendingRegistration.lastName,
-    fullName: pendingRegistration.fullName,
-    dob: pendingRegistration.dob,
-    email: pendingRegistration.email,
-    passwordHash: pendingRegistration.passwordHash,
-    salt: pendingRegistration.salt,
+    firstName: reg.firstName,
+    lastName: reg.lastName,
+    fullName: reg.fullName,
+    dob: reg.dob,
+    email: reg.email,
+    passwordHash: reg.passwordHash,
+    salt: reg.salt,
     isVerified: true,
     avatar: avatarSvg,
     createdAt: new Date().toISOString()
   };
 
-  accounts[pendingRegistration.email] = userRecord;
+  accounts[reg.email] = userRecord;
   saveStoredAccounts(accounts);
 
   // Set active session
@@ -1179,25 +1192,36 @@ function handleVerifyOtp(e) {
     token: 'bth_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
     signedAt: new Date().toISOString()
   };
-  
   localStorage.setItem('batihub_user', JSON.stringify(activeSession));
-
-  // Save profile to device remembered list
-  const rememberCheck = document.getElementById('rememberMeCheck');
-  if (!rememberCheck || rememberCheck.checked) {
-    saveProfileToDeviceList(user.email, activeSession.name, avatarSvg);
+  if (window.electronDB && window.electronDB.saveActiveSession) {
+    window.electronDB.saveActiveSession(activeSession);
   }
 
-  // Show Dashboard
-  const appDashboard = document.getElementById('appDashboard');
-  if (appDashboard) appDashboard.classList.remove('hidden');
+  // Save profile to device remembered list
+  saveProfileToDeviceList(userRecord.email, activeSession.name, avatarSvg);
 
+  // Clear pending registration
+  pendingRegistration = null;
+  localStorage.removeItem('batihub_pending_reg');
 
   // Update Header UI
   const nameDisplay = document.getElementById('userNameDisplay');
   const avatarImg = document.getElementById('userAvatarImg');
   if (nameDisplay) nameDisplay.innerText = activeSession.name;
   if (avatarImg) avatarImg.src = avatarSvg;
+
+  // Show Dashboard
+  const appDashboard = document.getElementById('appDashboard');
+  if (appDashboard) appDashboard.classList.remove('hidden');
+
+  // Dismiss auth gate
+  const authGate = document.getElementById('authGateScreen');
+  if (authGate) {
+    authGate.classList.add('auth-hide');
+    setTimeout(() => {
+      authGate.style.display = 'none';
+    }, 450);
+  }
 
   // Confetti celebration
   if (typeof confetti === 'function') {
@@ -1209,16 +1233,10 @@ function handleVerifyOtp(e) {
     });
   }
 
-  // Dismiss auth gate
-  const authGate = document.getElementById('authGateScreen');
-  if (authGate) {
-    authGate.classList.add('auth-hide');
-    setTimeout(() => {
-      authGate.style.display = 'none';
-    }, 500);
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span data-i18n="auth_btn_verify_otp">${isAr ? 'تم تأكيد الحساب بنجاح!' : 'Compte confirmé avec succès !'}</span>`;
   }
-
-  pendingRegistration = null;
 }
 
 // 3. LOGIN FLOW
@@ -1248,7 +1266,7 @@ async function handleUserLogin(e) {
   // Verify password hash
   const checkHash = await hashPassword(password, user.salt);
   if (checkHash !== user.passwordHash) {
-    alert(isAr ? 'كلمة المرور غير صحيحة. يرجى المحاولة مجدداً أو النقر على "نسيت كلمة المرور؟"' : 'Mot de passe incorrect. Veuillez réessayer ou cliquer sur "Mot de passe oublié ?".');
+    alert(isAr ? 'كلمة المرور غير صحيحة! يرجى المحاولة مجدداً أو النقر على "نسيت كلمة المرور؟"' : 'Mot de passe incorrect. Veuillez réessayer ou cliquer sur "Mot de passe oublié ?".');
     return;
   }
 
@@ -1264,6 +1282,15 @@ async function handleUserLogin(e) {
     signedAt: new Date().toISOString()
   };
   localStorage.setItem('batihub_user', JSON.stringify(activeSession));
+  if (window.electronDB && window.electronDB.saveActiveSession) {
+    window.electronDB.saveActiveSession(activeSession);
+  }
+
+  // Save profile to device remembered list
+  const rememberCheck = document.getElementById('rememberMeCheck');
+  if (!rememberCheck || rememberCheck.checked) {
+    saveProfileToDeviceList(user.email, activeSession.name, avatarSvg);
+  }
 
   // Update Header UI
   const nameDisplay = document.getElementById('userNameDisplay');
@@ -1271,13 +1298,17 @@ async function handleUserLogin(e) {
   if (nameDisplay) nameDisplay.innerText = activeSession.name;
   if (avatarImg) avatarImg.src = avatarSvg;
 
+  // Show Dashboard
+  const appDashboard = document.getElementById('appDashboard');
+  if (appDashboard) appDashboard.classList.remove('hidden');
+
   // Dismiss auth gate
   const authGate = document.getElementById('authGateScreen');
   if (authGate) {
     authGate.classList.add('auth-hide');
     setTimeout(() => {
       authGate.style.display = 'none';
-    }, 500);
+    }, 450);
   }
 }
 
@@ -1393,6 +1424,7 @@ async function handleConfirmPasswordReset() {
 function checkAuthStatus() {
   const saved = localStorage.getItem('batihub_user');
   const authGate = document.getElementById('authGateScreen');
+  const appDashboard = document.getElementById('appDashboard');
   const nameDisplay = document.getElementById('userNameDisplay');
   const avatarImg = document.getElementById('userAvatarImg');
 
@@ -1405,19 +1437,24 @@ function checkAuthStatus() {
         authGate.classList.add('auth-hide');
         authGate.style.display = 'none';
       }
+      if (appDashboard) {
+        appDashboard.classList.remove('hidden');
+      }
       return true;
     } catch (e) {
       console.error('Error parsing stored user:', e);
     }
   }
 
-  // Not logged in -> Show auth gate
+  // Not logged in -> Keep dashboard completely hidden, show auth gate
+  if (appDashboard) {
+    appDashboard.classList.add('hidden');
+  }
   if (authGate) {
     authGate.style.display = 'flex';
-    setTimeout(() => {
-      authGate.classList.remove('auth-hide');
-      switchAuthView('login');
-    }, 50);
+    authGate.classList.remove('auth-hide');
+    switchAuthView('login');
+    renderSavedAccounts();
   }
   return false;
 }
@@ -1425,23 +1462,30 @@ function checkAuthStatus() {
 function handleSignOut() {
   const isAr = state.lang === 'ar';
   const confirmMsg = isAr 
-    ? 'هل أنت متأكد من رغبتك في تسجيل الخروج؟' 
+    ? 'هل أنت متأكد من رغبتك في تسجيل الخروج من حسابك؟' 
     : (state.lang === 'en' ? 'Are you sure you want to sign out?' : 'Voulez-vous vraiment vous déconnecter de votre compte ?');
 
   if (confirm(confirmMsg)) {
+    closeUserProfileModal();
     localStorage.removeItem('batihub_user');
+    if (window.electronDB && window.electronDB.saveActiveSession) {
+      window.electronDB.saveActiveSession(null);
+    }
+
     const nameDisplay = document.getElementById('userNameDisplay');
     const avatarImg = document.getElementById('userAvatarImg');
     if (nameDisplay) nameDisplay.innerText = isAr ? 'مستخدم' : (state.lang === 'en' ? 'User' : 'Utilisateur');
     if (avatarImg) avatarImg.src = 'assets/batihub_logo.png';
 
+    const appDashboard = document.getElementById('appDashboard');
+    if (appDashboard) appDashboard.classList.add('hidden');
+
     const authGate = document.getElementById('authGateScreen');
     if (authGate) {
       authGate.style.display = 'flex';
-      setTimeout(() => {
-        authGate.classList.remove('auth-hide');
-        switchAuthView('login');
-      }, 50);
+      authGate.classList.remove('auth-hide');
+      switchAuthView('login');
+      renderSavedAccounts();
     }
   }
 }
@@ -2906,6 +2950,9 @@ function saveProfileToDeviceList(email, name, avatar) {
   list.unshift({ email: email.toLowerCase(), name, avatar });
   if (list.length > 5) list = list.slice(0, 5);
   localStorage.setItem('batihub_saved_profiles', JSON.stringify(list));
+  if (window.electronDB && window.electronDB.saveSavedProfiles) {
+    window.electronDB.saveSavedProfiles(list);
+  }
 }
 
 function removeSavedProfile(email, e) {
@@ -2913,6 +2960,9 @@ function removeSavedProfile(email, e) {
   let list = getSavedProfiles();
   list = list.filter(p => p.email.toLowerCase() !== email.toLowerCase());
   localStorage.setItem('batihub_saved_profiles', JSON.stringify(list));
+  if (window.electronDB && window.electronDB.saveSavedProfiles) {
+    window.electronDB.saveSavedProfiles(list);
+  }
   renderSavedAccounts();
 }
 

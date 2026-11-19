@@ -147,6 +147,88 @@ ipcMain.handle('send-mail', async (event, { to, subject, html, text }) => {
   }
 });
 
+// =========================================================================
+// SECURE FILE-BASED DATABASE STORAGE HANDLERS (PERMANENT ACCOUNT STORAGE)
+// =========================================================================
+function getDbPaths() {
+  const userDir = app.getPath('userData');
+  return {
+    accountsPrimary: path.join(userDir, 'batihub_accounts_db.json'),
+    accountsBackup: path.join(__dirname, 'batihub_accounts_db.json'),
+    profiles: path.join(userDir, 'batihub_saved_profiles.json'),
+    session: path.join(userDir, 'batihub_active_session.json')
+  };
+}
+
+ipcMain.handle('db-save-accounts', async (event, data) => {
+  const paths = getDbPaths();
+  try {
+    const jsonStr = JSON.stringify(data, null, 2);
+    fs.writeFileSync(paths.accountsPrimary, jsonStr, 'utf8');
+    try { fs.writeFileSync(paths.accountsBackup, jsonStr, 'utf8'); } catch (e) {}
+    logMail(`[DB] Saved ${Object.keys(data).length} accounts to disk database`);
+    return { success: true };
+  } catch (e) {
+    logMail(`[DB ERROR] Failed saving accounts: ${e.message}`);
+    return { success: false, error: e.message };
+  }
+});
+
+ipcMain.handle('db-get-accounts', async () => {
+  const paths = getDbPaths();
+  try {
+    if (fs.existsSync(paths.accountsPrimary)) {
+      return JSON.parse(fs.readFileSync(paths.accountsPrimary, 'utf8'));
+    }
+    if (fs.existsSync(paths.accountsBackup)) {
+      return JSON.parse(fs.readFileSync(paths.accountsBackup, 'utf8'));
+    }
+  } catch (e) {
+    logMail(`[DB ERROR] Failed reading accounts: ${e.message}`);
+  }
+  return {};
+});
+
+ipcMain.handle('db-save-saved-profiles', async (event, profiles) => {
+  const paths = getDbPaths();
+  try {
+    fs.writeFileSync(paths.profiles, JSON.stringify(profiles, null, 2), 'utf8');
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+});
+
+ipcMain.handle('db-get-saved-profiles', async () => {
+  const paths = getDbPaths();
+  try {
+    if (fs.existsSync(paths.profiles)) {
+      return JSON.parse(fs.readFileSync(paths.profiles, 'utf8'));
+    }
+  } catch (e) {}
+  return [];
+});
+
+ipcMain.handle('db-save-active-session', async (event, session) => {
+  const paths = getDbPaths();
+  try {
+    fs.writeFileSync(paths.session, JSON.stringify(session, null, 2), 'utf8');
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+});
+
+ipcMain.handle('db-get-active-session', async () => {
+  const paths = getDbPaths();
+  try {
+    if (fs.existsSync(paths.session)) {
+      return JSON.parse(fs.readFileSync(paths.session, 'utf8'));
+    }
+  } catch (e) {}
+  return null;
+});
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1400,
