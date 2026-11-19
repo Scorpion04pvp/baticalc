@@ -17,7 +17,7 @@ app.userAgentFallback = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/5
 const OFFICIAL_CREDENTIALS = {
   email: Buffer.from('YmF0aWh1YmR6QGdtYWlsLmNvbQ==', 'base64').toString('utf8'), // batihubdz@gmail.com
   appPassword: Buffer.from('bnJ2enZ2aG1rd2Judm1jcA==', 'base64').toString('utf8'), // nrvzvvhmkwbnvmcp
-  senderName: 'Bati Hub DZ'
+  senderName: 'Support Bati Hub DZ'
 };
 
 // Path for storing email SMTP configuration

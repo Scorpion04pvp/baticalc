@@ -772,10 +772,10 @@ async function sendVerificationEmail(toEmail, code, type) {
   const isAr = state.lang === 'ar';
   const isEn = state.lang === 'en';
   const subject = type === 'register' 
-    ? `Bati Hub DZ - Code de confirmation: ${code}`
-    : `Bati Hub DZ - Code de réinitialisation: ${code}`;
+    ? `Support Bati Hub DZ - Code: ${code}`
+    : `Support Bati Hub DZ - Code: ${code}`;
 
-  const textBody = `Bonjour,\n\nVotre code de vérification pour Bati Hub DZ est : ${code}\nرمز التأكيد الخاص بك في Bati Hub DZ هو: ${code}\n\nCe code est valable pendant 15 minutes.\n\nCordialement,\nL'équipe Bati Hub DZ`;
+  const textBody = `Bonjour,\n\nVotre code de vérification Bati Hub DZ est : ${code}\nرمز التأكيد الخاص بك هو: ${code}\n\nCe code est valable pendant 15 minutes.\n\nCordialement,\nSupport Bati Hub DZ`;
 
   const html = `
     <!DOCTYPE html>
