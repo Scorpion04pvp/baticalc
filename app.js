@@ -4062,6 +4062,53 @@ function getCurrentSessionUser() {
 // 15. CUSTOM APP NOTIFICATION & TOAST ENGINE
 // =========================================================================
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function formatPostTime(ts) {
+  if (!ts) return '';
+  const diffSec = Math.floor((Date.now() - ts) / 1000);
+  const isAr = state.lang === 'ar';
+  if (diffSec < 60) return isAr ? 'الآن' : "À l'instant";
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return isAr ? `منذ ${diffMin} دقيقة` : `Il y a ${diffMin} min`;
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) return isAr ? `منذ ${diffHours} ساعة` : `Il y a ${diffHours} h`;
+  const diffDays = Math.floor(diffHours / 24);
+  return isAr ? `منذ ${diffDays} يوم` : `Il y a ${diffDays} j`;
+}
+
+function getLocalizedTradeName(tradeKey) {
+  const isAr = state.lang === 'ar';
+  const isEn = state.lang === 'en';
+  const clean = (tradeKey || '').trim();
+
+  const map = {
+    'بناء': { ar: 'بناء', fr: 'Maçonnerie', en: 'Masonry' },
+    'كهرباء': { ar: 'كهرباء', fr: 'Électricité', en: 'Electricity' },
+    'ترصيص وصحي': { ar: 'ترصيص وصحي', fr: 'Plomberie & Sanitaire', en: 'Plumbing' },
+    'دهان وديكور': { ar: 'دهان وديكور', fr: 'Peinture & Décoration', en: 'Painting' },
+    'بلاط وسيراميك': { ar: 'بلاط وسيراميك', fr: 'Carrelage & Céramique', en: 'Tiling' },
+    'نجارة وألمنيوم': { ar: 'نجارة وألمنيوم', fr: 'Menuiserie & Alu', en: 'Carpentry & Alu' },
+    'حدادة وتسليح': { ar: 'حدادة وتسليح', fr: 'Ferraillage & Métallerie', en: 'Steel & Ironwork' },
+    'تكييف وتبريد': { ar: 'تكييف وتبريد', fr: 'Climatisation & Chauffage', en: 'HVAC' },
+    'أشغال حفر وتطهير': { ar: 'أشغال حفر وتطهير', fr: 'Terrassement & Engins', en: 'Earthworks' },
+    'تخصص آخر': { ar: 'تخصص آخر', fr: 'Autre métier', en: 'Other' }
+  };
+
+  if (map[clean]) {
+    return isAr ? map[clean].ar : (isEn ? map[clean].en : map[clean].fr);
+  }
+  return clean;
+}
+
 function showAppToast(message, type = 'info', duration = 3500) {
   const container = document.getElementById('appToastContainer');
   if (!container) return;
