@@ -344,10 +344,15 @@ function getGmailAvatarDataUrl(name, email) {
 function resolveAvatarSrc(avatarUrl, name, email) {
   if (avatarUrl && typeof avatarUrl === 'string' && avatarUrl.trim() !== '') {
     const trimmed = avatarUrl.trim();
-    if (trimmed.startsWith('data:image/png') || trimmed.startsWith('data:image/jpeg') || trimmed.startsWith('data:image/webp') || trimmed.startsWith('data:image/gif') || trimmed.startsWith('assets/') || trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    // Valid standard uploaded/asset image paths without HTML injection
+    if ((trimmed.startsWith('data:image/png') || trimmed.startsWith('data:image/jpeg') || trimmed.startsWith('data:image/webp') || trimmed.startsWith('data:image/gif') || trimmed.startsWith('assets/') || trimmed.startsWith('http://') || trimmed.startsWith('https://')) && !trimmed.includes('"') && !trimmed.includes('<') && !trimmed.includes('>')) {
       return trimmed;
     }
-    if (trimmed.startsWith('data:image/svg+xml') || trimmed.startsWith('<svg')) {
+    // Clean SVG Data URLs
+    if (trimmed.startsWith('data:image/svg+xml') && !trimmed.includes('"') && !trimmed.includes('<')) {
+      return trimmed;
+    }
+    if (trimmed.startsWith('<svg') || trimmed.startsWith('data:image/svg+xml')) {
       let rawSvg = trimmed;
       if (rawSvg.startsWith('data:image/svg+xml')) {
         rawSvg = rawSvg.replace(/^data:image\/svg\+xml;?(charset=utf-8|charset=UTF-8|utf8)?,?/, '');
@@ -360,12 +365,15 @@ function resolveAvatarSrc(avatarUrl, name, email) {
 }
 
 /**
- * Generates an img tag string with clean safe source
+ * Generates an img tag string with clean safe source and graceful fallback
  */
 function renderAvatarImgTag(avatarUrl, name, email, cssClasses) {
-  const safeSrc = resolveAvatarSrc(avatarUrl, name, email);
+  let safeSrc = resolveAvatarSrc(avatarUrl, name, email);
+  // Strict attribute sanitization: eliminate any double quotes or angle brackets
+  safeSrc = safeSrc.replace(/"/g, '%22').replace(/</g, '%3C').replace(/>/g, '%3E');
   const safeName = escapeHTML(name || email || 'User');
-  return `<img src="${safeSrc}" alt="${safeName}" class="${cssClasses}">`;
+  const fallbackSrc = getGmailAvatarDataUrl(name, email).replace(/"/g, '%22');
+  return `<img src="${safeSrc}" alt="${safeName}" class="${cssClasses}" onerror="this.onerror=null;this.src='${fallbackSrc}';">`;
 }
 
 /* ========================================================================= */
@@ -441,9 +449,11 @@ function initDefaultFeedsIfEmpty() {
   if (Array.isArray(existingPosts) && existingPosts.length > 0) {
     let postsCleaned = false;
     existingPosts.forEach(p => {
-      if (p.authorAvatar && (p.authorAvatar.includes('<') || p.authorAvatar.includes('"'))) {
-        p.authorAvatar = resolveAvatarSrc(p.authorAvatar, p.authorName, p.authorId);
-        postsCleaned = true;
+      if (p.authorAvatar) {
+        if (typeof p.authorAvatar !== 'string' || p.authorAvatar.includes('<') || p.authorAvatar.includes('"') || (!p.authorAvatar.startsWith('data:') && !p.authorAvatar.startsWith('assets/') && !p.authorAvatar.startsWith('http'))) {
+          p.authorAvatar = null;
+          postsCleaned = true;
+        }
       }
     });
     if (postsCleaned) setStorageJSON('batihub_worker_posts', existingPosts);
@@ -699,22 +709,60 @@ async function handleUserLogin(event) {
     return;
   }
 
-  // Successful login
-  currentUser = { ...account };
+  // Credentials match!
+  pendingLoginAccount = account;
+  pendingLoginPassword = password;
 
-  if (rememberCheck && rememberCheck.checked) {
+  // Check if already saved and validated with same hash on this device
+  const saved = getStorageJSON('batihub_saved_login_cred', null);
+  if (saved && saved.email.toLowerCase() === account.email.toLowerCase() && saved.passwordHash === account.passwordHash) {
+    currentUser = { ...account };
+    setStorageJSON('batihub_current_user', currentUser);
+    showToast(`أهلاً بك مجدداً ${currentUser.fullName || currentUser.firstName}!`, 'success');
+    transitionToDashboard();
+    return;
+  }
+
+  // Otherwise, prompt user: Save credentials on this device or not?
+  const promptModal = document.getElementById('modalPromptSaveLogin');
+  const emailDisplay = document.getElementById('promptSaveEmailDisplay');
+  if (emailDisplay) emailDisplay.textContent = account.email;
+  if (promptModal) {
+    promptModal.classList.remove('hidden');
+  } else {
+    confirmSaveLoginCredentials(true);
+  }
+}
+
+let pendingLoginAccount = null;
+let pendingLoginPassword = null;
+
+function confirmSaveLoginCredentials(shouldSave) {
+  const promptModal = document.getElementById('modalPromptSaveLogin');
+  if (promptModal) promptModal.classList.add('hidden');
+
+  if (!pendingLoginAccount) return;
+
+  currentUser = { ...pendingLoginAccount };
+
+  if (shouldSave) {
     setStorageJSON('batihub_saved_login_cred', {
-      email: account.email,
-      password: password,
-      passwordHash: account.passwordHash
+      email: pendingLoginAccount.email,
+      password: pendingLoginPassword,
+      passwordHash: pendingLoginAccount.passwordHash
     });
     setStorageJSON('batihub_current_user', currentUser);
+    showToast('تم حفظ بيانات الحساب على هذا الجهاز بنجاح!', 'success');
   } else {
     localStorage.removeItem('batihub_saved_login_cred');
     sessionStorage.setItem('batihub_current_user', JSON.stringify(currentUser));
+    showToast('تم تسجيل الدخول لهذه الجلسة فقط', 'info');
   }
 
-  showToast(`أهلاً بك مجدداً ${currentUser.fullName || currentUser.firstName}!`, 'success');
+  pendingLoginAccount = null;
+  pendingLoginPassword = null;
+
+  showToast(`أهلاً بك ${currentUser.fullName || currentUser.firstName}!`, 'success');
   transitionToDashboard();
 }
 
@@ -1266,6 +1314,21 @@ async function broadcastLiveEvent(action, payload) {
   }
 }
 
+async function parseLiveSyncPacketFromRaw(rawItem) {
+  if (rawItem.attachment && rawItem.attachment.url) {
+    try {
+      const attRes = await fetch(rawItem.attachment.url);
+      if (attRes.ok) return await attRes.json();
+    } catch (e) {}
+  }
+  if (rawItem.message) {
+    try {
+      return JSON.parse(rawItem.message);
+    } catch (e) {}
+  }
+  return null;
+}
+
 function initLiveSyncEngine() {
   if (liveEventSource) return;
 
@@ -1275,12 +1338,11 @@ function initLiveSyncEngine() {
   // 2. Real-time Server-Sent Events (SSE) connection
   try {
     liveEventSource = new EventSource(`${LIVE_SYNC_TOPIC}/sse`);
-    liveEventSource.onmessage = (event) => {
+    liveEventSource.onmessage = async (event) => {
       try {
         const raw = JSON.parse(event.data);
-        if (!raw.message) return;
-        const packet = JSON.parse(raw.message);
-        if (packet.senderDeviceId === currentDeviceId) return; // ignore own echo
+        const packet = await parseLiveSyncPacketFromRaw(raw);
+        if (!packet || packet.senderDeviceId === currentDeviceId) return;
         handleIncomingLiveSyncPacket(packet);
       } catch (e) {}
     };
@@ -1289,8 +1351,8 @@ function initLiveSyncEngine() {
     };
   } catch (e) {}
 
-  // 3. Fallback polling every 8 seconds for background or waking devices
-  setInterval(pollLiveSyncHistory, 8000);
+  // 3. Fallback polling every 3 seconds for lightning-fast cross-device updates
+  setInterval(pollLiveSyncHistory, 3000);
 }
 
 async function pollLiveSyncHistory() {
@@ -1300,18 +1362,17 @@ async function pollLiveSyncHistory() {
     const text = await res.text();
     const lines = text.trim().split('\n');
 
-    lines.forEach(line => {
-      if (!line.trim()) return;
+    for (const line of lines) {
+      if (!line.trim()) continue;
       try {
         const item = JSON.parse(line);
-        if (item.time && item.time * 1000 <= lastSyncedPacketTime) return;
+        if (item.time && item.time * 1000 <= lastSyncedPacketTime) continue;
         if (item.time) lastSyncedPacketTime = item.time * 1000;
-        if (!item.message) return;
-        const packet = JSON.parse(item.message);
-        if (packet.senderDeviceId === currentDeviceId) return;
+        const packet = await parseLiveSyncPacketFromRaw(item);
+        if (!packet || packet.senderDeviceId === currentDeviceId) continue;
         handleIncomingLiveSyncPacket(packet);
       } catch (e) {}
-    });
+    }
   } catch (e) {}
 }
 
@@ -1350,11 +1411,20 @@ function handleIncomingLiveSyncPacket(packet) {
   else if (action === 'new_worker_post') {
     let posts = getStorageJSON('batihub_worker_posts', []);
     if (!posts.some(p => p.id === payload.id)) {
+      if (payload.authorAvatar && (typeof payload.authorAvatar !== 'string' || payload.authorAvatar.includes('<') || payload.authorAvatar.includes('"') || (!payload.authorAvatar.startsWith('data:') && !payload.authorAvatar.startsWith('assets/') && !payload.authorAvatar.startsWith('http')))) {
+        payload.authorAvatar = null;
+      }
       posts.unshift(payload);
       setStorageJSON('batihub_worker_posts', posts);
+      updateAdminPendingBadge();
+      updateWorkerFilterPillsVisibility();
       renderWorkerPostsFeed();
+      renderAdminPendingRequestsSection();
+
       if (currentUser && currentUser.role === 'admin') {
-        showToast(`طلب منشور عمل جديد قيد المراجعة من ${escapeHTML(payload.authorName)}`, 'warning', 4500);
+        showToast(`طلب منشور جديد بانتظار المراجعة من ${escapeHTML(payload.authorName)} ⏳`, 'warning', 5000);
+      } else if (currentUser && currentUser.email.toLowerCase() === payload.authorId.toLowerCase()) {
+        showToast('تم استلام منشورك وهو الآن قيد الفحص والمراجعة لدى الإدارة ⏳', 'info', 5000);
       }
     }
   }
@@ -1366,8 +1436,16 @@ function handleIncomingLiveSyncPacket(packet) {
     if (post) {
       post.status = 'approved';
       setStorageJSON('batihub_worker_posts', posts);
+      updateAdminPendingBadge();
+      updateWorkerFilterPillsVisibility();
       renderWorkerPostsFeed();
-      showToast('تم اعتماد ونشر عرض عمل جديد في المنصة!', 'info', 2500);
+      renderAdminPendingRequestsSection();
+
+      if (currentUser && post.authorId && currentUser.email.toLowerCase() === post.authorId.toLowerCase()) {
+        showToast('تهانينا! تمت الموافقة على منشورك وأصبح ظاهراً للجميع في المنصة! 🎉', 'success', 6000);
+      } else {
+        showToast('تم اعتماد ونشر عرض عمل جديد في المنصة!', 'info', 3000);
+      }
     }
   }
 
@@ -1773,16 +1851,60 @@ function injectQuickValue(elementId) {
 /* 13. WORKER POSTS & ARTISANS BOARD                                         */
 /* ========================================================================= */
 
-function filterWorkerFeed(tradeCategory, btn) {
-  activeWorkerFilter = tradeCategory;
-  showPendingOnly = false;
+function filterWorkerFeed(category, btn) {
+  activeWorkerFilter = category;
+  showPendingOnly = (category === 'admin_pending');
 
   document.querySelectorAll('.worker-filter-pill').forEach(b => {
     b.classList.remove('active-filter');
   });
-  if (btn) btn.classList.add('active-filter');
+  if (btn) {
+    btn.classList.add('active-filter');
+  } else {
+    if (category === 'all') {
+      const allBtn = document.getElementById('filterPillAll');
+      if (allBtn) allBtn.classList.add('active-filter');
+    } else if (category === 'my_pending') {
+      const userBtn = document.getElementById('userPendingFilterBtn');
+      if (userBtn) userBtn.classList.add('active-filter');
+    } else if (category === 'admin_pending') {
+      const adminBtn = document.getElementById('adminPendingFilterBtn');
+      if (adminBtn) adminBtn.classList.add('active-filter');
+    }
+  }
 
   renderWorkerPostsFeed();
+}
+
+function updateWorkerFilterPillsVisibility() {
+  const userPendingBtn = document.getElementById('userPendingFilterBtn');
+  const userPendingBadge = document.getElementById('userPendingPostsBadge');
+  const adminPendingBtn = document.getElementById('adminPendingFilterBtn');
+  const adminPendingBadge = document.getElementById('pendingPostsCountBadge');
+
+  const posts = getStorageJSON('batihub_worker_posts', []);
+
+  // Admin review pill
+  if (adminPendingBtn) {
+    if (currentUser && currentUser.role === 'admin') {
+      adminPendingBtn.classList.remove('hidden');
+      const pendingCount = posts.filter(p => p.status === 'pending').length;
+      if (adminPendingBadge) adminPendingBadge.textContent = String(pendingCount);
+    } else {
+      adminPendingBtn.classList.add('hidden');
+    }
+  }
+
+  // Regular user pending pill
+  if (userPendingBtn) {
+    if (currentUser && currentUser.role !== 'admin') {
+      const myPendingCount = posts.filter(p => p.authorId && p.authorId.toLowerCase() === currentUser.email.toLowerCase() && p.status === 'pending').length;
+      userPendingBtn.classList.remove('hidden');
+      if (userPendingBadge) userPendingBadge.textContent = String(myPendingCount);
+    } else {
+      userPendingBtn.classList.add('hidden');
+    }
+  }
 }
 
 function togglePendingPostsFilter() {
@@ -1929,37 +2051,64 @@ function renderWorkerPostsFeed() {
   const dict = I18N[currentLanguage] || I18N.ar;
   let posts = getStorageJSON('batihub_worker_posts', []);
 
+  // Update filter pills badges and visibility
+  updateWorkerFilterPillsVisibility();
+
   // Filter logic
   let filtered = posts.filter(p => {
-    // Admin pending posts view toggle
-    if (showPendingOnly) {
+    // Admin dedicated review category
+    if (activeWorkerFilter === 'admin_pending' || showPendingOnly) {
       return p.status === 'pending';
     }
 
-    if (currentUser && currentUser.role === 'admin') {
-      // In the general feed, admin sees approved posts (pending are in the dedicated panel above)
-      if (p.status === 'pending') return false;
-    } else {
-      // Regular user: sees approved posts + their own pending posts
-      if (p.status === 'pending') {
-        if (!currentUser || p.authorId !== currentUser.email) return false;
-      }
+    // User dedicated pending posts category
+    if (activeWorkerFilter === 'my_pending') {
+      if (!currentUser) return false;
+      return p.authorId && p.authorId.toLowerCase() === currentUser.email.toLowerCase() && p.status === 'pending';
     }
 
+    // Specific trade filter
     if (activeWorkerFilter !== 'all') {
-      return p.trade === activeWorkerFilter;
+      if (p.trade !== activeWorkerFilter) return false;
+      if (p.status === 'pending') {
+        return currentUser && p.authorId && p.authorId.toLowerCase() === currentUser.email.toLowerCase();
+      }
+      return p.status === 'approved';
     }
-    return true;
+
+    // Default 'all' category:
+    if (p.status === 'pending') {
+      // Author sees their pending post at the top; others only see approved
+      if (currentUser && p.authorId && p.authorId.toLowerCase() === currentUser.email.toLowerCase()) {
+        return true;
+      }
+      return false;
+    }
+    return true; // Approved
   });
 
   if (filtered.length === 0) {
+    let emptyTitle = dict.empty_posts;
+    let emptyDesc = 'شارك خبرتك أو تواصل مع أفضل الحرفيين والمهندسين في الجزائر.';
+    let emptyIcon = 'fa-briefcase';
+
+    if (activeWorkerFilter === 'my_pending') {
+      emptyTitle = 'لا توجد لديك منشورات معلقة حالياً';
+      emptyDesc = 'جميع منشوراتك معتمدة وتظهر للجميع في الخلاصة، أو يمكنك نشر عرض عمل جديد الآن.';
+      emptyIcon = 'fa-hourglass-half';
+    } else if (activeWorkerFilter === 'admin_pending') {
+      emptyTitle = 'لا توجد طلبات معلقة بانتظار المراجعة';
+      emptyDesc = 'جميع عروض العمل المقدمة من المستخدمين تم اعتمادها أو معالجتها بنجاح.';
+      emptyIcon = 'fa-shield-halved';
+    }
+
     container.innerHTML = `
       <div class="bg-bh-card border border-bh-border rounded-2xl p-8 text-center space-y-3">
         <div class="w-16 h-16 mx-auto rounded-2xl bg-bh-yellow/10 text-bh-yellow flex items-center justify-center text-3xl">
-          <i class="fa-solid fa-briefcase"></i>
+          <i class="fa-solid ${emptyIcon}"></i>
         </div>
-        <h3 class="font-bold text-white text-base">${dict.empty_posts}</h3>
-        <p class="text-xs text-slate-400 max-w-sm mx-auto">شارك خبرتك أو تواصل مع أفضل الحرفيين والمهندسين في الجزائر.</p>
+        <h3 class="font-bold text-white text-base">${emptyTitle}</h3>
+        <p class="text-xs text-slate-400 max-w-sm mx-auto">${emptyDesc}</p>
         <button type="button" onclick="openCreateWorkerPostModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold text-xs">
           ${dict.btn_new_worker_post}
         </button>
@@ -2255,12 +2404,15 @@ function handleCreateWorkerPostSubmit(event) {
 
   closeCreateWorkerPostModal();
   updateAdminPendingBadge();
-  renderWorkerPostsFeed();
+  updateWorkerFilterPillsVisibility();
 
   if (isAdmin) {
+    renderWorkerPostsFeed();
     showToast(I18N[currentLanguage].post_published_admin_success, 'success');
   } else {
-    showToast('تم إرسال المنشور بنجاح وهو الآن قيد المعالجة والمراجعة من قبل الإدارة.', 'success', 5000);
+    // Switch to user pending category to immediately show their pending post!
+    filterWorkerFeed('my_pending');
+    showToast('تم إرسال المنشور بنجاح! هو الآن في خانة (منشوراتي المعلقة ⏳) بانتظار فحص واعتماد الإدارة.', 'warning', 6000);
   }
 }
 

@@ -441,10 +441,24 @@
         </div>
 
         <!-- Category Filter Pills -->
-        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 pt-1 text-xs">
-          <button type="button" onclick="filterWorkerFeed('all', this)" class="worker-filter-pill active-filter">
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 pt-1 text-xs" id="workerFilterPillsContainer">
+          <button type="button" onclick="filterWorkerFeed('all', this)" class="worker-filter-pill active-filter" id="filterPillAll">
             <i class="fa-solid fa-layer-group text-slate-950"></i>
             <span data-i18n="filter_all">الكل</span>
+          </button>
+          
+          <!-- USER DEDICATED PENDING CATEGORY PILL -->
+          <button type="button" id="userPendingFilterBtn" onclick="filterWorkerFeed('my_pending', this)" class="hidden worker-filter-pill border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20">
+            <i class="fa-solid fa-hourglass-half text-bh-yellow animate-pulse"></i>
+            <span>منشوراتي المعلقة</span>
+            <span id="userPendingPostsBadge" class="px-1.5 py-0.5 rounded-full bg-bh-yellow text-slate-950 text-[10px] font-black">0</span>
+          </button>
+
+          <!-- ADMIN DEDICATED REVIEW CATEGORY PILL -->
+          <button type="button" id="adminPendingFilterBtn" onclick="filterWorkerFeed('admin_pending', this)" class="hidden worker-filter-pill border-amber-500/50 bg-amber-500/15 text-amber-300 hover:bg-amber-500/25">
+            <i class="fa-solid fa-shield-halved text-bh-yellow"></i>
+            <span>طلبات معلقة للمراجعة</span>
+            <span id="pendingPostsCountBadge" class="px-1.5 py-0.5 rounded-full bg-bh-yellow text-slate-950 text-[10px] font-black">0</span>
           </button>
           <button type="button" onclick="filterWorkerFeed('بناء', this)" class="worker-filter-pill">
             <i class="fa-solid fa-trowel-bricks text-amber-400"></i>
@@ -478,11 +492,7 @@
             <i class="fa-solid fa-snowflake text-cyan-400"></i>
             <span data-i18n="filter_hvac">تكييف وتبريد</span>
           </button>
-          <button type="button" id="adminPendingFilterBtn" onclick="togglePendingPostsFilter()" class="hidden worker-filter-pill border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20">
-            <i class="fa-solid fa-hourglass-half text-bh-yellow animate-pulse"></i>
-            <span>بانتظار الموافقة</span>
-            <span id="pendingPostsCountBadge" class="px-1.5 py-0.5 rounded-full bg-bh-yellow text-slate-950 text-[10px] font-black">0</span>
-          </button>
+          
         </div>
 
         <!-- Admin Dedicated Approval Section (Visible ONLY to Admin) -->
@@ -939,6 +949,36 @@
   <div id="modalImageLightbox" onclick="closeImageLightbox()" class="fixed inset-0 z-[100005] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 hidden cursor-zoom-out">
     <div class="relative max-w-4xl max-h-[90vh]">
       <img id="lightboxImg" src="" alt="Enlarged" class="max-h-[85vh] max-w-full rounded-2xl object-contain shadow-2xl border border-bh-border">
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: PROMPT SAVE LOGIN CREDENTIALS                                      -->
+  <!-- ========================================================================= -->
+  <div id="modalPromptSaveLogin" class="modal-backdrop hidden">
+    <div class="modal-box max-w-sm w-full p-6 text-center space-y-4 shadow-2xl relative" dir="rtl">
+      <div class="w-16 h-16 mx-auto rounded-3xl bg-gradient-to-br from-bh-yellow/20 to-bh-orange/20 text-bh-yellow border border-bh-yellow/40 flex items-center justify-center text-2xl shadow-xl">
+        <i class="fa-solid fa-key"></i>
+      </div>
+      <div class="space-y-1">
+        <h3 class="font-heading font-black text-white text-base">حفظ بيانات الحساب؟</h3>
+        <p class="text-xs text-slate-300">هل ترغب في حفظ بيانات تسجيل الدخول على هذا الجهاز لتسهيل الدخول التلقائي لاحقاً؟</p>
+      </div>
+
+      <div class="p-2.5 rounded-xl bg-bh-bg border border-bh-border text-xs text-slate-400 font-mono text-center truncate">
+        <i class="fa-regular fa-envelope text-bh-yellow ml-1"></i>
+        <span id="promptSaveEmailDisplay" class="text-white font-bold"></span>
+      </div>
+
+      <div class="flex flex-col gap-2 pt-2">
+        <button type="button" onclick="confirmSaveLoginCredentials(true)" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-black text-xs shadow-lg hover:opacity-95 transition flex items-center justify-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-check"></i>
+          <span>نعم، احفظ الحساب على هذا الجهاز</span>
+        </button>
+        <button type="button" onclick="confirmSaveLoginCredentials(false)" class="w-full py-2.5 rounded-xl bg-bh-bg hover:bg-slate-800 text-slate-300 font-semibold text-xs border border-bh-border transition cursor-pointer">
+          لا، لا تحفظ (الدخول لهذه الجلسة فقط)
+        </button>
+      </div>
     </div>
   </div>
 
