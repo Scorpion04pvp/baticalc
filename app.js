@@ -334,34 +334,38 @@ function getColorForString(str) {
 function getGmailAvatarDataUrl(name, email) {
   const letter = getInitialLetter(name, email);
   const color = getColorForString(email || name);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
-    <circle cx="48" cy="48" r="48" fill="${color}"/>
-    <text x="48" y="52" font-family="'Plus Jakarta Sans', 'Cairo', Arial, sans-serif" font-size="44" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central">${letter}</text>
-  </svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"><circle cx="48" cy="48" r="48" fill="${color}"/><text x="48" y="52" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="44" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central">${letter}</text></svg>`;
   return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
 }
 
 /**
- * Resolves safe avatar source.
+ * Resolves safe avatar source, guaranteed to never break HTML attributes.
  */
 function resolveAvatarSrc(avatarUrl, name, email) {
   if (avatarUrl && typeof avatarUrl === 'string' && avatarUrl.trim() !== '') {
-    // If it's a valid data URL or valid path
-    if (avatarUrl.startsWith('data:image/') || avatarUrl.startsWith('assets/') || avatarUrl.startsWith('http')) {
-      return avatarUrl;
+    const trimmed = avatarUrl.trim();
+    if (trimmed.startsWith('data:image/png') || trimmed.startsWith('data:image/jpeg') || trimmed.startsWith('data:image/webp') || trimmed.startsWith('data:image/gif') || trimmed.startsWith('assets/') || trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+    if (trimmed.startsWith('data:image/svg+xml') || trimmed.startsWith('<svg')) {
+      let rawSvg = trimmed;
+      if (rawSvg.startsWith('data:image/svg+xml')) {
+        rawSvg = rawSvg.replace(/^data:image\/svg\+xml;?(charset=utf-8|charset=UTF-8|utf8)?,?/, '');
+        try { rawSvg = decodeURIComponent(rawSvg); } catch (e) {}
+      }
+      return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(rawSvg);
     }
   }
   return getGmailAvatarDataUrl(name, email);
 }
 
 /**
- * Generates an img tag string with error fallback
+ * Generates an img tag string with clean safe source
  */
 function renderAvatarImgTag(avatarUrl, name, email, cssClasses) {
   const safeSrc = resolveAvatarSrc(avatarUrl, name, email);
-  const safeFallback = getGmailAvatarDataUrl(name, email);
   const safeName = escapeHTML(name || email || 'User');
-  return `<img src="${safeSrc}" alt="${safeName}" class="${cssClasses}" onerror="this.onerror=null;this.src='${safeFallback}';">`;
+  return `<img src="${safeSrc}" alt="${safeName}" class="${cssClasses}">`;
 }
 
 /* ========================================================================= */
@@ -420,11 +424,31 @@ function initAccountsDatabase() {
     }
   }
 
+  // Auto-heal any account avatars containing raw/unencoded SVG strings
+  for (const acc of Object.values(accounts)) {
+    if (acc.avatar && (acc.avatar.includes('<') || acc.avatar.includes('"'))) {
+      acc.avatar = resolveAvatarSrc(acc.avatar, acc.fullName || acc.firstName, acc.email);
+    }
+  }
+
   setStorageJSON('batihub_registered_accounts', accounts);
   return accounts;
 }
 
 function initDefaultFeedsIfEmpty() {
+  // Sanitize any existing posts in storage
+  let existingPosts = getStorageJSON('batihub_worker_posts', null);
+  if (Array.isArray(existingPosts) && existingPosts.length > 0) {
+    let postsCleaned = false;
+    existingPosts.forEach(p => {
+      if (p.authorAvatar && (p.authorAvatar.includes('<') || p.authorAvatar.includes('"'))) {
+        p.authorAvatar = resolveAvatarSrc(p.authorAvatar, p.authorName, p.authorId);
+        postsCleaned = true;
+      }
+    });
+    if (postsCleaned) setStorageJSON('batihub_worker_posts', existingPosts);
+  }
+
   // Worker Posts default sample
   let posts = getStorageJSON('batihub_worker_posts', null);
   if (!posts || !Array.isArray(posts) || posts.length === 0) {
@@ -609,6 +633,7 @@ function switchAuthView(viewName) {
     views.login.classList.remove('hidden');
     if (headerTitle) headerTitle.textContent = 'BatiHub DZ • تسجيل الدخول';
     if (headerSub) headerSub.textContent = 'منصة المحترفين وأصحاب المشاريع وعروض العمل في الجزائر';
+    loadSavedLoginCredentials();
   } else if (viewName === 'register') {
     views.register.classList.remove('hidden');
     if (headerTitle) headerTitle.textContent = 'إنشاء حساب جديد في BatiHub DZ';
@@ -678,13 +703,79 @@ async function handleUserLogin(event) {
   currentUser = { ...account };
 
   if (rememberCheck && rememberCheck.checked) {
+    setStorageJSON('batihub_saved_login_cred', {
+      email: account.email,
+      password: password,
+      passwordHash: account.passwordHash
+    });
     setStorageJSON('batihub_current_user', currentUser);
   } else {
+    localStorage.removeItem('batihub_saved_login_cred');
     sessionStorage.setItem('batihub_current_user', JSON.stringify(currentUser));
   }
 
   showToast(`أهلاً بك مجدداً ${currentUser.fullName || currentUser.firstName}!`, 'success');
   transitionToDashboard();
+}
+
+/**
+ * Loads device-local saved credentials if remembered and validates hash against database
+ */
+function loadSavedLoginCredentials() {
+  const emailInput = document.getElementById('loginEmail');
+  const passwordInput = document.getElementById('loginPassword');
+  const rememberCheck = document.getElementById('rememberMeCheck');
+  const savedNotice = document.getElementById('savedCredNotice');
+  if (!emailInput || !passwordInput) return;
+
+  const saved = getStorageJSON('batihub_saved_login_cred', null);
+  if (!saved || !saved.email) {
+    if (savedNotice) savedNotice.classList.add('hidden');
+    return;
+  }
+
+  const accounts = initAccountsDatabase();
+  const account = accounts[saved.email.toLowerCase()];
+
+  // If account still exists and password hash has NOT changed
+  if (account && account.passwordHash === saved.passwordHash) {
+    emailInput.value = saved.email;
+    passwordInput.value = saved.password || '';
+    if (rememberCheck) rememberCheck.checked = true;
+    if (savedNotice) {
+      savedNotice.classList.remove('hidden');
+      savedNotice.innerHTML = `
+        <div class="flex items-center justify-between p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[11px]">
+          <span class="flex items-center gap-1.5 font-semibold"><i class="fa-solid fa-circle-check"></i> تم حفظ بيانات الدخول تلقائياً على هذا الجهاز</span>
+          <button type="button" onclick="forgetSavedLoginCredentials()" class="text-[10px] text-slate-400 hover:text-rose-400 underline cursor-pointer">إلغاء الحفظ</button>
+        </div>
+      `;
+    }
+  } else {
+    // Password has changed! Invalidate old saved credentials on this device
+    localStorage.removeItem('batihub_saved_login_cred');
+    emailInput.value = saved.email;
+    passwordInput.value = '';
+    if (rememberCheck) rememberCheck.checked = false;
+    if (savedNotice) savedNotice.classList.add('hidden');
+    showToast('تم تغيير كلمة المرور سابقاً لهذا الحساب. يرجى إدخال كلمة المرور الجديدة لتسجيل الدخول.', 'warning', 4500);
+  }
+}
+
+/**
+ * Erases local saved credentials on this device
+ */
+function forgetSavedLoginCredentials() {
+  localStorage.removeItem('batihub_saved_login_cred');
+  const emailInput = document.getElementById('loginEmail');
+  const passwordInput = document.getElementById('loginPassword');
+  const rememberCheck = document.getElementById('rememberMeCheck');
+  const savedNotice = document.getElementById('savedCredNotice');
+  if (emailInput) emailInput.value = '';
+  if (passwordInput) passwordInput.value = '';
+  if (rememberCheck) rememberCheck.checked = false;
+  if (savedNotice) savedNotice.classList.add('hidden');
+  showToast('تمت إزالة الحفظ التلقائي لهذا الجهاز بنجاح', 'info');
 }
 
 async function sendOtpEmail(toEmail, otpCode, purpose = 'registration') {
@@ -1033,6 +1124,16 @@ async function handleDirectPasswordChange(event) {
   currentUser.passwordHash = newHash;
   setStorageJSON('batihub_current_user', currentUser);
 
+  // If saved on this local device, keep local credentials updated
+  const saved = getStorageJSON('batihub_saved_login_cred', null);
+  if (saved && saved.email.toLowerCase() === currentUser.email.toLowerCase()) {
+    setStorageJSON('batihub_saved_login_cred', {
+      email: currentUser.email,
+      password: newPwd,
+      passwordHash: newHash
+    });
+  }
+
   closeChangePasswordModal();
   showToast('تم تغيير كلمة المرور بنجاح!', 'success');
 }
@@ -1331,6 +1432,31 @@ function handleIncomingLiveSyncPacket(packet) {
     setStorageJSON('batihub_study_offices', offices);
     renderStudyOfficesFeed();
   }
+
+  // 10. Real-time User Block Status Sync
+  else if (action === 'user_block_toggle' && payload) {
+    const { blocker, blocked, isBlocked } = payload;
+    let blocks = getActiveBlocks();
+    blocks = blocks.filter(b => !(b.blocker.toLowerCase() === blocker.toLowerCase() && b.blocked.toLowerCase() === blocked.toLowerCase()));
+    if (isBlocked) {
+      blocks.push({
+        blocker: blocker.toLowerCase(),
+        blocked: blocked.toLowerCase(),
+        timestamp: new Date().toISOString()
+      });
+    }
+    setStorageJSON('batihub_active_blocks', blocks);
+
+    // If chat modal is currently open with either party, refresh the UI immediately!
+    if (currentChatPartner && currentUser) {
+      const myEmail = currentUser.email.toLowerCase();
+      const pEmail = currentChatPartner.email.toLowerCase();
+      if ((pEmail === blocker.toLowerCase() && myEmail === blocked.toLowerCase()) ||
+          (pEmail === blocked.toLowerCase() && myEmail === blocker.toLowerCase())) {
+        openPrivateChat(currentChatPartner.email, currentChatPartner.name, currentChatPartner.avatar);
+      }
+    }
+  }
 }
 
 /* ========================================================================= */
@@ -1561,12 +1687,13 @@ function clearCalcHistory() {
   showToast('تم مسح سجل العمليات الحسابية', 'info');
 }
 
-/* Quick Tools Calculations */
+/* Quick Tools Calculations (Safely guarded) */
 function runQuickCalcSurface() {
   const lEl = document.getElementById('qcLength') || document.getElementById('qcSurfL');
   const wEl = document.getElementById('qcWidth') || document.getElementById('qcSurfW');
-  const l = parseFloat(lEl ? lEl.value : 0) || 0;
-  const w = parseFloat(wEl ? wEl.value : 0) || 0;
+  if (!lEl || !wEl) return;
+  const l = parseFloat(lEl.value || 0) || 0;
+  const w = parseFloat(wEl.value || 0) || 0;
   const area = (l * w).toFixed(2);
   const perim = (2 * (l + w)).toFixed(2);
 
@@ -1578,10 +1705,16 @@ function runQuickCalcSurface() {
 }
 
 function runQuickCalcConcrete() {
-  const l = parseFloat(document.getElementById('qcConcL').value) || 0;
-  const w = parseFloat(document.getElementById('qcConcW').value) || 0;
-  const h = parseFloat(document.getElementById('qcConcH').value) || 0;
-  const dosage = parseFloat(document.getElementById('qcConcDosage').value) || 350;
+  const lEl = document.getElementById('qcConcL');
+  const wEl = document.getElementById('qcConcW');
+  const hEl = document.getElementById('qcConcH');
+  const dosageEl = document.getElementById('qcConcDosage');
+  if (!lEl || !wEl || !hEl) return;
+
+  const l = parseFloat(lEl.value || 0) || 0;
+  const w = parseFloat(wEl.value || 0) || 0;
+  const h = parseFloat(hEl.value || 0) || 0;
+  const dosage = parseFloat(dosageEl ? dosageEl.value : 350) || 350;
 
   const vol = l * w * h;
   const volFormatted = vol.toFixed(2);
@@ -1593,23 +1726,35 @@ function runQuickCalcConcrete() {
   const sand = (vol * 0.4).toFixed(2);
   const gravel = (vol * 0.8).toFixed(2);
 
-  document.getElementById('qcConcVolOutput').textContent = `${volFormatted} m³`;
-  document.getElementById('qcBagsOutput').textContent = `${bags} كيس (${tons}T)`;
-  document.getElementById('qcSandOutput').textContent = `${sand} m³`;
-  document.getElementById('qcGravelOutput').textContent = `${gravel} m³`;
+  const volOut = document.getElementById('qcConcVolOutput');
+  const bagsOut = document.getElementById('qcBagsOutput');
+  const sandOut = document.getElementById('qcSandOutput');
+  const gravelOut = document.getElementById('qcGravelOutput');
+
+  if (volOut) volOut.textContent = `${volFormatted} m³`;
+  if (bagsOut) bagsOut.textContent = `${bags} كيس (${tons}T)`;
+  if (sandOut) sandOut.textContent = `${sand} m³`;
+  if (gravelOut) gravelOut.textContent = `${gravel} m³`;
 }
 
 function runQuickCalcSteel() {
-  const dia = parseFloat(document.getElementById('qcSteelDiameter').value) || 12;
-  const len = parseFloat(document.getElementById('qcSteelLength').value) || 0;
+  const diaEl = document.getElementById('qcSteelDiameter');
+  const lenEl = document.getElementById('qcSteelLength');
+  if (!diaEl || !lenEl) return;
+
+  const dia = parseFloat(diaEl.value || 12) || 12;
+  const len = parseFloat(lenEl.value || 0) || 0;
 
   // Weight per meter formula: (dia^2) / 162
   const kgPerMeter = Math.pow(dia, 2) / 162;
   const totalWeight = len * kgPerMeter;
   const quintals = totalWeight / 100;
 
-  document.getElementById('qcSteelWeightOutput').textContent = `${totalWeight.toFixed(2)} kg`;
-  document.getElementById('qcSteelQuintalsOutput').textContent = `${quintals.toFixed(2)} Q`;
+  const weightOut = document.getElementById('qcSteelWeightOutput');
+  const quintalsOut = document.getElementById('qcSteelQuintalsOutput');
+
+  if (weightOut) weightOut.textContent = `${totalWeight.toFixed(2)} kg`;
+  if (quintalsOut) quintalsOut.textContent = `${quintals.toFixed(2)} Q`;
 }
 
 function injectQuickValue(elementId) {
@@ -2557,7 +2702,18 @@ function getConversationKey(email1, email2) {
   return `thread_${sorted[0]}__${sorted[1]}`;
 }
 
+function getActiveBlocks() {
+  return getStorageJSON('batihub_active_blocks', []);
+}
+
+function isUserBlockedBy(targetEmail, potentialBlockerEmail) {
+  if (!targetEmail || !potentialBlockerEmail) return false;
+  const blocks = getActiveBlocks();
+  return blocks.some(b => b.blocker.toLowerCase() === potentialBlockerEmail.toLowerCase() && b.blocked.toLowerCase() === targetEmail.toLowerCase());
+}
+
 function openPrivateChat(partnerEmail, partnerName, partnerAvatar) {
+  if (!currentUser) return;
   currentChatPartner = {
     email: partnerEmail.toLowerCase(),
     name: partnerName || partnerEmail,
@@ -2570,27 +2726,57 @@ function openPrivateChat(partnerEmail, partnerName, partnerAvatar) {
   const blockBtn = document.getElementById('btnBlockUserChat');
   const blockedNotice = document.getElementById('chatBlockedNotice');
   const form = document.getElementById('privateChatForm');
+  const chatInput = document.getElementById('chatMessageInput');
 
   if (partnerNameEl) partnerNameEl.textContent = currentChatPartner.name;
   if (partnerAvatarEl) partnerAvatarEl.src = resolveAvatarSrc(currentChatPartner.avatar, currentChatPartner.name, currentChatPartner.email);
 
-  // Check if blocked
-  const blockedList = getStorageJSON('batihub_blocked_users', []);
-  const isBlocked = blockedList.includes(currentChatPartner.email);
+  const myEmail = currentUser.email.toLowerCase();
+  const theirEmail = currentChatPartner.email.toLowerCase();
+
+  const isBlockedByPartner = isUserBlockedBy(myEmail, theirEmail);
+  const hasBlockedPartner = isUserBlockedBy(theirEmail, myEmail);
 
   if (blockBtn) {
-    blockBtn.innerHTML = isBlocked
-      ? '<i class="fa-solid fa-unlock text-[11px] mr-1"></i> <span>إلغاء الحظر</span>'
-      : '<i class="fa-solid fa-ban text-[11px] mr-1"></i> <span>حظر</span>';
+    if (isBlockedByPartner) {
+      blockBtn.classList.add('hidden');
+    } else {
+      blockBtn.classList.remove('hidden');
+      blockBtn.innerHTML = hasBlockedPartner
+        ? '<i class="fa-solid fa-unlock text-[11px] mr-1"></i> <span>إلغاء الحظر</span>'
+        : '<i class="fa-solid fa-ban text-[11px] mr-1"></i> <span>حظر</span>';
+      blockBtn.className = hasBlockedPartner
+        ? 'px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-bold transition cursor-pointer'
+        : 'px-2.5 py-1 rounded-lg bg-bh-bg hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 border border-bh-border text-xs transition cursor-pointer';
+    }
   }
 
   if (blockedNotice && form) {
-    if (isBlocked) {
+    if (isBlockedByPartner) {
       blockedNotice.classList.remove('hidden');
+      blockedNotice.className = 'text-center text-xs text-rose-300 bg-rose-500/20 p-2.5 rounded-xl border border-rose-500/40 font-bold';
+      blockedNotice.innerHTML = '<i class="fa-solid fa-circle-ban text-sm mr-1.5"></i> لقد تم حظرك من قبل هذا المستخدم، لا يمكنك مراسلته أو إرسال رسائل إليه.';
       form.classList.add('opacity-40', 'pointer-events-none');
+      if (chatInput) {
+        chatInput.disabled = true;
+        chatInput.placeholder = '🚫 لا يمكنك إرسال رسائل لأنك محظور من هذا المستخدم';
+      }
+    } else if (hasBlockedPartner) {
+      blockedNotice.classList.remove('hidden');
+      blockedNotice.className = 'text-center text-xs text-amber-300 bg-amber-500/20 p-2.5 rounded-xl border border-amber-500/40 font-bold';
+      blockedNotice.innerHTML = '<i class="fa-solid fa-user-slash text-sm mr-1.5"></i> قمت بحظر هذا المستخدم. لا يمكنه إرسال رسائل إليك.';
+      form.classList.add('opacity-40', 'pointer-events-none');
+      if (chatInput) {
+        chatInput.disabled = true;
+        chatInput.placeholder = 'قمت بحظر هذا الطرف (اضغط إلغاء الحظر للمراسلة)';
+      }
     } else {
       blockedNotice.classList.add('hidden');
       form.classList.remove('opacity-40', 'pointer-events-none');
+      if (chatInput) {
+        chatInput.disabled = false;
+        chatInput.placeholder = 'اكتب رسالتك هنا...';
+      }
     }
   }
 
@@ -2667,6 +2853,18 @@ function renderPrivateChatMessages() {
 function handleSendPrivateMessage(event) {
   if (event) event.preventDefault();
   if (!currentUser || !currentChatPartner) return;
+
+  const myEmail = currentUser.email.toLowerCase();
+  const partnerEmail = currentChatPartner.email.toLowerCase();
+
+  if (isUserBlockedBy(myEmail, partnerEmail)) {
+    showToast('لقد تم حظرك من قبل هذا المستخدم، لا يمكنك إرسال رسائل إليه!', 'error');
+    return;
+  }
+  if (isUserBlockedBy(partnerEmail, myEmail)) {
+    showToast('لا يمكنك إرسال رسائل لمستخدم قمت بحظره! قم بإلغاء الحظر أولاً.', 'warning');
+    return;
+  }
 
   const input = document.getElementById('chatMessageInput');
   const text = (input.value || '').trim();
@@ -2771,6 +2969,18 @@ async function toggleVoiceRecording() {
 function sendVoiceMessage(audioBase64) {
   if (!currentUser || !currentChatPartner) return;
 
+  const myEmail = currentUser.email.toLowerCase();
+  const partnerEmail = currentChatPartner.email.toLowerCase();
+
+  if (isUserBlockedBy(myEmail, partnerEmail)) {
+    showToast('لقد تم حظرك من قبل هذا المستخدم، لا يمكنك إرسال رسائل إليه!', 'error');
+    return;
+  }
+  if (isUserBlockedBy(partnerEmail, myEmail)) {
+    showToast('لا يمكنك إرسال رسائل لمستخدم قمت بحظره! قم بإلغاء الحظر أولاً.', 'warning');
+    return;
+  }
+
   const threadKey = getConversationKey(currentUser.email, currentChatPartner.email);
   const chats = getStorageJSON('batihub_private_chats', {});
   if (!chats[threadKey]) chats[threadKey] = [];
@@ -2801,21 +3011,36 @@ function sendVoiceMessage(audioBase64) {
 }
 
 function toggleBlockCurrentChatPartner() {
-  if (!currentChatPartner) return;
+  if (!currentChatPartner || !currentUser) return;
+  const myEmail = currentUser.email.toLowerCase();
+  const partnerEmail = currentChatPartner.email.toLowerCase();
 
-  const blockedList = getStorageJSON('batihub_blocked_users', []);
-  const email = currentChatPartner.email;
-  const idx = blockedList.indexOf(email);
+  let blocks = getActiveBlocks();
+  const existingIdx = blocks.findIndex(b => b.blocker.toLowerCase() === myEmail && b.blocked.toLowerCase() === partnerEmail);
+  let isNowBlocked = false;
 
-  if (idx > -1) {
-    blockedList.splice(idx, 1);
+  if (existingIdx > -1) {
+    blocks.splice(existingIdx, 1);
+    isNowBlocked = false;
     showToast(`تم إلغاء حظر ${currentChatPartner.name}`, 'info');
   } else {
-    blockedList.push(email);
+    blocks.push({
+      blocker: myEmail,
+      blocked: partnerEmail,
+      timestamp: new Date().toISOString()
+    });
+    isNowBlocked = true;
     showToast(`تم حظر ${currentChatPartner.name} بنجاح`, 'warning');
   }
+  setStorageJSON('batihub_active_blocks', blocks);
 
-  setStorageJSON('batihub_blocked_users', blockedList);
+  // Broadcast in real-time across all devices
+  broadcastLiveEvent('user_block_toggle', {
+    blocker: myEmail,
+    blocked: partnerEmail,
+    isBlocked: isNowBlocked
+  });
+
   openPrivateChat(currentChatPartner.email, currentChatPartner.name, currentChatPartner.avatar);
 }
 
@@ -3078,11 +3303,9 @@ document.addEventListener('DOMContentLoaded', () => {
   startLiveClock();
   initLiveSyncEngine();
 
-  // 4. Initialize quick tools defaults
-  runQuickCalcSurface();
-  runQuickCalcConcrete();
-  runQuickCalcSteel();
+  // 4. Initialize calculator history tape and saved credentials
   renderCalcHistory();
+  loadSavedLoginCredentials();
 
   // 5. Check existing login session
   const storedUser = getStorageJSON('batihub_current_user', null) ||

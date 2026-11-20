@@ -140,6 +140,7 @@
               <span>تذكر بيانات تسجيل الدخول على هذا الجهاز</span>
             </label>
           </div>
+          <div id="savedCredNotice" class="hidden"></div>
 
           <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
             <i class="fa-solid fa-arrow-right-to-bracket"></i>
@@ -379,171 +380,32 @@
             </div>
           </div>
 
-          <!-- RIGHT COLUMN: CIVIL ENGINEERING TOOLS (5 COLS) -->
-          <div class="lg:col-span-5 space-y-4 text-right">
-            
-            <!-- Tool 1: Surface & Perimeter -->
-            <div class="bg-bh-card border border-bh-border rounded-2xl p-4 shadow-xl space-y-3">
-              <div class="flex items-center justify-between pb-2 border-b border-bh-border">
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-vector-square text-bh-yellow text-sm"></i>
-                  <h3 class="font-bold text-white text-xs sm:text-sm" data-i18n="qc_surface_title">1. حساب المساحة والمحيط</h3>
-                </div>
-                <span class="text-[10px] text-slate-400 font-mono">m² / m</span>
-              </div>
+          <!-- RIGHT COLUMN: CALCULATION HISTORY TAPE (5 COLS) -->
+          <div class="lg:col-span-5 text-right">
+            <div class="bg-bh-card border border-bh-border rounded-2xl p-4 sm:p-5 shadow-2xl flex flex-col h-full min-h-[420px]">
               
-              <div class="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <label class="block text-[11px] text-slate-400 mb-1" data-i18n="qc_length">الطول (بالمتر) :</label>
-                  <input type="number" id="qcLength" value="12" step="0.1" oninput="runQuickCalcSurface()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-2 text-white font-mono font-bold focus:border-bh-yellow focus:outline-none text-left" dir="ltr">
-                </div>
-                <div>
-                  <label class="block text-[11px] text-slate-400 mb-1" data-i18n="qc_width">العرض (بالمتر) :</label>
-                  <input type="number" id="qcWidth" value="8" step="0.1" oninput="runQuickCalcSurface()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-2 text-white font-mono font-bold focus:border-bh-yellow focus:outline-none text-left" dir="ltr">
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-2 bg-bh-bg p-2.5 rounded-xl border border-bh-border text-xs font-mono">
-                <div>
-                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_area_res">المساحة الإجمالية:</span>
-                  <span id="qcAreaOutput" class="text-sm font-black text-bh-yellow">96.00 m²</span>
-                </div>
-                <div>
-                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_perim_res">المحيط:</span>
-                  <span id="qcPerimOutput" class="text-sm font-black text-emerald-400">40.00 m</span>
-                </div>
-              </div>
-
-              <button type="button" onclick="injectQuickValue('qcAreaOutput')" class="w-full py-1.5 rounded-lg bg-bh-cardhover hover:bg-bh-yellow/20 text-bh-yellow border border-bh-border hover:border-bh-yellow/40 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
-                <i class="fa-solid fa-arrow-down-left-and-up-right-to-center text-[10px]"></i>
-                <span data-i18n="qc_btn_inject_calc">نقل المساحة إلى الآلة الحاسبة</span>
-              </button>
-            </div>
-
-            <!-- Tool 2: Concrete Volume & Cement -->
-            <div class="bg-bh-card border border-bh-border rounded-2xl p-4 shadow-xl space-y-3">
-              <div class="flex items-center justify-between pb-2 border-b border-bh-border">
+              <div class="flex items-center justify-between pb-3 border-b border-bh-border mb-3">
                 <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-cubes text-emerald-400 text-sm"></i>
-                  <h3 class="font-bold text-white text-xs sm:text-sm" data-i18n="qc_concrete_title">2. حجم الخرسانة وأكياس الإسمنت</h3>
+                  <div class="w-8 h-8 rounded-xl bg-bh-yellow/15 text-bh-yellow flex items-center justify-center text-sm shadow-sm">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-white text-xs sm:text-sm" data-i18n="qc_history_title">سجل العمليات الحسابية</h3>
+                    <p class="text-[10px] text-slate-400">حفظ تلقائي للعمليات السابقة مع إمكانية إعادة استخدام النتائج</p>
+                  </div>
                 </div>
-                <span class="text-[10px] text-slate-400 font-mono">m³</span>
-              </div>
-
-              <div class="grid grid-cols-3 gap-2 text-xs">
-                <div>
-                  <label class="block text-[10px] text-slate-400 mb-1" data-i18n="qc_conc_l">الطول (متر) :</label>
-                  <input type="number" id="qcConcL" value="10" step="0.1" oninput="runQuickCalcConcrete()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-1.5 text-white font-mono font-bold focus:border-bh-yellow focus:outline-none text-left" dir="ltr">
-                </div>
-                <div>
-                  <label class="block text-[10px] text-slate-400 mb-1" data-i18n="qc_conc_w">العرض (متر) :</label>
-                  <input type="number" id="qcConcW" value="5" step="0.1" oninput="runQuickCalcConcrete()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-1.5 text-white font-mono font-bold focus:border-bh-yellow focus:outline-none text-left" dir="ltr">
-                </div>
-                <div>
-                  <label class="block text-[10px] text-slate-400 mb-1" data-i18n="qc_conc_h">الارتفاع / السمك (متر) :</label>
-                  <input type="number" id="qcConcH" value="0.20" step="0.05" oninput="runQuickCalcConcrete()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-1.5 text-white font-mono font-bold focus:border-bh-yellow focus:outline-none text-left" dir="ltr">
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <label class="block text-[10px] text-slate-400 mb-1" data-i18n="qc_dosage">عيار الإسمنت :</label>
-                  <select id="qcConcDosage" onchange="runQuickCalcConcrete()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-1.5 text-white text-xs font-mono focus:border-bh-yellow focus:outline-none">
-                    <option value="350">350 كغ/م³ (عناصر مسلحة وسقف)</option>
-                    <option value="250">250 كغ/م³ (خرسانة نظافة)</option>
-                    <option value="400">400 كغ/م³ (خرسانة عالية القوة)</option>
-                  </select>
-                </div>
-                <div class="bg-bh-bg p-2 rounded-xl border border-bh-border flex flex-col justify-center">
-                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_vol_res">حجم الخرسانة:</span>
-                  <span id="qcConcVolOutput" class="text-sm font-black text-emerald-400 font-mono">10.00 m³</span>
-                </div>
-              </div>
-
-              <!-- Breakdown -->
-              <div class="grid grid-cols-3 gap-2 bg-bh-bg p-2 rounded-xl border border-bh-border text-center text-xs font-mono">
-                <div>
-                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_cement_bags">أكياس الإسمنت:</span>
-                  <span id="qcBagsOutput" class="text-xs font-black text-bh-yellow">70 كيس (3.5T)</span>
-                </div>
-                <div>
-                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_sand_vol">الرمل :</span>
-                  <span id="qcSandOutput" class="text-xs font-bold text-slate-200">4.00 m³</span>
-                </div>
-                <div>
-                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_gravel_vol">الحصى :</span>
-                  <span id="qcGravelOutput" class="text-xs font-bold text-slate-200">8.00 m³</span>
-                </div>
-              </div>
-
-              <button type="button" onclick="injectQuickValue('qcConcVolOutput')" class="w-full py-1.5 rounded-lg bg-bh-cardhover hover:bg-emerald-500/20 text-emerald-400 border border-bh-border hover:border-emerald-500/40 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
-                <i class="fa-solid fa-arrow-down-left-and-up-right-to-center text-[10px]"></i>
-                <span data-i18n="qc_btn_inject_vol">نقل الحجم إلى الآلة الحاسبة</span>
-              </button>
-            </div>
-
-            <!-- Tool 3: Steel Rebar Weight -->
-            <div class="bg-bh-card border border-bh-border rounded-2xl p-4 shadow-xl space-y-3">
-              <div class="flex items-center justify-between pb-2 border-b border-bh-border">
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-bars text-bh-orange text-sm"></i>
-                  <h3 class="font-bold text-white text-xs sm:text-sm" data-i18n="qc_steel_title">3. وزن حديد التسليح</h3>
-                </div>
-                <span class="text-[10px] text-slate-400 font-mono">kg / Q</span>
-              </div>
-
-              <div class="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <label class="block text-[10px] text-slate-400 mb-1" data-i18n="qc_steel_dia">قطر السيخ :</label>
-                  <select id="qcSteelDiameter" onchange="runQuickCalcSteel()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-2 text-white text-xs font-mono focus:border-bh-yellow focus:outline-none">
-                    <option value="6">Ø 6 مم (0.222 kg/m)</option>
-                    <option value="8">Ø 8 مم (0.395 kg/m)</option>
-                    <option value="10">Ø 10 مم (0.617 kg/m)</option>
-                    <option value="12" selected>Ø 12 مم (0.888 kg/m)</option>
-                    <option value="14">Ø 14 مم (1.208 kg/m)</option>
-                    <option value="16">Ø 16 مم (1.578 kg/m)</option>
-                    <option value="20">Ø 20 مم (2.466 kg/m)</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-[10px] text-slate-400 mb-1" data-i18n="qc_steel_len">الطول الإجمالي (بالمتر) :</label>
-                  <input type="number" id="qcSteelLength" value="120" step="1" oninput="runQuickCalcSteel()" class="w-full bg-bh-bg border border-bh-border rounded-lg p-2 text-white font-mono font-bold focus:border-bh-yellow focus:outline-none text-left" dir="ltr">
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-2 bg-bh-bg p-2.5 rounded-xl border border-bh-border text-xs font-mono">
-                <div>
-                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_steel_weight">الوزن الإجمالي:</span>
-                  <span id="qcSteelWeightOutput" class="text-sm font-black text-bh-orange">106.56 kg</span>
-                </div>
-                <div>
-                  <span class="text-[10px] text-slate-400 block" data-i18n="qc_steel_quintals">بالقنطار :</span>
-                  <span id="qcSteelQuintalsOutput" class="text-sm font-black text-white">1.07 Q</span>
-                </div>
-              </div>
-
-              <button type="button" onclick="injectQuickValue('qcSteelWeightOutput')" class="w-full py-1.5 rounded-lg bg-bh-cardhover hover:bg-bh-orange/20 text-bh-orange border border-bh-border hover:border-bh-orange/40 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
-                <i class="fa-solid fa-arrow-down-left-and-up-right-to-center text-[10px]"></i>
-                <span data-i18n="qc_btn_inject_steel">نقل الوزن إلى الآلة الحاسبة</span>
-              </button>
-            </div>
-
-            <!-- History Tape -->
-            <div class="bg-bh-card border border-bh-border rounded-2xl p-4 shadow-xl space-y-3">
-              <div class="flex items-center justify-between pb-2 border-b border-bh-border">
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-clock-rotate-left text-bh-yellow text-sm"></i>
-                  <h3 class="font-bold text-white text-xs sm:text-sm" data-i18n="qc_history_title">سجل العمليات الحسابية</h3>
-                </div>
-                <button type="button" onclick="clearCalcHistory()" class="text-[10px] text-slate-400 hover:text-rose-400 transition cursor-pointer" data-i18n="qc_btn_clear_history">
-                  <i class="fa-regular fa-trash-can mr-1"></i> مسح السجل
+                <button type="button" onclick="clearCalcHistory()" class="px-2.5 py-1.5 rounded-xl bg-bh-bg hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 border border-bh-border text-xs font-bold transition cursor-pointer flex items-center gap-1.5" data-i18n="qc_btn_clear_history">
+                  <i class="fa-regular fa-trash-can text-[11px]"></i>
+                  <span>مسح السجل</span>
                 </button>
               </div>
-              <div id="calcHistoryTapeContainer" class="max-h-48 overflow-y-auto space-y-1.5 pr-1 text-xs font-mono text-left" dir="ltr">
-                <p class="text-[11px] text-slate-500 text-center py-4 text-right" dir="rtl" data-i18n="qc_history_empty">لا توجد عمليات سابقة بعد</p>
-              </div>
-            </div>
 
+              <!-- History Tape list -->
+              <div id="calcHistoryTapeContainer" class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs font-mono text-left max-h-[460px]" dir="ltr">
+                <p class="text-[11px] text-slate-500 text-center py-12 text-right" dir="rtl" data-i18n="qc_history_empty">لا توجد عمليات حسابية سابقة بعد</p>
+              </div>
+
+            </div>
           </div>
 
         </div>

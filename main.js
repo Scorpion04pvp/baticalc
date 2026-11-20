@@ -127,15 +127,15 @@ ipcMain.handle('send-mail', async (event, { to, subject, html, text }) => {
     });
 
     const info = await transporter.sendMail({
-      from: `"${cfg.senderName || 'Support Bati Hub DZ'}" <${email}>`,
+      from: `"Support Bati Hub DZ" <${email}>`,
+      replyTo: `"Support Bati Hub DZ" <${email}>`,
       to,
       subject,
       text: text || '',
       html: html || '',
       headers: {
-        'X-Priority': '1',
-        'X-MSMail-Priority': 'High',
-        'Importance': 'high'
+        'X-Entity-Ref-ID': Date.now().toString(),
+        'X-Auto-Response-Suppress': 'OOF, AutoReply'
       }
     });
 
