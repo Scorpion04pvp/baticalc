@@ -205,6 +205,10 @@ body {
 
 /* Navigation Tab Styles */
 .nav-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   padding: 0.55rem 1.1rem;
   border-radius: 0.75rem;
   color: #94a3b8;
@@ -212,6 +216,7 @@ body {
   white-space: nowrap;
   font-size: 0.82rem;
   font-weight: 700;
+  cursor: pointer;
 }
 .nav-tab:hover {
   color: #f8fafc;

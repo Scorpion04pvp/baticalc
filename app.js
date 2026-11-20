@@ -846,6 +846,42 @@ function generate6DigitOtp() {
 }
 
 // =========================================================================
+// GOOGLE GMAIL-STYLE DYNAMIC AVATARS & SAFE SANITIZATION
+// =========================================================================
+const GMAIL_PALETTE = ['#EA4335', '#4285F4', '#34A853', '#FBBC05', '#9C27B0', '#009688', '#E91E63', '#FF6D00', '#3F51B5', '#795548'];
+
+function getGmailStyleAvatar(nameOrEmail, customBgColor = null) {
+  const str = String(nameOrEmail || 'User').trim();
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const colorIndex = Math.abs(hash) % GMAIL_PALETTE.length;
+  const bgColor = customBgColor || GMAIL_PALETTE[colorIndex];
+  const initial = (str.charAt(0) || 'U').toUpperCase();
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="${bgColor}"/><text x="50%" y="54%" text-anchor="middle" dominant-baseline="central" fill="#ffffff" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="30" font-weight="700">${initial}</text></svg>`;
+
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+}
+
+function resolveSafeAvatar(avatarUrl, nameOrEmail) {
+  if (avatarUrl && typeof avatarUrl === 'string') {
+    if (avatarUrl.startsWith('data:image/jpeg') || avatarUrl.startsWith('data:image/png') || avatarUrl.startsWith('assets/')) {
+      return avatarUrl;
+    }
+    if (avatarUrl.startsWith('data:image/svg+xml')) {
+      if (avatarUrl.includes('"')) {
+        const svgContent = avatarUrl.replace(/^data:image\/svg\+xml;utf8,/, '');
+        return 'data:image/svg+xml;utf8,' + encodeURIComponent(svgContent);
+      }
+      return avatarUrl;
+    }
+  }
+  return getGmailStyleAvatar(nameOrEmail || 'U');
+}
+
+// =========================================================================
 // SECURE VAULT & USER DATA ENCRYPTION (حماية وتشفير بيانات المستخدمين)
 // =========================================================================
 const VAULT_SECURITY_KEY = 'BTH_SEC_VAULT_KEY_2026_MOUHANED_GUELLIF_DZ_BATI_PRO';
@@ -913,7 +949,7 @@ async function initAccountsDatabase() {
       "salt": "7vjx6gpgjb31pc5dvnexgp",
       "isVerified": true,
       "role": "user",
-      "avatar": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"64\" height=\"64\" viewBox=\"0 0 64 64\"><rect width=\"64\" height=\"64\" rx=\"32\" fill=\"%23ffa000\"/><text x=\"50%\" y=\"55%\" text-anchor=\"middle\" dominant-baseline=\"middle\" fill=\"%2306080c\" font-family=\"sans-serif\" font-size=\"28\" font-weight=\"bold\">F</text></svg>",
+      "avatar": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2264%22%20height%3D%2264%22%20viewBox%3D%220%200%2064%2064%22%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2232%22%20r%3D%2232%22%20fill%3D%22%23EA4335%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2254%25%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22central%22%20fill%3D%22%23ffffff%22%20font-family%3D%22-apple-system%2CBlinkMacSystemFont%2C'Segoe%20UI'%2CRoboto%2Csans-serif%22%20font-size%3D%2230%22%20font-weight%3D%22700%22%3EF%3C%2Ftext%3E%3C%2Fsvg%3E",
       "createdAt": "2026-11-19T22:06:28.035Z"
     },
     "batihubdz@gmail.com": {
@@ -1430,8 +1466,7 @@ async function handleVerifyOtp(e) {
 
     // Account confirmed & verified!
     const accounts = getStoredAccounts();
-    const initial = ((reg.firstName || 'B').charAt(0)).toUpperCase();
-    const avatarSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="32" fill="%23ffa000"/><text x="50%" y="55%" text-anchor="middle" dominant-baseline="middle" fill="%2306080c" font-family="sans-serif" font-size="28" font-weight="bold">${initial}</text></svg>`;
+    const avatarSvg = getGmailStyleAvatar(reg.fullName || reg.firstName || reg.email);
 
     const userRecord = {
       id: 'usr_' + Date.now(),
@@ -1548,8 +1583,7 @@ async function handleUserLogin(e) {
   }
 
   // Login successful
-  const initial = ((user.firstName || user.fullName || 'B').charAt(0)).toUpperCase();
-  const avatarSvg = user.avatar || `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="32" fill="%23ffa000"/><text x="50%" y="55%" text-anchor="middle" dominant-baseline="middle" fill="%2306080c" font-family="sans-serif" font-size="28" font-weight="bold">${initial}</text></svg>`;
+  const avatarSvg = resolveSafeAvatar(user.avatar, user.fullName || user.firstName || user.email);
 
   const activeSession = {
     name: user.fullName || user.firstName || user.email,
@@ -1752,34 +1786,41 @@ function checkAuthStatus() {
   return false;
 }
 
-function handleSignOut() {
+async function handleSignOut() {
   const isAr = state.lang === 'ar';
   const confirmMsg = isAr 
     ? 'هل أنت متأكد من رغبتك في تسجيل الخروج من حسابك؟' 
     : (state.lang === 'en' ? 'Are you sure you want to sign out?' : 'Voulez-vous vraiment vous déconnecter de votre compte ?');
 
-  if (confirm(confirmMsg)) {
-    closeUserProfileModal();
-    localStorage.removeItem('batihub_user');
-    if (window.electronDB && window.electronDB.saveActiveSession) {
-      window.electronDB.saveActiveSession(null);
-    }
+  const ok = await showAppConfirm(
+    isAr ? 'تسجيل الخروج' : 'Déconnexion',
+    confirmMsg,
+    isAr ? 'تسجيل الخروج' : 'Se déconnecter',
+    isAr ? 'إلغاء' : 'Annuler',
+    'warning'
+  );
+  if (!ok) return;
 
-    const nameDisplay = document.getElementById('userNameDisplay');
-    const avatarImg = document.getElementById('userAvatarImg');
-    if (nameDisplay) nameDisplay.innerText = isAr ? 'مستخدم' : (state.lang === 'en' ? 'User' : 'Utilisateur');
-    if (avatarImg) avatarImg.src = 'assets/batihub_logo.png';
+  closeUserProfileModal();
+  localStorage.removeItem('batihub_user');
+  if (window.electronDB && window.electronDB.saveActiveSession) {
+    window.electronDB.saveActiveSession(null);
+  }
 
-    const appDashboard = document.getElementById('appDashboard');
-    if (appDashboard) appDashboard.classList.add('hidden');
+  const nameDisplay = document.getElementById('userNameDisplay');
+  const avatarImg = document.getElementById('userAvatarImg');
+  if (nameDisplay) nameDisplay.innerText = isAr ? 'مستخدم' : (state.lang === 'en' ? 'User' : 'Utilisateur');
+  if (avatarImg) avatarImg.src = 'assets/batihub_logo.png';
 
-    const authGate = document.getElementById('authGateScreen');
-    if (authGate) {
-      authGate.style.display = 'flex';
-      authGate.classList.remove('auth-hide');
-      switchAuthView('login');
-      renderSavedAccounts();
-    }
+  const appDashboard = document.getElementById('appDashboard');
+  if (appDashboard) appDashboard.classList.add('hidden');
+
+  const authGate = document.getElementById('authGateScreen');
+  if (authGate) {
+    authGate.style.display = 'flex';
+    authGate.classList.remove('auth-hide');
+    switchAuthView('login');
+    renderSavedAccounts();
   }
 }
 
@@ -3361,7 +3402,7 @@ function openUserProfileModal() {
 
   if (nameEl) nameEl.innerText = user.name || 'مستخدم BatiHub DZ';
   if (emailEl) emailEl.innerText = user.email || 'user@gmail.com';
-  if (avatarEl) avatarEl.src = user.avatar || 'assets/batihub_logo.png';
+  if (avatarEl) avatarEl.src = resolveSafeAvatar(user.avatar, user.name || user.email);
 
   // Highlight active language button in profile modal
   ['FR', 'AR', 'EN'].forEach(code => {
@@ -3383,6 +3424,62 @@ function openUserProfileModal() {
 function closeUserProfileModal() {
   const modal = document.getElementById('modalUserProfile');
   if (modal) modal.classList.add('hidden');
+}
+
+async function handleProfilePhotoUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  try {
+    const dataUrl = await compressImageFile(file, 256, 0.85);
+    const currentUser = getCurrentSessionUser();
+    if (!currentUser || !currentUser.email) return;
+
+    currentUser.avatar = dataUrl;
+    localStorage.setItem('batihub_user', JSON.stringify(currentUser));
+    if (window.electronDB && window.electronDB.saveActiveSession) {
+      window.electronDB.saveActiveSession(currentUser);
+    }
+
+    const accounts = getStoredAccounts();
+    if (accounts[currentUser.email]) {
+      accounts[currentUser.email].avatar = dataUrl;
+      saveStoredAccounts(accounts);
+    }
+
+    // Update UI elements
+    const modalAvatar = document.getElementById('profileModalAvatar');
+    const headerAvatar = document.getElementById('userAvatarImg');
+    if (modalAvatar) modalAvatar.src = dataUrl;
+    if (headerAvatar) headerAvatar.src = dataUrl;
+
+    // Update posts and comments authored by this user
+    const posts = getStoredWorkerPosts();
+    let updated = false;
+    posts.forEach(p => {
+      if (p.authorEmail && p.authorEmail.toLowerCase() === currentUser.email.toLowerCase()) {
+        p.authorAvatar = dataUrl;
+        updated = true;
+      }
+      if (p.comments) {
+        p.comments.forEach(c => {
+          if (c.authorEmail && c.authorEmail.toLowerCase() === currentUser.email.toLowerCase()) {
+            c.authorAvatar = dataUrl;
+            updated = true;
+          }
+        });
+      }
+    });
+    if (updated) {
+      saveStoredWorkerPosts(posts);
+      renderWorkerPostsFeed();
+    }
+
+    showAppToast('تم تحديث صورتك الشخصية بنجاح!', 'success');
+  } catch (err) {
+    console.error('Error uploading profile photo:', err);
+    showAppAlert('خطأ في تحميل الصورة', 'تعذر حفظ وتحديث الصورة الشخصية.', 'error');
+  }
 }
 
 let pendingChangePwdOtp = null;
@@ -5001,7 +5098,7 @@ function renderWorkerPostsFeed() {
         <!-- Header -->
         <div class="flex items-center justify-between gap-3">
           <div class="flex items-center gap-3">
-            <img src="${post.authorAvatar || 'assets/batihub_logo.png'}" alt="${escapeHtml(post.authorName)}" class="w-10 h-10 rounded-full object-cover border border-bh-border shadow-sm">
+            <img src="${resolveSafeAvatar(post.authorAvatar, post.authorName)}" alt="${escapeHtml(post.authorName)}" class="w-10 h-10 rounded-full object-cover border border-bh-border shadow-sm">
             <div>
               <div class="flex items-center gap-2 flex-wrap">
                 <span class="font-bold text-sm text-white">${escapeHtml(post.authorName)}</span>
@@ -5092,7 +5189,7 @@ function renderWorkerPostsFeed() {
           </button>
 
           <!-- 1-on-1 Private Chat Button -->
-          <button type="button" onclick="openPrivateChat('${escapeHtml(post.authorEmail)}', '${escapeHtml(post.authorName)}', '${escapeHtml(post.authorAvatar || '')}')" class="px-3.5 py-2 rounded-xl bg-bh-yellow/15 hover:bg-bh-yellow/25 text-bh-yellow border border-bh-yellow/30 text-xs font-bold transition flex items-center gap-2 cursor-pointer active:scale-95 shadow-sm">
+          <button type="button" onclick="openPrivateChat('${escapeHtml(post.authorEmail)}', '${escapeHtml(post.authorName)}')" class="px-3.5 py-2 rounded-xl bg-bh-yellow/15 hover:bg-bh-yellow/25 text-bh-yellow border border-bh-yellow/30 text-xs font-bold transition flex items-center gap-2 cursor-pointer active:scale-95 shadow-sm">
             <i class="fa-solid fa-comments text-xs"></i>
             <span>محادثة خاصة</span>
           </button>
@@ -5141,7 +5238,7 @@ function renderWorkerPostsFeed() {
 
               return `
                 <div class="flex items-start gap-2.5 p-2.5 rounded-xl bg-bh-bg/60 border border-bh-border/60">
-                  <img src="${comment.authorAvatar || 'assets/batihub_logo.png'}" alt="${escapeHtml(comment.authorName)}" class="w-7 h-7 rounded-full object-cover border border-bh-border shrink-0 mt-0.5">
+                  <img src="${resolveSafeAvatar(comment.authorAvatar, comment.authorName)}" alt="${escapeHtml(comment.authorName)}" class="w-7 h-7 rounded-full object-cover border border-bh-border shrink-0 mt-0.5">
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between gap-2">
                       <div class="flex items-center gap-1.5 flex-wrap">
@@ -5489,6 +5586,11 @@ function autoDetectOfficeGps() {
   );
 }
 
+function openGoogleMapsToPickLocation() {
+  window.open('https://www.google.com/maps', '_blank');
+  showAppToast('تم فتح خرائط Google. حدد موقع مكتبك أو انسخ رابطه أو عنوانه والصقه هنا.', 'info', 5000);
+}
+
 function openOfficeGps(gpsLocation) {
   if (!gpsLocation) {
     showAppToast('لم يتم إرفاق إحداثيات GPS لهذا المكتب', 'info');
@@ -5800,7 +5902,7 @@ function renderStudyOfficesFeed() {
             </button>
 
             <!-- 1-on-1 Private Chat -->
-            <button type="button" onclick="openPrivateChat('${escapeHtml(office.authorEmail)}', '${escapeHtml(office.name)}', '${escapeHtml(office.image || '')}')" class="flex-1 px-3 py-2 rounded-xl bg-bh-yellow/15 hover:bg-bh-yellow/25 text-bh-yellow border border-bh-yellow/30 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-sm">
+            <button type="button" onclick="openPrivateChat('${escapeHtml(office.authorEmail)}', '${escapeHtml(office.name)}')" class="flex-1 px-3 py-2 rounded-xl bg-bh-yellow/15 hover:bg-bh-yellow/25 text-bh-yellow border border-bh-yellow/30 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-sm">
               <i class="fa-solid fa-comments text-xs"></i>
               <span>محادثة خاصة</span>
             </button>
@@ -5895,7 +5997,7 @@ function openPrivateChat(targetEmail, targetName, targetAvatar) {
 
   activeChatPartnerEmail = targetEmail;
   activeChatPartnerName = targetName || targetEmail;
-  activeChatPartnerAvatar = targetAvatar || 'assets/batihub_logo.png';
+  activeChatPartnerAvatar = resolveSafeAvatar(targetAvatar || getStoredAccounts()[targetEmail]?.avatar, activeChatPartnerName);
 
   const modal = document.getElementById('modalPrivateChat');
   const nameEl = document.getElementById('chatPartnerName');
@@ -5966,7 +6068,7 @@ function renderActiveChatMessages() {
 
     return `
       <div class="flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}">
-        <img src="${msg.senderAvatar || 'assets/batihub_logo.png'}" alt="Avatar" class="w-7 h-7 rounded-full object-cover border border-bh-border shrink-0 mb-1">
+        <img src="${resolveSafeAvatar(msg.senderAvatar, msg.senderEmail)}" alt="Avatar" class="w-7 h-7 rounded-full object-cover border border-bh-border shrink-0 mb-1">
         
         <div class="max-w-[82%] sm:max-w-[70%] space-y-1.5 p-3 rounded-2xl ${isMe ? 'chat-bubble-out text-white' : 'chat-bubble-in text-slate-200'}">
           
@@ -6463,9 +6565,9 @@ function renderMessagesHubActiveChats() {
     if (conv.lastMsg.videoUrl) preview = '🎬 مقطع فيديو';
 
     return `
-      <div onclick="openPrivateChat('${escapeHtml(conv.partnerEmail)}', '${escapeHtml(conv.partnerName)}', '${escapeHtml(conv.partnerAvatar)}')" class="flex items-center justify-between p-3 rounded-xl bg-bh-bg hover:bg-bh-cardhover border border-bh-border hover:border-bh-yellow/40 transition cursor-pointer">
+      <div onclick="openPrivateChat('${escapeHtml(conv.partnerEmail)}', '${escapeHtml(conv.partnerName)}')" class="flex items-center justify-between p-3 rounded-xl bg-bh-bg hover:bg-bh-cardhover border border-bh-border hover:border-bh-yellow/40 transition cursor-pointer">
         <div class="flex items-center gap-3 min-w-0">
-          <img src="${conv.partnerAvatar || 'assets/batihub_logo.png'}" alt="Avatar" class="w-10 h-10 rounded-full object-cover border border-bh-border shrink-0">
+          <img src="${resolveSafeAvatar(conv.partnerAvatar, conv.partnerName)}" alt="Avatar" class="w-10 h-10 rounded-full object-cover border border-bh-border shrink-0">
           <div class="min-w-0">
             <h5 class="font-bold text-xs sm:text-sm text-white truncate">${escapeHtml(conv.partnerName)}</h5>
             <p class="text-[11px] text-slate-400 truncate mt-0.5">${escapeHtml(preview)}</p>

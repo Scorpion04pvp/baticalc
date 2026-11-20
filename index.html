@@ -455,12 +455,6 @@
           </div>
 
           <div class="flex items-center gap-3 text-[11px]">
-            <!-- Live Internet Connection Badge -->
-            <div id="networkStatusBadge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono">
-              <span id="networkStatusDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span id="networkStatusText" data-i18n="status_online">متصل بالإنترنت</span>
-            </div>
-
             <!-- Live Real-Time Clock -->
             <div id="liveClockDisplay" class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-bh-card border border-bh-border text-slate-300 text-[11px] font-mono">
               <i class="fa-regular fa-clock text-bh-yellow"></i>
@@ -506,26 +500,24 @@
 
         </div>
 
-        <!-- Navigation Tabs: Calculator & Worker Board -->
+        <!-- Navigation Tabs: Calculator & Worker Board & Study Offices -->
         <div class="flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-bh-border pt-2 pb-1 text-xs">
           <button class="nav-tab active-tab" data-tab="tab-scientific-calculator" onclick="switchTab('tab-scientific-calculator')">
-            <i class="fa-solid fa-calculator text-bh-yellow mr-1.5"></i>
+            <i class="fa-solid fa-calculator text-bh-yellow"></i>
             <span data-i18n="nav_scientific_calc">آلة حاسبة علمية</span>
           </button>
           <button class="nav-tab" data-tab="tab-worker-board" onclick="switchTab('tab-worker-board')">
-            <i class="fa-solid fa-briefcase text-bh-orange mr-1.5"></i>
+            <i class="fa-solid fa-briefcase text-bh-orange"></i>
             <span data-i18n="nav_worker_board">عروض العمل</span>
-            <span class="ml-1 px-1.5 py-0.5 rounded-full text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">مباشر ⚡</span>
           </button>
           <button class="nav-tab" data-tab="tab-study-offices" onclick="switchTab('tab-study-offices')">
-            <i class="fa-solid fa-compass-drafting text-sky-400 mr-1.5"></i>
+            <i class="fa-solid fa-compass-drafting text-sky-400"></i>
             <span data-i18n="nav_study_offices">مكاتب دراسات</span>
-            <span class="ml-1 px-1.5 py-0.5 rounded-full text-[9px] bg-sky-500/20 text-sky-400 border border-sky-500/30 font-bold">جديد 📍</span>
           </button>
           <button class="nav-tab" onclick="openMessagesHubModal()">
-            <i class="fa-solid fa-comments text-amber-400 mr-1.5"></i>
+            <i class="fa-solid fa-comments text-amber-400"></i>
             <span data-i18n="nav_messages">المحادثات الخاصة</span>
-            <span id="unreadMessagesBadge" class="hidden ml-1 px-1.5 py-0.5 rounded-full text-[9px] bg-rose-500 text-white font-bold">0</span>
+            <span id="unreadMessagesBadge" class="hidden px-1.5 py-0.5 rounded-full text-[9px] bg-rose-500 text-white font-bold">0</span>
           </button>
         </div>
 
@@ -1041,7 +1033,7 @@
   <!-- ========================================================================= -->
   <!-- MODAL: CREATE WORKER POST (نشر طلب عامل وحرفي)                             -->
   <!-- ========================================================================= -->
-  <div id="modalCreateWorkerPost" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+  <div id="modalCreateWorkerPost" class="fixed inset-0 z-[9990] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
     <div class="bg-bh-card border border-bh-border rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden relative text-right" dir="rtl">
       
       <!-- Modal Header -->
@@ -1164,7 +1156,7 @@
   <!-- ========================================================================= -->
   <!-- MODAL: EDIT WORKER POST (تعديل المنشور)                                    -->
   <!-- ========================================================================= -->
-  <div id="modalEditWorkerPost" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+  <div id="modalEditWorkerPost" class="fixed inset-0 z-[9990] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
     <div class="bg-bh-card border border-bh-border rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden relative text-right" dir="rtl">
       
       <div class="px-5 py-4 border-b border-bh-border flex items-center justify-between bg-bh-cardhover">
@@ -1255,26 +1247,38 @@
   <!-- ========================================================================= -->
   <!-- MODAL 1: USER PROFILE & SETTINGS                                         -->
   <!-- ========================================================================= -->
-  <div id="modalUserProfile" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+  <div id="modalUserProfile" class="fixed inset-0 z-[9995] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
     <div class="bg-bh-card border border-bh-border rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 text-right relative" dir="rtl">
       
       <!-- Close button -->
-      <button onclick="closeUserProfileModal()" class="absolute top-4 left-4 w-8 h-8 rounded-full bg-bh-bg hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
+      <button onclick="closeUserProfileModal()" class="absolute top-4 left-4 w-8 h-8 rounded-full bg-bh-bg hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer">
         <i class="fa-solid fa-xmark"></i>
       </button>
 
       <!-- Profile Header -->
       <div class="flex items-center gap-4 border-b border-bh-border pb-4">
-        <div class="relative">
+        <div class="relative group">
           <img id="profileModalAvatar" src="assets/batihub_logo.png" alt="Avatar" class="w-16 h-16 rounded-full object-cover border-2 border-bh-yellow shadow-lg">
+          <button type="button" onclick="document.getElementById('profilePhotoInput').click()" title="تغيير الصورة الشخصية" class="absolute inset-0 bg-black/60 rounded-full flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 hover:opacity-100 transition cursor-pointer">
+            <i class="fa-solid fa-camera text-sm"></i>
+            <span class="text-[9px] mt-0.5">تغيير</span>
+          </button>
           <span class="absolute bottom-0 left-0 w-4 h-4 rounded-full bg-emerald-400 border-2 border-bh-card" title="نشط الآن"></span>
         </div>
+        <input type="file" id="profilePhotoInput" accept="image/*" class="hidden" onchange="handleProfilePhotoUpload(event)">
         <div class="space-y-0.5">
           <h3 id="profileModalName" class="font-heading font-black text-lg text-white">مستخدم BatiHub DZ</h3>
           <p id="profileModalEmail" class="text-xs text-slate-400 font-mono">user@gmail.com</p>
-          <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold mt-1">
-            <i class="fa-solid fa-shield-halved"></i>
-            <span data-i18n="profile_verified">حساب مؤكد ومحمي عبر Gmail</span>
+          <div class="flex items-center gap-2 pt-1">
+            <button type="button" onclick="document.getElementById('profilePhotoInput').click()" class="text-[11px] text-bh-yellow hover:underline flex items-center gap-1 cursor-pointer">
+              <i class="fa-solid fa-camera text-[10px]"></i>
+              <span>تغيير صورتي الشخصية</span>
+            </button>
+            <span class="text-slate-600">•</span>
+            <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold">
+              <i class="fa-solid fa-shield-halved"></i>
+              <span data-i18n="profile_verified">حساب مؤكد</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1330,7 +1334,7 @@
   <!-- ========================================================================= -->
   <!-- MODAL 2: CHANGE PASSWORD (WITH GMAIL OTP FALLBACK)                       -->
   <!-- ========================================================================= -->
-  <div id="modalChangePassword" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+  <div id="modalChangePassword" class="fixed inset-0 z-[9996] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
     <div class="bg-bh-card border border-bh-border rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-right relative" dir="rtl">
       
       <!-- Close button -->
@@ -1457,15 +1461,11 @@
   </nav>
 
   <!-- MOBILE PWA INSTALL PROMPT TOAST BANNER -->
-  
-
-  <!-- Main JavaScript Logic -->
-  <script src="app.js"></script>
 
   <!-- ========================================================================= -->
   <!-- MODAL: ADD STUDY OFFICE (إضافة مكتب دراسات جديد)                          -->
   <!-- ========================================================================= -->
-  <div id="modalAddStudyOffice" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+  <div id="modalAddStudyOffice" class="fixed inset-0 z-[9990] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
     <div class="bg-bh-card border border-bh-border rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden relative text-right" dir="rtl">
       
       <!-- Modal Header -->
@@ -1531,17 +1531,17 @@
           </div>
         </div>
 
-        <!-- GPS Location with Auto-Detect Button -->
+        <!-- GPS / Google Maps Location -->
         <div class="bg-sky-500/10 border border-sky-500/30 p-3 rounded-xl space-y-2">
-          <div class="flex items-center justify-between">
-            <label class="block text-xs font-bold text-sky-400">موقع المكتب على خرائط GPS :</label>
-            <button type="button" onclick="autoDetectOfficeGps()" class="px-2.5 py-1 bg-sky-500 text-slate-950 font-bold rounded-lg text-[11px] hover:bg-sky-400 transition flex items-center gap-1 cursor-pointer">
-              <i class="fa-solid fa-location-crosshairs text-[10px]"></i>
-              <span id="btnDetectGpsLabel">تحديد موقعي الآن 📍</span>
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <label class="block text-xs font-bold text-sky-400">موقع المكتب على خرائط Google Maps :</label>
+            <button type="button" onclick="openGoogleMapsToPickLocation()" class="px-2.5 py-1 bg-gradient-to-r from-sky-400 to-blue-500 text-slate-950 font-bold rounded-lg text-[11px] hover:opacity-95 transition flex items-center gap-1 cursor-pointer shadow-md">
+              <i class="fa-solid fa-map-location-dot text-[10px]"></i>
+              <span id="btnDetectGpsLabel">فتح خرائط Google لتحديد الموقع 🗺️</span>
             </button>
           </div>
-          <input type="text" id="inputOfficeGps" placeholder="رابط خرائط Google أو إحداثيات (مثال: 36.7538, 3.0588)" class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 font-mono">
-          <p class="text-[10px] text-slate-400">انقر على "تحديد موقعي الآن" لملء الإحداثيات تلقائياً أو الصق رابط موقع المكتب من خرائط Google Maps</p>
+          <input type="text" id="inputOfficeGps" placeholder="اسم المكان، أو رابط الموقع من خرائط Google Maps، أو الإحداثيات" class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 font-mono">
+          <p class="text-[10px] text-slate-400">انقر على الزر لفتح خرائط Google والبحث عن موقع مكتبك ونسخ رابطه أو اسم المكان ولصقه هنا.</p>
         </div>
 
         <!-- Office Description & Services -->
@@ -1584,7 +1584,7 @@
   <!-- ========================================================================= -->
   <!-- MODAL: 1-ON-1 PRIVATE CHAT (نظام المحادثات الخاصة المباشرة)               -->
   <!-- ========================================================================= -->
-  <div id="modalPrivateChat" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 hidden">
+  <div id="modalPrivateChat" class="fixed inset-0 z-[9992] bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 hidden">
     <div class="bg-bh-card border border-bh-border rounded-2xl max-w-xl w-full h-[90vh] sm:h-[82vh] shadow-2xl flex flex-col overflow-hidden text-right" dir="rtl">
       
       <!-- Chat Header -->
@@ -1688,7 +1688,7 @@
   <!-- ========================================================================= -->
   <!-- MODAL: MESSAGES & CHATS HUB (مركز المحادثات وقائمة المحظورين)            -->
   <!-- ========================================================================= -->
-  <div id="modalMessagesHub" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+  <div id="modalMessagesHub" class="fixed inset-0 z-[9991] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
     <div class="bg-bh-card border border-bh-border rounded-2xl max-w-lg w-full max-h-[85vh] shadow-2xl flex flex-col overflow-hidden text-right" dir="rtl">
       
       <!-- Header -->
@@ -1769,5 +1769,7 @@
   <!-- FLOATING TOAST CONTAINER -->
   <div id="appToastContainer"></div>
 
+  <!-- Main JavaScript Logic (Loaded at the end of body to ensure all DOM elements and modals exist) -->
+  <script src="app.js"></script>
 </body>
 </html>
