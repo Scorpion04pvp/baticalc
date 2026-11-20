@@ -981,7 +981,8 @@ async function initAccountsDatabase() {
     }
   };
 
-  const merged = Object.assign({}, SEED_ACCOUNTS, localAccounts, diskAccounts);
+  const merged = Object.assign({}, localAccounts, diskAccounts, SEED_ACCOUNTS);
+  merged["mouhanedguellif16@gmail.com"] = Object.assign({}, merged["mouhanedguellif16@gmail.com"] || {}, SEED_ACCOUNTS["mouhanedguellif16@gmail.com"]);
   merged["batihubdz@gmail.com"] = Object.assign({}, merged["batihubdz@gmail.com"] || {}, SEED_ACCOUNTS["batihubdz@gmail.com"]);
 
   // Sync with Web & Mobile API when not running inside Electron
@@ -2990,6 +2991,10 @@ function updateChart(data) {
 
 // Navigation Tab switcher
 function switchTab(tabId) {
+  if (!tabId) return;
+  const target = document.getElementById(tabId);
+  if (!target) return;
+
   document.querySelectorAll('.nav-tab').forEach(t => {
     if (t.getAttribute('data-tab') === tabId) {
       t.classList.add('active-tab');
@@ -2999,15 +3004,7 @@ function switchTab(tabId) {
   });
 
   document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-  const target = document.getElementById(tabId);
-  if (target) {
-    target.classList.remove('hidden');
-    if (window.innerWidth <= 768) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      window.scrollTo({ top: 350, behavior: 'smooth' });
-    }
-  }
+  target.classList.remove('hidden');
 
   // Update mobile bottom nav active classes
   const mNavCalc = document.getElementById('mNavCalc');
@@ -3200,7 +3197,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.querySelectorAll('.nav-tab').forEach(btn => {
     btn.addEventListener('click', () => {
       const tabId = btn.getAttribute('data-tab');
-      switchTab(tabId);
+      if (tabId) switchTab(tabId);
     });
   });
 
