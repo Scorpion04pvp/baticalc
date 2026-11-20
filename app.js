@@ -609,7 +609,6 @@ function switchAuthView(viewName) {
     views.login.classList.remove('hidden');
     if (headerTitle) headerTitle.textContent = 'BatiHub DZ • تسجيل الدخول';
     if (headerSub) headerSub.textContent = 'منصة المحترفين وأصحاب المشاريع وعروض العمل في الجزائر';
-    renderSavedAccountsQuickFill();
   } else if (viewName === 'register') {
     views.register.classList.remove('hidden');
     if (headerTitle) headerTitle.textContent = 'إنشاء حساب جديد في BatiHub DZ';
@@ -642,41 +641,6 @@ function togglePasswordVisibility(inputId, btn) {
       icon.classList.add('fa-eye');
     }
   }
-}
-
-function renderSavedAccountsQuickFill() {
-  const container = document.getElementById('savedAccountsContainer');
-  const list = document.getElementById('savedAccountsList');
-  if (!container || !list) return;
-
-  const accounts = initAccountsDatabase();
-  const emails = Object.keys(accounts);
-
-  if (emails.length === 0) {
-    container.classList.add('hidden');
-    return;
-  }
-
-  container.classList.remove('hidden');
-  list.innerHTML = '';
-
-  emails.forEach(email => {
-    const acc = accounts[email];
-    const pill = document.createElement('button');
-    pill.type = 'button';
-    pill.className = 'px-2 py-1 rounded-lg bg-bh-cardhover hover:bg-slate-700/80 text-[11px] text-slate-200 border border-bh-border hover:border-bh-yellow flex items-center gap-1.5 transition cursor-pointer';
-    pill.innerHTML = `
-      <span class="w-2 h-2 rounded-full ${acc.role === 'admin' ? 'bg-bh-yellow' : 'bg-emerald-400'}"></span>
-      <span class="font-mono text-[10px]">${escapeHTML(acc.email)}</span>
-      <span class="text-[9px] text-slate-400">(${acc.role === 'admin' ? 'إدارة' : 'مستخدم'})</span>
-    `;
-    pill.onclick = () => {
-      document.getElementById('loginEmail').value = acc.email;
-      document.getElementById('loginPassword').value = 'mouhaned25';
-      showToast('تم ملء بيانات الحساب تلقائياً: ' + acc.email, 'info', 2000);
-    };
-    list.appendChild(pill);
-  });
 }
 
 async function handleUserLogin(event) {
@@ -723,7 +687,52 @@ async function handleUserLogin(event) {
   transitionToDashboard();
 }
 
-function handleUserRegister(event) {
+async function sendOtpEmail(toEmail, otpCode, purpose = 'registration') {
+  const isReg = (purpose === 'registration');
+  const subject = isReg 
+    ? 'BatiHub DZ • رمز تأكيد الحساب وتفعيله'
+    : 'BatiHub DZ • رمز استعادة كلمة المرور';
+
+  const html = `
+    <div dir="rtl" style="font-family: Arial, Tahoma, sans-serif; background-color: #07090e; color: #f1f5f9; padding: 25px; border-radius: 16px; max-width: 520px; margin: auto; border: 1px solid #1c2638;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <h1 style="color: #ffa000; font-size: 24px; margin: 0; font-weight: bold;">BatiHub DZ</h1>
+        <p style="color: #94a3b8; font-size: 12px; margin-top: 5px;">منصة المحترفين وعروض العمل في الجزائر</p>
+      </div>
+      <div style="background-color: #0f1520; padding: 20px; border-radius: 12px; border: 1px solid #1c2638; text-align: center;">
+        <h3 style="color: #ffffff; font-size: 16px; margin-top: 0;">${isReg ? 'رمز تفعيل حسابك الجديد' : 'رمز إعادة تعيين كلمة المرور'}</h3>
+        <p style="color: #94a3b8; font-size: 13px;">أدخل هذا الرمز المكون من 6 أرقام لإكمال العملية:</p>
+        <div style="display: inline-block; background: linear-gradient(135deg, #ffa000, #ff6d00); color: #07090e; font-size: 32px; font-weight: bold; letter-spacing: 8px; padding: 12px 28px; border-radius: 12px; margin: 15px 0; font-family: monospace;">
+          ${otpCode}
+        </div>
+        <p style="color: #64748b; font-size: 11px; margin-bottom: 0;">هذا الرمز صالح لمدة 15 دقيقة. لا تشاركه مع أي شخص لحماية حسابك.</p>
+      </div>
+      <p style="text-align: center; font-size: 11px; color: #64748b; margin-top: 20px;">
+        BatiHub DZ Official Support • Developed by Mouhaned Guellif
+      </p>
+    </div>
+  `;
+
+  if (window.electronMailAPI && typeof window.electronMailAPI.sendMail === 'function') {
+    try {
+      const res = await window.electronMailAPI.sendMail({
+        to: toEmail,
+        subject: subject,
+        text: `رمز التحقق الخاص بك هو: ${otpCode}`,
+        html: html
+      });
+      return res;
+    } catch (err) {
+      console.error('SMTP Mail send error:', err);
+      return { success: false, error: err.message };
+    }
+  }
+
+  // Web / PWA fallback
+  return { success: true, fallback: true };
+}
+
+async function handleUserRegister(event) {
   if (event) event.preventDefault();
 
   const firstName = document.getElementById('regFirstName').value.trim();
@@ -768,13 +777,22 @@ function handleUserRegister(event) {
     otp: generatedOtp
   };
 
+  showToast('جاري إرسال رمز التحقق إلى بريدك الإلكتروني عبر Gmail...', 'info', 3000);
+
+  // Send real email via Gmail SMTP
+  const mailRes = await sendOtpEmail(email, generatedOtp, 'registration');
+
   switchAuthView('otp');
-  // Auto-fill OTP for zero friction in PWA / Static Web
   const otpInput = document.getElementById('otpCodeInput');
-  if (otpInput) {
-    otpInput.value = generatedOtp;
+
+  if (mailRes && mailRes.success && !mailRes.fallback) {
+    showToast(`تم إرسال رمز التحقق إلى ${email} بنجاح! تفقد بريدك الوارد أو الترويجي.`, 'success', 6000);
+    if (otpInput) otpInput.value = '';
+  } else {
+    // If on web / fallback mode, also show/auto-fill for ease of testing
+    if (otpInput) otpInput.value = generatedOtp;
+    showToast(`رمز التحقق الخاص بك هو: ${generatedOtp}`, 'info', 6000);
   }
-  showToast(`رمز التحقق الخاص بك هو: ${generatedOtp}`, 'info', 6000);
 }
 
 async function handleVerifyOtp(event) {
@@ -822,7 +840,7 @@ async function handleVerifyOtp(event) {
   transitionToDashboard();
 }
 
-function handleSendPasswordResetCode() {
+async function handleSendPasswordResetCode() {
   const emailInput = document.getElementById('forgotEmail');
   const email = (emailInput.value || '').trim().toLowerCase();
 
@@ -837,8 +855,17 @@ function handleSendPasswordResetCode() {
     return;
   }
 
-  showToast('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك!', 'success', 4000);
-  setTimeout(() => switchAuthView('login'), 1500);
+  const resetOtp = String(Math.floor(100000 + Math.random() * 900000));
+  showToast('جاري إرسال رمز إعادة التعيين إلى بريدك الإلكتروني...', 'info', 3000);
+
+  const mailRes = await sendOtpEmail(email, resetOtp, 'reset');
+  if (mailRes && mailRes.success && !mailRes.fallback) {
+    showToast(`تم إرسال رمز استعادة كلمة المرور إلى ${email} بنجاح!`, 'success', 5000);
+  } else {
+    showToast(`رمز استعادة كلمة المرور هو: ${resetOtp}`, 'info', 5000);
+  }
+
+  setTimeout(() => switchAuthView('login'), 2000);
 }
 
 function handleSignOut() {
@@ -1103,51 +1130,208 @@ function applyLanguage(lang) {
     activeBtn.classList.add('bg-bh-yellow', 'text-slate-950');
   }
 
-  updateNetworkStatusIndicator();
   renderWorkerPostsFeed();
   renderStudyOfficesFeed();
 }
 
 /* ========================================================================= */
-/* 11. NETWORK & CONNECTION DETECTION                                        */
+/* 11. REALTIME MULTI-DEVICE SYNCHRONIZATION ENGINE                          */
 /* ========================================================================= */
 
-function updateNetworkStatusIndicator() {
-  const badge = document.getElementById('networkStatusBadge');
-  const dot = document.getElementById('networkStatusDot');
-  const text = document.getElementById('networkStatusText');
-  if (!badge || !text) return;
+const LIVE_SYNC_TOPIC = 'https://ntfy.sh/batihub_dz_live_sync_2026';
+const currentDeviceId = 'dev_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
+let liveEventSource = null;
+let lastSyncedPacketTime = Date.now() - 3600000;
 
-  const dict = I18N[currentLanguage] || I18N.ar;
+async function broadcastLiveEvent(action, payload) {
+  try {
+    const packet = {
+      senderDeviceId: currentDeviceId,
+      timestamp: Date.now(),
+      action: action,
+      payload: payload
+    };
 
-  if (navigator.onLine) {
-    badge.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-mono';
-    if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
-
-    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    if (conn && conn.type === 'wifi') {
-      text.textContent = dict.net_online_wifi;
-    } else if (conn && (conn.effectiveType === '4g' || conn.type === 'cellular')) {
-      text.textContent = dict.net_online_data;
-    } else {
-      text.textContent = dict.net_online_data;
-    }
-  } else {
-    badge.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[11px] font-mono';
-    if (dot) dot.className = 'w-2 h-2 rounded-full bg-rose-500';
-    text.textContent = dict.net_offline;
+    await fetch(LIVE_SYNC_TOPIC, {
+      method: 'POST',
+      body: JSON.stringify(packet),
+      headers: {
+        'Title': 'BatiHub Live Sync',
+        'Priority': 'default'
+      }
+    });
+  } catch (err) {
+    console.warn('[Sync Broadcast Warning]:', err);
   }
 }
 
-window.addEventListener('online', () => {
-  updateNetworkStatusIndicator();
-  showToast(I18N[currentLanguage].net_online, 'success', 2500);
-});
+function initLiveSyncEngine() {
+  if (liveEventSource) return;
 
-window.addEventListener('offline', () => {
-  updateNetworkStatusIndicator();
-  showToast(I18N[currentLanguage].net_offline, 'error', 3500);
-});
+  // 1. Initial poll for recent events
+  pollLiveSyncHistory();
+
+  // 2. Real-time Server-Sent Events (SSE) connection
+  try {
+    liveEventSource = new EventSource(`${LIVE_SYNC_TOPIC}/sse`);
+    liveEventSource.onmessage = (event) => {
+      try {
+        const raw = JSON.parse(event.data);
+        if (!raw.message) return;
+        const packet = JSON.parse(raw.message);
+        if (packet.senderDeviceId === currentDeviceId) return; // ignore own echo
+        handleIncomingLiveSyncPacket(packet);
+      } catch (e) {}
+    };
+    liveEventSource.onerror = () => {
+      // Reconnects automatically by browser SSE spec
+    };
+  } catch (e) {}
+
+  // 3. Fallback polling every 8 seconds for background or waking devices
+  setInterval(pollLiveSyncHistory, 8000);
+}
+
+async function pollLiveSyncHistory() {
+  try {
+    const res = await fetch(`${LIVE_SYNC_TOPIC}/json?poll=1&since=20s`);
+    if (!res.ok) return;
+    const text = await res.text();
+    const lines = text.trim().split('\n');
+
+    lines.forEach(line => {
+      if (!line.trim()) return;
+      try {
+        const item = JSON.parse(line);
+        if (item.time && item.time * 1000 <= lastSyncedPacketTime) return;
+        if (item.time) lastSyncedPacketTime = item.time * 1000;
+        if (!item.message) return;
+        const packet = JSON.parse(item.message);
+        if (packet.senderDeviceId === currentDeviceId) return;
+        handleIncomingLiveSyncPacket(packet);
+      } catch (e) {}
+    });
+  } catch (e) {}
+}
+
+function handleIncomingLiveSyncPacket(packet) {
+  const { action, payload } = packet;
+
+  // 1. Chat Message Sync
+  if (action === 'chat_message') {
+    const { threadKey, recipientEmail, senderEmail, message } = payload;
+    if (!currentUser) return;
+
+    const userEmail = currentUser.email.toLowerCase();
+    const isForMe = (userEmail === recipientEmail.toLowerCase() || userEmail === senderEmail.toLowerCase());
+    if (!isForMe) return;
+
+    const chats = getStorageJSON('batihub_private_chats', {});
+    if (!chats[threadKey]) chats[threadKey] = [];
+
+    // Avoid duplicate message IDs
+    if (!chats[threadKey].some(m => m.id === message.id)) {
+      chats[threadKey].push(message);
+      setStorageJSON('batihub_private_chats', chats);
+
+      // If chat modal is currently open with this sender
+      if (currentChatPartner && currentChatPartner.email.toLowerCase() === senderEmail.toLowerCase()) {
+        renderPrivateChatMessages();
+      } else {
+        // Notification & badge update
+        showToast(`رسالة خاصة جديدة من ${escapeHTML(message.senderName || senderEmail)} 💬`, 'info', 4000);
+        updateUnreadMessagesCount();
+      }
+    }
+  }
+
+  // 2. Worker Posts Sync (new post created)
+  else if (action === 'new_worker_post') {
+    let posts = getStorageJSON('batihub_worker_posts', []);
+    if (!posts.some(p => p.id === payload.id)) {
+      posts.unshift(payload);
+      setStorageJSON('batihub_worker_posts', posts);
+      renderWorkerPostsFeed();
+      if (currentUser && currentUser.role === 'admin') {
+        showToast(`طلب منشور عمل جديد قيد المراجعة من ${escapeHTML(payload.authorName)}`, 'warning', 4500);
+      }
+    }
+  }
+
+  // 3. Worker Post Approved
+  else if (action === 'approve_worker_post') {
+    let posts = getStorageJSON('batihub_worker_posts', []);
+    const post = posts.find(p => p.id === payload.postId);
+    if (post) {
+      post.status = 'approved';
+      setStorageJSON('batihub_worker_posts', posts);
+      renderWorkerPostsFeed();
+      showToast('تم اعتماد ونشر عرض عمل جديد في المنصة!', 'info', 2500);
+    }
+  }
+
+  // 4. Worker Post Deleted / Rejected
+  else if (action === 'delete_worker_post') {
+    let posts = getStorageJSON('batihub_worker_posts', []);
+    posts = posts.filter(p => p.id !== payload.postId);
+    setStorageJSON('batihub_worker_posts', posts);
+    renderWorkerPostsFeed();
+  }
+
+  // 5. Post Like Toggled
+  else if (action === 'toggle_like') {
+    let posts = getStorageJSON('batihub_worker_posts', []);
+    const post = posts.find(p => p.id === payload.postId);
+    if (post) {
+      post.likes = payload.likes;
+      setStorageJSON('batihub_worker_posts', posts);
+      renderWorkerPostsFeed();
+    }
+  }
+
+  // 6. Post Comment Added
+  else if (action === 'add_comment') {
+    let posts = getStorageJSON('batihub_worker_posts', []);
+    const post = posts.find(p => p.id === payload.postId);
+    if (post) {
+      if (!post.comments) post.comments = [];
+      if (!post.comments.some(c => c.id === payload.comment.id)) {
+        post.comments.push(payload.comment);
+        setStorageJSON('batihub_worker_posts', posts);
+        renderWorkerPostsFeed();
+      }
+    }
+  }
+
+  // 7. Post Comment Deleted
+  else if (action === 'delete_comment') {
+    let posts = getStorageJSON('batihub_worker_posts', []);
+    const post = posts.find(p => p.id === payload.postId);
+    if (post && post.comments) {
+      post.comments = post.comments.filter(c => c.id !== payload.commentId);
+      setStorageJSON('batihub_worker_posts', posts);
+      renderWorkerPostsFeed();
+    }
+  }
+
+  // 8. Study Office Created
+  else if (action === 'new_study_office') {
+    let offices = getStorageJSON('batihub_study_offices', []);
+    if (!offices.some(o => o.id === payload.id)) {
+      offices.unshift(payload);
+      setStorageJSON('batihub_study_offices', offices);
+      renderStudyOfficesFeed();
+    }
+  }
+
+  // 9. Study Office Deleted
+  else if (action === 'delete_study_office') {
+    let offices = getStorageJSON('batihub_study_offices', []);
+    offices = offices.filter(o => o.id !== payload.officeId);
+    setStorageJSON('batihub_study_offices', offices);
+    renderStudyOfficesFeed();
+  }
+}
 
 /* ========================================================================= */
 /* 12. SCIENTIFIC CALCULATOR & QUICK TOOLS                                   */
@@ -1479,7 +1663,121 @@ function updateAdminPendingBadge() {
   badge.textContent = String(pendingCount);
 }
 
+function renderAdminPendingRequestsSection() {
+  const section = document.getElementById('adminPendingRequestsSection');
+  const list = document.getElementById('adminPendingCardsList');
+  const countBadge = document.getElementById('adminPendingHeaderCount');
+  if (!section || !list) return;
+
+  if (!currentUser || currentUser.role !== 'admin') {
+    section.classList.add('hidden');
+    return;
+  }
+
+  section.classList.remove('hidden');
+  const posts = getStorageJSON('batihub_worker_posts', []);
+  const pendingPosts = posts.filter(p => p.status === 'pending');
+
+  if (countBadge) countBadge.textContent = String(pendingPosts.length);
+
+  if (pendingPosts.length === 0) {
+    list.innerHTML = `
+      <div class="bg-bh-bg/60 border border-bh-border p-5 rounded-xl text-center space-y-1">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-xl block mb-1"></i>
+        <h4 class="font-bold text-xs text-white">لا توجد طلبات منشورات معلقة حالياً</h4>
+        <p class="text-[11px] text-slate-400">جميع عروض العمل المنشورة معتمدة وتظهر للمستخدمين مباشرة.</p>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = '';
+  pendingPosts.forEach(post => {
+    const rawPhone = (post.phone || '').replace(/[^0-9]/g, '');
+    let intlPhone = rawPhone.startsWith('0') ? '213' + rawPhone.slice(1) : rawPhone;
+
+    const unitMap = {
+      m2: 'دج / م²',
+      linear_m: 'دج / م خطي',
+      hour: 'دج / ساعة',
+      day: 'دج / يوم',
+      global: 'مبلغ إجمالي',
+      negotiable: 'قابل للتفاوض'
+    };
+    const unitLabel = unitMap[post.unit] || 'دج / م²';
+
+    const avatarHTML = renderAvatarImgTag(post.authorAvatar, post.authorName, post.authorId, 'w-10 h-10 rounded-full object-cover border border-amber-500/50 shadow');
+
+    let postImageHTML = '';
+    if (post.image) {
+      postImageHTML = `
+        <div class="rounded-xl overflow-hidden border border-bh-border max-h-48 bg-bh-bg cursor-pointer mt-2" onclick="openImageLightbox('${escapeHTML(post.image)}')">
+          <img src="${post.image}" alt="Attached Work" class="w-full h-auto object-cover max-h-48 hover:scale-102 transition">
+        </div>
+      `;
+    }
+
+    const card = document.createElement('div');
+    card.className = 'bg-bh-card border border-amber-500/40 rounded-2xl p-4 shadow-xl space-y-3';
+    card.innerHTML = `
+      <div class="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-bh-border">
+        <div class="flex items-center gap-2.5">
+          ${avatarHTML}
+          <div>
+            <div class="flex items-center gap-2">
+              <h4 class="font-bold text-sm text-white">${escapeHTML(post.authorName)}</h4>
+              <span class="text-[10px] text-slate-400 font-mono" dir="ltr">(${escapeHTML(post.authorId)})</span>
+            </div>
+            <div class="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
+              <span class="text-bh-yellow font-bold">${escapeHTML(post.trade)}</span>
+              <span>•</span>
+              <span class="font-mono text-[10px]">${new Date(post.createdAt).toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="px-3 py-1 rounded-xl bg-bh-yellow/20 border border-bh-yellow/40 text-bh-yellow font-mono font-bold text-xs">
+          ${post.price ? `${escapeHTML(post.price)} ${unitLabel}` : unitLabel}
+        </div>
+      </div>
+
+      <p class="text-xs text-slate-200 leading-relaxed whitespace-pre-line">${escapeHTML(post.text)}</p>
+
+      ${postImageHTML}
+
+      <!-- Contact Info -->
+      <div class="flex items-center gap-2 text-xs pt-1">
+        <a href="tel:${rawPhone}" class="px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+          <i class="fa-solid fa-phone text-[10px]"></i>
+          <span>${escapeHTML(post.phone)}</span>
+        </a>
+        <a href="https://wa.me/${intlPhone}" target="_blank" class="px-3 py-1.5 rounded-lg bg-green-500/20 text-green-300 border border-green-500/30 flex items-center gap-1">
+          <i class="fa-brands fa-whatsapp text-xs"></i>
+          <span>واتساب</span>
+        </a>
+      </div>
+
+      <!-- Admin Decision Action Buttons -->
+      <div class="pt-2 border-t border-bh-border flex items-center justify-end gap-2">
+        <button type="button" onclick="rejectWorkerPost('${post.id}')" class="px-4 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-trash-can"></i>
+          <span>رفض وحذف نهائياً ❌</span>
+        </button>
+
+        <button type="button" onclick="approveWorkerPost('${post.id}')" class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:opacity-95 text-slate-950 text-xs font-black shadow-lg transition flex items-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>قبول ونشر المنشور للجميع ✅</span>
+        </button>
+      </div>
+    `;
+
+    list.appendChild(card);
+  });
+}
+
 function renderWorkerPostsFeed() {
+  renderAdminPendingRequestsSection();
+
   const container = document.getElementById('workerPostsFeedContainer');
   if (!container) return;
 
@@ -1488,15 +1786,16 @@ function renderWorkerPostsFeed() {
 
   // Filter logic
   let filtered = posts.filter(p => {
-    // Admin pending posts view
+    // Admin pending posts view toggle
     if (showPendingOnly) {
       return p.status === 'pending';
     }
 
-    // Role visibility: regular users only see approved posts OR their own pending posts
     if (currentUser && currentUser.role === 'admin') {
-      // Admin sees everything
+      // In the general feed, admin sees approved posts (pending are in the dedicated panel above)
+      if (p.status === 'pending') return false;
     } else {
+      // Regular user: sees approved posts + their own pending posts
       if (p.status === 'pending') {
         if (!currentUser || p.authorId !== currentUser.email) return false;
       }
@@ -1601,7 +1900,19 @@ function renderWorkerPostsFeed() {
       `;
     }
 
+    // Pending banner
+    let pendingBannerHTML = '';
+    if (post.status === 'pending') {
+      pendingBannerHTML = `
+        <div class="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold flex items-center gap-2">
+          <i class="fa-solid fa-hourglass-half animate-spin text-sm shrink-0"></i>
+          <span>منشورك قيد المعالجة والمراجعة من قبل الإدارة، وسيظهر للجميع فور اعتماده.</span>
+        </div>
+      `;
+    }
+
     card.innerHTML = `
+      ${pendingBannerHTML}
       <!-- Header Row -->
       <div class="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-bh-border">
         <div class="flex items-center gap-2.5">
@@ -1794,6 +2105,9 @@ function handleCreateWorkerPostSubmit(event) {
   posts.unshift(newPost);
   setStorageJSON('batihub_worker_posts', posts);
 
+  // Broadcast to all other devices in real-time
+  broadcastLiveEvent('new_worker_post', newPost);
+
   closeCreateWorkerPostModal();
   updateAdminPendingBadge();
   renderWorkerPostsFeed();
@@ -1801,7 +2115,7 @@ function handleCreateWorkerPostSubmit(event) {
   if (isAdmin) {
     showToast(I18N[currentLanguage].post_published_admin_success, 'success');
   } else {
-    showToast(I18N[currentLanguage].post_published_success, 'success', 5000);
+    showToast('تم إرسال المنشور بنجاح وهو الآن قيد المعالجة والمراجعة من قبل الإدارة.', 'success', 5000);
   }
 }
 
@@ -1825,6 +2139,7 @@ function togglePostLike(postId) {
   }
 
   setStorageJSON('batihub_worker_posts', posts);
+  broadcastLiveEvent('toggle_like', { postId, likes: post.likes });
   renderWorkerPostsFeed();
 }
 
@@ -1885,15 +2200,18 @@ function handleAddCommentSubmit(event, postId) {
   if (!post) return;
 
   if (!post.comments) post.comments = [];
-  post.comments.push({
+  const newComment = {
     id: 'c_' + Date.now(),
     authorId: currentUser.email,
     authorName: currentUser.fullName || currentUser.firstName,
     text,
     createdAt: new Date().toISOString()
-  });
+  };
 
+  post.comments.push(newComment);
   setStorageJSON('batihub_worker_posts', posts);
+  broadcastLiveEvent('add_comment', { postId, comment: newComment });
+
   input.value = '';
   renderWorkerPostsFeed();
   toggleCommentsSection(postId); // keep open
@@ -1906,6 +2224,8 @@ function deleteComment(postId, commentId) {
 
   post.comments = post.comments.filter(c => c.id !== commentId);
   setStorageJSON('batihub_worker_posts', posts);
+  broadcastLiveEvent('delete_comment', { postId, commentId });
+
   renderWorkerPostsFeed();
   toggleCommentsSection(postId);
   showToast('تم حذف التعليق بنجاح', 'info');
@@ -1920,6 +2240,8 @@ function approveWorkerPost(postId) {
 
   post.status = 'approved';
   setStorageJSON('batihub_worker_posts', posts);
+
+  broadcastLiveEvent('approve_worker_post', { postId });
 
   updateAdminPendingBadge();
   renderWorkerPostsFeed();
@@ -1938,6 +2260,8 @@ function deleteWorkerPost(postId) {
   const posts = getStorageJSON('batihub_worker_posts', []);
   const updated = posts.filter(p => p.id !== postId);
   setStorageJSON('batihub_worker_posts', updated);
+
+  broadcastLiveEvent('delete_worker_post', { postId });
 
   updateAdminPendingBadge();
   renderWorkerPostsFeed();
@@ -2194,6 +2518,8 @@ function handleCreateStudyOfficeSubmit(event) {
   offices.unshift(newOffice);
   setStorageJSON('batihub_study_offices', offices);
 
+  broadcastLiveEvent('new_study_office', newOffice);
+
   closeAddStudyOfficeModal();
   renderStudyOfficesFeed();
   showToast(I18N[currentLanguage].office_published_success, 'success');
@@ -2203,6 +2529,9 @@ function deleteStudyOffice(officeId) {
   const offices = getStorageJSON('batihub_study_offices', []);
   const updated = offices.filter(o => o.id !== officeId);
   setStorageJSON('batihub_study_offices', updated);
+
+  broadcastLiveEvent('delete_study_office', { officeId });
+
   renderStudyOfficesFeed();
   showToast('تم حذف بطاقة مكتب الدراسات', 'info');
 }
@@ -2361,6 +2690,14 @@ function handleSendPrivateMessage(event) {
   chats[threadKey].push(newMsg);
   setStorageJSON('batihub_private_chats', chats);
 
+  // Broadcast in real-time across all devices
+  broadcastLiveEvent('chat_message', {
+    threadKey: threadKey,
+    recipientEmail: currentChatPartner.email,
+    senderEmail: currentUser.email,
+    message: newMsg
+  });
+
   input.value = '';
   cachedChatImageBase64 = null;
   renderPrivateChatMessages();
@@ -2450,6 +2787,15 @@ function sendVoiceMessage(audioBase64) {
 
   chats[threadKey].push(newMsg);
   setStorageJSON('batihub_private_chats', chats);
+
+  // Broadcast in real-time across all devices
+  broadcastLiveEvent('chat_message', {
+    threadKey: threadKey,
+    recipientEmail: currentChatPartner.email,
+    senderEmail: currentUser.email,
+    message: newMsg
+  });
+
   renderPrivateChatMessages();
   showToast('تم إرسال الرسالة الصوتية بنجاح!', 'success', 2000);
 }
@@ -2728,9 +3074,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const savedLang = localStorage.getItem('batihub_lang') || 'ar';
   currentLanguage = savedLang;
 
-  // 3. Start live clock & network monitor
+  // 3. Start live clock & realtime multi-device sync
   startLiveClock();
-  updateNetworkStatusIndicator();
+  initLiveSyncEngine();
 
   // 4. Initialize quick tools defaults
   runQuickCalcSurface();

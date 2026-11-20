@@ -107,12 +107,6 @@
 
       <!-- VIEW 1: LOGIN -->
       <div id="viewLogin" class="space-y-4 text-right">
-        <!-- Quick Fill Saved Accounts -->
-        <div id="savedAccountsContainer" class="hidden space-y-1.5 p-2.5 rounded-xl bg-bh-bg border border-bh-border">
-          <span class="text-[10px] text-slate-400 font-semibold block">الحسابات المحفوظة على هذا الجهاز (انقر للملء) :</span>
-          <div id="savedAccountsList" class="flex flex-wrap gap-1.5"></div>
-        </div>
-
         <form onsubmit="handleUserLogin(event)" class="space-y-3.5">
           <div>
             <label class="block text-[11px] font-semibold text-slate-300 mb-1">عنوان البريد الإلكتروني :</label>
@@ -257,12 +251,6 @@
           </div>
 
           <div class="flex items-center gap-3 text-[11px]">
-            <!-- Network Connection Status Pill -->
-            <div id="networkStatusBadge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-mono">
-              <span id="networkStatusDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span id="networkStatusText">متصل (بيانات 4G 📶)</span>
-            </div>
-
             <!-- Live Clock -->
             <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-bh-card border border-bh-border text-slate-300 text-[11px] font-mono">
               <i class="fa-regular fa-clock text-bh-yellow"></i>
@@ -633,6 +621,32 @@
             <span>بانتظار الموافقة</span>
             <span id="pendingPostsCountBadge" class="px-1.5 py-0.5 rounded-full bg-bh-yellow text-slate-950 text-[10px] font-black">0</span>
           </button>
+        </div>
+
+        <!-- Admin Dedicated Approval Section (Visible ONLY to Admin) -->
+        <div id="adminPendingRequestsSection" class="hidden bg-gradient-to-r from-amber-500/10 via-bh-card to-amber-500/10 border-2 border-amber-500/40 rounded-2xl p-4 sm:p-5 shadow-2xl space-y-4">
+          <div class="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-amber-500/30">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg font-black shadow-inner">
+                <i class="fa-solid fa-user-shield"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-heading font-black text-sm sm:text-base text-white">لوحة مراجعة المنشورات المعلقة</h3>
+                  <span class="text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full font-mono">خاص بالإدارة</span>
+                </div>
+                <p class="text-xs text-slate-300 mt-0.5">راجع طلبات المنشورات الجديدة: اقبل لنشرها للعامة فوراً أو ارفض لحذفها نهائياً</p>
+              </div>
+            </div>
+            <div>
+              <span class="px-3 py-1.5 rounded-xl bg-amber-500 text-slate-950 font-black font-mono text-xs flex items-center gap-1.5 shadow-lg">
+                <i class="fa-solid fa-hourglass-half"></i>
+                <span id="adminPendingHeaderCount">0</span> طلبات بانتظار قرارك
+              </span>
+            </div>
+          </div>
+
+          <div id="adminPendingCardsList" class="space-y-3"></div>
         </div>
 
         <!-- Feed Container -->
