@@ -1414,8 +1414,12 @@ async function handleVerifyOtp(e) {
       return;
     }
 
-    if (inputCode !== String(reg.otpCode).trim()) {
-      alert(isAr ? 'رمز التحقق غير صحيح، يرجى التأكد من الرمز المدخل وإعادة المحاولة' : 'Code de vérification incorrect. Veuillez vérifier.');
+    if (inputCode !== String(reg.otpCode).replace(/\D/g, '').trim()) {
+      showAppAlert(
+        isAr ? 'خطأ في الرمز' : 'Code incorrect',
+        isAr ? 'رمز التحقق غير صحيح، يرجى التأكد من الرمز المدخل وإعادة المحاولة' : 'Code de vérification incorrect. Veuillez vérifier.',
+        'error'
+      );
       return;
     }
 
@@ -4149,7 +4153,7 @@ function showAppAlert(title, message, type = 'info') {
     const btnCancel = document.getElementById('btnAppNotifyCancel');
 
     if (!modal) {
-      alert(message);
+      console.warn('[BatiHub Alert]', message);
       resolve(true);
       return;
     }
@@ -4187,6 +4191,13 @@ function showAppAlert(title, message, type = 'info') {
   });
 }
 
+// Global Alert Redirection to Custom App Modal
+if (typeof window !== 'undefined') {
+  window.alert = function(message) {
+    showAppAlert('BatiHub DZ', message, 'info');
+  };
+}
+
 function showAppConfirm(title, message, confirmText = 'تأكيد', cancelText = 'إلغاء', type = 'warning') {
   return new Promise((resolve) => {
     const modal = document.getElementById('appNotificationModal');
@@ -4198,7 +4209,8 @@ function showAppConfirm(title, message, confirmText = 'تأكيد', cancelText =
     const btnCancel = document.getElementById('btnAppNotifyCancel');
 
     if (!modal) {
-      resolve(confirm(message));
+      console.warn('[BatiHub Confirm]', message);
+      resolve(true);
       return;
     }
 
@@ -4228,6 +4240,76 @@ function showAppConfirm(title, message, confirmText = 'تأكيد', cancelText =
     }
 
     modal.classList.remove('hidden');
+  });
+}
+
+// -------------------------------------------------------------
+// Image Lightbox Viewer
+// -------------------------------------------------------------
+function openImageLightbox(src) {
+  if (!src) return;
+  const modal = document.getElementById('modalImageLightbox');
+  const img = document.getElementById('lightboxImg');
+  if (modal && img) {
+    img.src = src;
+    modal.classList.remove('hidden');
+  }
+}
+
+function closeImageLightbox() {
+  const modal = document.getElementById('modalImageLightbox');
+  if (modal) modal.classList.add('hidden');
+}
+
+// -------------------------------------------------------------
+// Universal Modal Dismiss Handlers (Backdrop click & Escape key)
+// -------------------------------------------------------------
+function initUniversalModalDismiss() {
+  const modalIds = [
+    'modalCreateWorkerPost',
+    'modalEditWorkerPost',
+    'modalAddStudyOffice',
+    'modalPrivateChat',
+    'modalMessagesHub',
+    'modalUserProfile',
+    'modalChangePassword',
+    'modalImageLightbox',
+    'appNotificationModal'
+  ];
+
+  modalIds.forEach(id => {
+    const modal = document.getElementById(id);
+    if (!modal) return;
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        if (id === 'modalPrivateChat') closePrivateChatModal();
+        else if (id === 'modalImageLightbox') closeImageLightbox();
+        else if (id === 'appNotificationModal') {
+          const btnCancel = document.getElementById('btnAppNotifyCancel');
+          if (btnCancel && !btnCancel.classList.contains('hidden')) {
+            btnCancel.click();
+          } else {
+            const btnConfirm = document.getElementById('btnAppNotifyConfirm');
+            if (btnConfirm) btnConfirm.click();
+          }
+        } else {
+          modal.classList.add('hidden');
+        }
+      }
+    });
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      modalIds.forEach(id => {
+        const modal = document.getElementById(id);
+        if (modal && !modal.classList.contains('hidden')) {
+          if (id === 'modalPrivateChat') closePrivateChatModal();
+          else if (id === 'modalImageLightbox') closeImageLightbox();
+          else modal.classList.add('hidden');
+        }
+      });
+    }
   });
 }
 
@@ -6466,8 +6548,10 @@ function updateUnreadMessagesCount() {
 window.addEventListener('DOMContentLoaded', () => {
   initWorkerRealtimeSync();
   renderStudyOfficesFeed();
+  initUniversalModalDismiss();
 });
 setTimeout(() => {
   initWorkerRealtimeSync();
   renderStudyOfficesFeed();
+  initUniversalModalDismiss();
 }, 600);

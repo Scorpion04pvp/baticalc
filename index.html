@@ -336,7 +336,7 @@
             <input type="text" id="inputOtpCode" maxlength="8" autocomplete="one-time-code" inputmode="numeric" required placeholder="000000" class="w-48 mx-auto text-center bg-bh-bg border-2 border-bh-yellow/60 rounded-xl py-2.5 text-2xl font-mono font-black text-white tracking-[0.4em] focus:outline-none focus:border-bh-yellow shadow-inner">
           </div>
 
-          <button type="submit" id="btnSubmitOtp" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
+          <button type="submit" id="btnSubmitOtp" onclick="handleVerifyOtp(event)" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
             <i class="fa-solid fa-circle-check"></i>
             <span data-i18n="auth_btn_verify_otp">تأكيد الرمز والدخول إلى BatiHub DZ</span>
           </button>
@@ -1243,7 +1243,7 @@
   <!-- ========================================================================= -->
   <!-- MODAL: IMAGE LIGHTBOX VIEWER                                              -->
   <!-- ========================================================================= -->
-  <div id="modalImageLightbox" onclick="closeImageLightbox()" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 hidden cursor-zoom-out">
+  <div id="modalImageLightbox" onclick="closeImageLightbox()" class="fixed inset-0 z-[99995] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 hidden cursor-zoom-out">
     <div class="relative max-w-4xl max-h-[90vh]">
       <img id="lightboxImg" src="" alt="صورة مكبرة" class="max-h-[85vh] max-w-full rounded-2xl object-contain shadow-2xl border border-bh-border">
       <button onclick="closeImageLightbox()" class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-bh-card border border-bh-border text-white hover:text-bh-yellow flex items-center justify-center shadow-lg">
@@ -1739,7 +1739,7 @@
   <!-- ========================================================================= -->
   <!-- APP-THEMED ALERT & CONFIRM MODAL (نافذة التنبيهات المخصصة للتطبيق)        -->
   <!-- ========================================================================= -->
-  <div id="appNotificationModal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+  <div id="appNotificationModal" class="fixed inset-0 z-[100000] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
     <div class="bg-bh-card border border-bh-border rounded-2xl max-w-sm w-full shadow-2xl p-5 space-y-4 text-center transform transition-all duration-200 scale-95" id="appNotificationBox" dir="rtl">
       
       <!-- Icon Wrapper -->
