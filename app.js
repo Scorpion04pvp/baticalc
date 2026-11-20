@@ -383,9 +383,14 @@ async function sha256Hash(text) {
 function getStorageJSON(key, defaultVal) {
   try {
     const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : defaultVal;
+    if (!raw) return defaultVal;
+    if (typeof raw === 'string' && raw.startsWith('BTH_VAULT_')) {
+      localStorage.removeItem(key);
+      return defaultVal;
+    }
+    return JSON.parse(raw);
   } catch (err) {
-    console.error('Storage Read Error:', key, err);
+    localStorage.removeItem(key);
     return defaultVal;
   }
 }
