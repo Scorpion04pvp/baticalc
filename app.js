@@ -52,6 +52,9 @@ const TRANSLATIONS = {
     qc_perim_res: "Périmètre :",
     qc_btn_inject_calc: "Transférer la surface à la calculatrice",
     qc_concrete_title: "2. Volume de Béton & Ciment",
+    qc_conc_l: "Longueur L (m) :",
+    qc_conc_w: "Largeur W (m) :",
+    qc_conc_h: "Épaisseur / Hauteur (m) :",
     qc_dosage: "Dosage Ciment :",
     qc_vol_res: "Volume béton :",
     qc_cement_bags: "Sacs de ciment :",
@@ -296,6 +299,9 @@ const TRANSLATIONS = {
     qc_perim_res: "المحيط:",
     qc_btn_inject_calc: "نقل المساحة إلى الآلة الحاسبة",
     qc_concrete_title: "2. حجم الخرسانة وأكياس الإسمنت",
+    qc_conc_l: "الطول (بالمتر) :",
+    qc_conc_w: "العرض (بالمتر) :",
+    qc_conc_h: "الارتفاع / السمك (بالمتر) :",
     qc_dosage: "عيار الإسمنت :",
     qc_vol_res: "حجم الخرسانة:",
     qc_cement_bags: "أكياس الإسمنت:",
@@ -540,6 +546,9 @@ const TRANSLATIONS = {
     qc_perim_res: "Perimeter:",
     qc_btn_inject_calc: "Transfer area to calculator",
     qc_concrete_title: "2. Concrete Volume & Cement Bags",
+    qc_conc_l: "Length L (m):",
+    qc_conc_w: "Width W (m):",
+    qc_conc_h: "Thickness / Height (m):",
     qc_dosage: "Cement Dosage:",
     qc_vol_res: "Concrete Volume:",
     qc_cement_bags: "Cement Bags:",
@@ -867,15 +876,19 @@ function getGmailStyleAvatar(nameOrEmail, customBgColor = null) {
 
 function resolveSafeAvatar(avatarUrl, nameOrEmail) {
   if (avatarUrl && typeof avatarUrl === 'string') {
-    if (avatarUrl.startsWith('data:image/jpeg') || avatarUrl.startsWith('data:image/png') || avatarUrl.startsWith('assets/')) {
-      return avatarUrl;
+    const trimmed = avatarUrl.trim();
+    if (trimmed.startsWith('data:image/jpeg') || trimmed.startsWith('data:image/png') || trimmed.startsWith('data:image/webp') || trimmed.startsWith('assets/')) {
+      return trimmed;
     }
-    if (avatarUrl.startsWith('data:image/svg+xml')) {
-      if (avatarUrl.includes('"')) {
-        const svgContent = avatarUrl.replace(/^data:image\/svg\+xml;utf8,/, '');
+    if (trimmed.startsWith('data:image/svg+xml')) {
+      if (trimmed.includes('"') || trimmed.includes('<') || trimmed.includes('>')) {
+        const svgContent = trimmed.replace(/^data:image\/svg\+xml;?(utf8|utf-8)?,?/, '');
         return 'data:image/svg+xml;utf8,' + encodeURIComponent(svgContent);
       }
-      return avatarUrl;
+      return trimmed;
+    }
+    if (trimmed.startsWith('<svg')) {
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(trimmed);
     }
   }
   return getGmailStyleAvatar(nameOrEmail || 'U');
