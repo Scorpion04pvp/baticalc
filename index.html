@@ -517,6 +517,16 @@
             <span data-i18n="nav_worker_board">عروض العمل</span>
             <span class="ml-1 px-1.5 py-0.5 rounded-full text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">مباشر ⚡</span>
           </button>
+          <button class="nav-tab" data-tab="tab-study-offices" onclick="switchTab('tab-study-offices')">
+            <i class="fa-solid fa-compass-drafting text-sky-400 mr-1.5"></i>
+            <span data-i18n="nav_study_offices">مكاتب دراسات</span>
+            <span class="ml-1 px-1.5 py-0.5 rounded-full text-[9px] bg-sky-500/20 text-sky-400 border border-sky-500/30 font-bold">جديد 📍</span>
+          </button>
+          <button class="nav-tab" onclick="openMessagesHubModal()">
+            <i class="fa-solid fa-comments text-amber-400 mr-1.5"></i>
+            <span data-i18n="nav_messages">المحادثات الخاصة</span>
+            <span id="unreadMessagesBadge" class="hidden ml-1 px-1.5 py-0.5 rounded-full text-[9px] bg-rose-500 text-white font-bold">0</span>
+          </button>
         </div>
 
       </div>
@@ -916,10 +926,80 @@
             <i class="fa-solid fa-snowflake text-cyan-400"></i>
             <span data-i18n="filter_hvac">تكييف وتبريد</span>
           </button>
+          <button type="button" id="adminPendingFilterBtn" onclick="togglePendingPostsFilter()" class="hidden worker-filter-pill border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20">
+            <i class="fa-solid fa-hourglass-half text-bh-yellow animate-pulse"></i>
+            <span>بانتظار الموافقة</span>
+            <span id="pendingPostsCountBadge" class="px-1.5 py-0.5 rounded-full bg-bh-yellow text-slate-950 text-[10px] font-black">0</span>
+          </button>
         </div>
 
         <!-- Feed Container (Cards will be rendered dynamically) -->
         <div id="workerPostsFeedContainer" class="space-y-4">
+          <!-- Populated by JS -->
+        </div>
+
+      </div>
+
+    
+      <!-- ========================================================================= -->
+      <!-- TAB: BUREAUX D'ÉTUDES & INGÉNIERIE (مكاتب دراسات وهندسة)                   -->
+      <!-- ========================================================================= -->
+      <div id="tab-study-offices" class="tab-content hidden space-y-6">
+
+        <!-- Top Header & Create Office Trigger -->
+        <div class="bg-gradient-to-r from-bh-card via-bh-cardhover to-bh-card border border-bh-border rounded-2xl p-4 sm:p-6 flex flex-wrap items-center justify-between gap-4 shadow-xl">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-slate-950 text-xl font-black shadow-lg shadow-sky-500/30">
+              <i class="fa-solid fa-compass-drafting"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="font-heading font-black text-lg sm:text-xl text-white tracking-tight" data-i18n="offices_title">دليل مكاتب الدراسات والهندسة في الجزائر</h2>
+                <span class="text-[10px] font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30 px-2 py-0.5 rounded-full font-mono flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span> خرائط GPS 📍
+                </span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5" data-i18n="offices_sub">مهندسون معماريون ومدنيون معتمدون، رخص البناء، دراسات التربة ومتابعة الورشات مع تحديد الموقع المباشر</p>
+            </div>
+          </div>
+
+          <button onclick="openAddStudyOfficeModal()" class="px-4 py-2.5 bg-gradient-to-r from-sky-400 to-blue-500 hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs sm:text-sm shadow-lg shadow-sky-500/20 transition flex items-center gap-2 cursor-pointer active:scale-95">
+            <i class="fa-solid fa-circle-plus"></i>
+            <span data-i18n="btn_new_office">إضافة مكتب دراسات جديد</span>
+          </button>
+        </div>
+
+        <!-- Category Filter Pills for Study Offices -->
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 pt-1 text-xs">
+          <button type="button" onclick="filterOfficesFeed('all', this)" class="office-filter-pill active-filter">
+            <i class="fa-solid fa-layer-group text-slate-950"></i>
+            <span data-i18n="filter_offices_all">الكل</span>
+          </button>
+          <button type="button" onclick="filterOfficesFeed('مهندس معماري', this)" class="office-filter-pill">
+            <i class="fa-solid fa-drafting-compass text-amber-400"></i>
+            <span data-i18n="filter_offices_arch">مهندس معماري</span>
+          </button>
+          <button type="button" onclick="filterOfficesFeed('مهندس مدني', this)" class="office-filter-pill">
+            <i class="fa-solid fa-building-columns text-sky-400"></i>
+            <span data-i18n="filter_offices_civil">مهندس مدني</span>
+          </button>
+          <button type="button" onclick="filterOfficesFeed('مكتب دراسات متكامل', this)" class="office-filter-pill">
+            <i class="fa-solid fa-city text-emerald-400"></i>
+            <span data-i18n="filter_offices_bet">مكتب دراسات متكامل</span>
+          </button>
+          <button type="button" onclick="filterOfficesFeed('توبوغرافيا ومسح أراضي', this)" class="office-filter-pill">
+            <i class="fa-solid fa-map-location-dot text-purple-400"></i>
+            <span data-i18n="filter_offices_topo">توبوغرافيا ومسح أراضي</span>
+          </button>
+          <button type="button" id="adminPendingOfficesBtn" onclick="togglePendingOfficesFilter()" class="hidden office-filter-pill border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20">
+            <i class="fa-solid fa-hourglass-half text-bh-yellow animate-pulse"></i>
+            <span>مكاتب بانتظار الموافقة</span>
+            <span id="pendingOfficesCountBadge" class="px-1.5 py-0.5 rounded-full bg-bh-yellow text-slate-950 text-[10px] font-black">0</span>
+          </button>
+        </div>
+
+        <!-- Feed Container for Study Offices -->
+        <div id="studyOfficesFeedContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Populated by JS -->
         </div>
 
@@ -998,6 +1078,26 @@
         </div>
 
         <!-- Wilaya / Location -->
+        <div>
+          <!-- Pricing & Rate Details -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-bh-bg/60 p-3 rounded-xl border border-bh-border">
+          <div>
+            <label class="block text-xs font-semibold text-bh-yellow mb-1">المبلغ / السعر (بالدينار DZD) :</label>
+            <input type="number" id="inputPostPriceAmount" min="0" step="50" placeholder="مثال: 800 أو 4500 (اتركه فارغاً للتفاوض)" class="w-full bg-bh-card border border-bh-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-bh-yellow mb-1">طريقة الحساب ووحدة التسعير :</label>
+            <select id="inputPostPriceUnit" class="w-full bg-bh-card border border-bh-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-bh-yellow">
+              <option value="m2">لكل متر مربع (1 م²)</option>
+              <option value="hour">للساعة (آليات وحفارات / 1h)</option>
+              <option value="day">باليوم (يومية عمل)</option>
+              <option value="linear_m">للمتر الطولي (1 م.ط)</option>
+              <option value="forfait">مقاولة إجمالية شاملة</option>
+              <option value="negotiable">قابل للتفاوض بعد المعاينة</option>
+            </select>
+          </div>
+        </div>
+
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1">الولاية / مكان الورشة :</label>
           <input type="text" id="inputPostLocation" required placeholder="مثال: الجزائر العاصمة، سطيف، وهران، قسنطينة..." class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow">
@@ -1091,6 +1191,25 @@
             <option value="أشغال حفر وتطهير">أشغال حفر وتطهير</option>
             <option value="تخصص آخر">تخصص أو حرفة أخرى</option>
           </select>
+        </div>
+
+        <!-- Pricing & Rate Details (Edit) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-bh-bg/60 p-3 rounded-xl border border-bh-border">
+          <div>
+            <label class="block text-xs font-semibold text-bh-yellow mb-1">المبلغ / السعر (بالدينار DZD) :</label>
+            <input type="number" id="editPostPriceAmount" min="0" step="50" placeholder="اتركه فارغاً للتفاوض" class="w-full bg-bh-card border border-bh-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-bh-yellow mb-1">طريقة الحساب ووحدة التسعير :</label>
+            <select id="editPostPriceUnit" class="w-full bg-bh-card border border-bh-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-bh-yellow">
+              <option value="m2">لكل متر مربع (1 م²)</option>
+              <option value="hour">للساعة (آليات وحفارات / 1h)</option>
+              <option value="day">باليوم (يومية عمل)</option>
+              <option value="linear_m">للمتر الطولي (1 م.ط)</option>
+              <option value="forfait">مقاولة إجمالية شاملة</option>
+              <option value="negotiable">قابل للتفاوض بعد المعاينة</option>
+            </select>
+          </div>
         </div>
 
         <div>
@@ -1309,53 +1428,346 @@
   </div>
 
   <!-- MOBILE BOTTOM NAVIGATION BAR (VISIBLE ONLY ON MOBILE DEVICES) -->
-  <nav id="mobileBottomNav" class="fixed bottom-0 left-0 right-0 z-40 bg-[#0c1017]/95 backdrop-blur-xl border-t border-bh-border px-3 py-1.5 flex items-center justify-around md:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.7)] safe-area-bottom">
-    <button type="button" onclick="switchTab('tab-scientific-calculator')" id="mNavCalc" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-bh-yellow transition active:scale-90">
-      <i class="fa-solid fa-calculator text-lg"></i>
-      <span class="text-[10px] font-bold mt-0.5 tracking-tight" data-i18n="m_nav_calc">الحاسبة</span>
+  <nav id="mobileBottomNav" class="fixed bottom-0 left-0 right-0 z-40 bg-[#0c1017]/95 backdrop-blur-xl border-t border-bh-border px-2 py-1.5 flex items-center justify-around md:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.7)] safe-area-bottom">
+    <button type="button" onclick="switchTab('tab-scientific-calculator')" id="mNavCalc" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2 rounded-xl text-bh-yellow transition active:scale-90">
+      <i class="fa-solid fa-calculator text-base"></i>
+      <span class="text-[9px] font-bold mt-0.5 tracking-tight" data-i18n="m_nav_calc">الحاسبة</span>
     </button>
 
-    <button type="button" onclick="switchTab('tab-worker-board')" id="mNavWorkers" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
-      <i class="fa-solid fa-briefcase text-lg"></i>
-      <span class="text-[10px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_workers">عروض العمل</span>
+    <button type="button" onclick="switchTab('tab-worker-board')" id="mNavWorkers" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
+      <i class="fa-solid fa-briefcase text-base"></i>
+      <span class="text-[9px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_workers">عروض العمل</span>
     </button>
 
-    <button type="button" onclick="openUserProfileModal()" id="mNavProfile" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
-      <i class="fa-solid fa-user-gear text-lg"></i>
-      <span class="text-[10px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_profile">حسابي</span>
+    <button type="button" onclick="switchTab('tab-study-offices')" id="mNavOffices" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
+      <i class="fa-solid fa-compass-drafting text-base text-sky-400"></i>
+      <span class="text-[9px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_offices">مكاتب دراسات</span>
     </button>
 
-    <button type="button" onclick="toggleLanguageQuick()" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
-      <i class="fa-solid fa-globe text-lg"></i>
-      <span class="text-[10px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_lang">اللغة</span>
+    <button type="button" onclick="openMessagesHubModal()" id="mNavMessages" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2 rounded-xl text-slate-400 hover:text-white transition active:scale-90 relative">
+      <i class="fa-solid fa-comments text-base text-amber-400"></i>
+      <span id="mUnreadBadge" class="hidden absolute top-0.5 right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+      <span class="text-[9px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_messages">محادثات</span>
     </button>
 
-    <button type="button" id="btnMobileInstallPwa" onclick="promptInstallPwa()" class="hidden mobile-nav-item flex flex-col items-center justify-center py-1 px-2 rounded-xl text-amber-400 transition active:scale-90">
-      <i class="fa-solid fa-mobile-screen-button text-lg animate-bounce text-bh-yellow"></i>
-      <span class="text-[10px] font-bold mt-0.5 tracking-tight text-bh-yellow" data-i18n="m_nav_install">تثبيت</span>
+    <button type="button" onclick="openUserProfileModal()" id="mNavProfile" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
+      <i class="fa-solid fa-user-circle text-base"></i>
+      <span class="text-[9px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_profile">حسابي</span>
     </button>
   </nav>
 
   <!-- MOBILE PWA INSTALL PROMPT TOAST BANNER -->
-  <div id="pwaInstallPromptBanner" class="fixed bottom-16 left-3 right-3 z-50 p-3 bg-gradient-to-r from-[#141c2c] to-[#0f1520] border border-bh-yellow/50 rounded-2xl shadow-2xl flex items-center justify-between gap-3 hidden md:hidden transition-all duration-300">
-    <div class="flex items-center gap-2.5 min-w-0">
-      <img src="assets/batihub_logo.png" alt="BatiHub DZ" class="w-9 h-9 rounded-xl object-contain bg-bh-bg p-1 border border-bh-yellow/40 shrink-0">
-      <div class="min-w-0">
-        <p class="text-xs font-bold text-white truncate" data-i18n="pwa_banner_title">تطبيق BatiHub DZ للهاتف</p>
-        <p class="text-[10px] text-slate-300 truncate" data-i18n="pwa_banner_desc">ثبّت التطبيق على شاشة هاتفك الرئيسية بنقرة واحدة</p>
-      </div>
-    </div>
-    <div class="flex items-center gap-1.5 shrink-0">
-      <button type="button" onclick="promptInstallPwa()" class="px-3 py-1.5 bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold rounded-xl text-[11px] shadow-md active:scale-95 transition">
-        <span data-i18n="pwa_btn_install">تثبيت</span>
-      </button>
-      <button type="button" onclick="dismissPwaBanner()" class="text-slate-400 hover:text-white p-1 text-sm">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </div>
-  </div>
+  
 
   <!-- Main JavaScript Logic -->
   <script src="app.js"></script>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: ADD STUDY OFFICE (إضافة مكتب دراسات جديد)                          -->
+  <!-- ========================================================================= -->
+  <div id="modalAddStudyOffice" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bg-bh-card border border-bh-border rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden relative text-right" dir="rtl">
+      
+      <!-- Modal Header -->
+      <div class="px-5 py-4 border-b border-bh-border flex items-center justify-between bg-bh-cardhover">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold">
+            <i class="fa-solid fa-compass-drafting text-sm"></i>
+          </div>
+          <h3 class="font-bold text-white text-sm" data-i18n="modal_add_office_title">إضافة مكتب دراسات وهندسة جديد</h3>
+        </div>
+        <button onclick="closeAddStudyOfficeModal()" class="w-7 h-7 rounded-full bg-bh-bg hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <form id="formAddStudyOffice" onsubmit="handlePublishStudyOffice(event)" class="p-5 space-y-3.5 max-h-[80vh] overflow-y-auto no-scrollbar">
+        
+        <!-- Office Name -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">اسم المكتب أو المهندس :</label>
+          <input type="text" id="inputOfficeName" required placeholder="مثال: مكتب الأفق للدراسات المعمارية والهندسية" class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
+        </div>
+
+        <!-- Specialty Selection -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">التخصص والاعتماد :</label>
+          <select id="inputOfficeSpecialty" required class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-400">
+            <option value="مهندس معماري">مهندس معماري (Architecte Agréé)</option>
+            <option value="مهندس مدني">مهندس مدني (Ingénieur Génie Civil Agréé)</option>
+            <option value="مكتب دراسات متكامل">مكتب دراسات تقنية متكاملة (BET Pluridisciplinaire)</option>
+            <option value="توبوغرافيا ومسح أراضي">خبير مسح أراضي وتوبوغرافيا (Géomètre Topographe)</option>
+          </select>
+        </div>
+
+        <!-- Lead Engineer Name -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">اسم المهندس المسؤول / المعتمد :</label>
+          <input type="text" id="inputOfficeEngineer" required placeholder="مثال: م. أحمد بن علي" class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
+        </div>
+
+        <!-- Wilaya & Commune -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">الولاية :</label>
+            <input type="text" id="inputOfficeWilaya" required placeholder="مثال: الجزائر، سطيف، وهران..." class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">البلدية / العنوان :</label>
+            <input type="text" id="inputOfficeAddress" required placeholder="مثال: وسط المدينة، شارع..." class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
+          </div>
+        </div>
+
+        <!-- Phone & WhatsApp -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">رقم الهاتف :</label>
+            <input type="tel" id="inputOfficePhone" required placeholder="0550123456" class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">رقم واتساب (اختياري) :</label>
+            <input type="tel" id="inputOfficeWhatsapp" placeholder="0550123456" class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 font-mono">
+          </div>
+        </div>
+
+        <!-- GPS Location with Auto-Detect Button -->
+        <div class="bg-sky-500/10 border border-sky-500/30 p-3 rounded-xl space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-bold text-sky-400">موقع المكتب على خرائط GPS :</label>
+            <button type="button" onclick="autoDetectOfficeGps()" class="px-2.5 py-1 bg-sky-500 text-slate-950 font-bold rounded-lg text-[11px] hover:bg-sky-400 transition flex items-center gap-1 cursor-pointer">
+              <i class="fa-solid fa-location-crosshairs text-[10px]"></i>
+              <span id="btnDetectGpsLabel">تحديد موقعي الآن 📍</span>
+            </button>
+          </div>
+          <input type="text" id="inputOfficeGps" placeholder="رابط خرائط Google أو إحداثيات (مثال: 36.7538, 3.0588)" class="w-full bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 font-mono">
+          <p class="text-[10px] text-slate-400">انقر على "تحديد موقعي الآن" لملء الإحداثيات تلقائياً أو الصق رابط موقع المكتب من خرائط Google Maps</p>
+        </div>
+
+        <!-- Office Description & Services -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">خدمات ومجالات عمل المكتب :</label>
+          <textarea id="inputOfficeDescription" required rows="3" placeholder="مخططات معمارية وهندسية، رخص البناء، ملفات المطابقة، دراسات التربة ومتابعة الورشات..." class="w-full bg-bh-bg border border-bh-border rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 resize-none"></textarea>
+        </div>
+
+        <!-- Office Image / Logo -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">صورة المكتب أو الشعار أو نماذج الأعمال (اختياري) :</label>
+          <div class="flex items-center gap-3">
+            <label class="cursor-pointer px-3 py-2 bg-bh-bg hover:bg-slate-800 border border-bh-border hover:border-sky-400/50 rounded-xl text-xs text-slate-300 flex items-center gap-2 transition">
+              <i class="fa-solid fa-image text-sky-400"></i>
+              <span>اختر صورة</span>
+              <input type="file" id="inputOfficeImage" accept="image/*" class="hidden" onchange="handleOfficeImageSelect(event)">
+            </label>
+            <span id="officeImageFileName" class="text-[11px] text-slate-500 truncate max-w-[200px]">لم يتم اختيار صورة</span>
+            <button type="button" id="btnRemoveOfficeImage" onclick="clearOfficeImageSelection()" class="text-rose-400 hover:text-rose-300 text-xs hidden cursor-pointer">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+          <div id="officeImagePreviewContainer" class="hidden mt-2">
+            <img id="officeImagePreview" src="" alt="معاينة" class="max-h-36 rounded-xl object-contain border border-bh-border">
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-2">
+          <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-sky-400 to-blue-500 hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs sm:text-sm shadow-lg shadow-sky-500/20 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+            <i class="fa-solid fa-check-circle"></i>
+            <span>تأكيد ونشر مكتب الدراسات</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: 1-ON-1 PRIVATE CHAT (نظام المحادثات الخاصة المباشرة)               -->
+  <!-- ========================================================================= -->
+  <div id="modalPrivateChat" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 hidden">
+    <div class="bg-bh-card border border-bh-border rounded-2xl max-w-xl w-full h-[90vh] sm:h-[82vh] shadow-2xl flex flex-col overflow-hidden text-right" dir="rtl">
+      
+      <!-- Chat Header -->
+      <div class="px-4 py-3 border-b border-bh-border flex items-center justify-between bg-bh-cardhover shrink-0">
+        <div class="flex items-center gap-3">
+          <img id="chatPartnerAvatar" src="assets/batihub_logo.png" alt="Avatar" class="w-9 h-9 rounded-full object-cover border border-bh-border shadow-sm">
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h4 id="chatPartnerName" class="font-bold text-white text-sm">اسم المستخدم</h4>
+              <span id="chatPartnerAdminBadge" class="hidden px-1.5 py-0.2 rounded bg-bh-yellow/20 text-bh-yellow border border-bh-yellow/30 text-[9px] font-bold">إدارة</span>
+            </div>
+            <p id="chatPartnerStatus" class="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> متصل مباشرة
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <!-- Block / Unblock Button -->
+          <button type="button" id="btnToggleBlockUser" onclick="handleToggleBlockActiveChatUser()" class="px-2.5 py-1 rounded-xl bg-bh-bg border border-bh-border text-slate-400 hover:text-rose-400 text-xs font-semibold transition flex items-center gap-1 cursor-pointer" title="حظر أو إلغاء حظر المستخدم">
+            <i class="fa-solid fa-ban text-[11px]"></i>
+            <span id="blockButtonLabel">حظر</span>
+          </button>
+          
+          <!-- Close Button -->
+          <button type="button" onclick="closePrivateChatModal()" class="w-8 h-8 rounded-full bg-bh-bg hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer">
+            <i class="fa-solid fa-xmark text-sm"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Blocked Alert Banner inside Chat -->
+      <div id="chatBlockedNotice" class="hidden bg-rose-500/20 border-b border-rose-500/40 p-2.5 text-center text-xs text-rose-300 font-bold shrink-0">
+        <i class="fa-solid fa-circle-exclamation mr-1"></i> لقد قمت بحظر هذا المستخدم. لن تتمكن من مراسلته حتى تقوم بإلغاء الحظر.
+      </div>
+
+      <!-- Messages Feed Container -->
+      <div id="chatMessagesContainer" class="flex-1 p-3 sm:p-4 overflow-y-auto space-y-3 font-sans">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Active Audio Recording Preview Bar -->
+      <div id="chatVoiceRecordingBar" class="hidden px-4 py-2 bg-rose-500/10 border-t border-rose-500/30 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2 text-rose-400 text-xs font-bold font-mono">
+          <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+          <span>جاري تسجيل رسالة صوتية (فوكال)...</span>
+          <span id="voiceRecordingTimer" class="px-2 py-0.5 rounded bg-rose-500/20 text-white font-mono">00:00</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="cancelVoiceRecording()" class="px-2.5 py-1 rounded-lg bg-bh-bg text-slate-400 hover:text-white text-xs cursor-pointer">إلغاء</button>
+          <button type="button" onclick="stopAndAttachVoiceRecording()" class="px-3 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs cursor-pointer flex items-center gap-1">
+            <i class="fa-solid fa-stop text-[10px]"></i>
+            <span>إيقاف واعتماد</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Attached Attachment Preview Bar (Photo, Video, or Audio preview) -->
+      <div id="chatAttachmentPreviewBar" class="hidden px-4 py-2 bg-bh-bg border-t border-bh-border flex items-center justify-between shrink-0">
+        <div id="chatAttachmentContent" class="flex items-center gap-2">
+          <!-- Dynamic preview elements -->
+        </div>
+        <button type="button" onclick="clearChatAttachment()" class="text-rose-400 hover:text-rose-300 text-xs px-2 py-1 cursor-pointer">
+          <i class="fa-solid fa-trash-can mr-1"></i> حذف المرفق
+        </button>
+      </div>
+
+      <!-- Chat Input & Toolbar -->
+      <form id="formSendChatMessage" onsubmit="handleSendChatMessage(event)" class="p-2 sm:p-3 bg-bh-cardhover border-t border-bh-border flex items-center gap-2 shrink-0">
+        
+        <!-- Microphone Button (Voice Notes) -->
+        <button type="button" id="btnVoiceRecord" onclick="toggleVoiceRecording()" class="w-9 h-9 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow/50 text-slate-300 hover:text-bh-yellow flex items-center justify-center transition shrink-0 cursor-pointer" title="تسجيل رسالة صوتية (فوكال)">
+          <i class="fa-solid fa-microphone text-sm"></i>
+        </button>
+
+        <!-- Attach Photo Button -->
+        <label class="w-9 h-9 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow/50 text-slate-300 hover:text-bh-yellow flex items-center justify-center transition shrink-0 cursor-pointer" title="إرفاق صورة">
+          <i class="fa-solid fa-image text-sm"></i>
+          <input type="file" id="inputChatImage" accept="image/*" class="hidden" onchange="handleChatImageSelect(event)">
+        </label>
+
+        <!-- Attach Video Button -->
+        <label class="w-9 h-9 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow/50 text-slate-300 hover:text-bh-yellow flex items-center justify-center transition shrink-0 cursor-pointer" title="إرفاق فيديو">
+          <i class="fa-solid fa-video text-sm"></i>
+          <input type="file" id="inputChatVideo" accept="video/*" class="hidden" onchange="handleChatVideoSelect(event)">
+        </label>
+
+        <!-- Message Text Input -->
+        <input type="text" id="inputChatMessage" placeholder="اكتب رسالتك هنا..." class="flex-1 bg-bh-bg border border-bh-border rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow">
+
+        <!-- Send Button -->
+        <button type="submit" id="btnSendChat" class="px-4 py-2 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold text-xs shadow-md hover:opacity-95 transition flex items-center gap-1.5 shrink-0 cursor-pointer active:scale-95">
+          <i class="fa-solid fa-paper-plane text-xs"></i>
+          <span>إرسال</span>
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: MESSAGES & CHATS HUB (مركز المحادثات وقائمة المحظورين)            -->
+  <!-- ========================================================================= -->
+  <div id="modalMessagesHub" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bg-bh-card border border-bh-border rounded-2xl max-w-lg w-full max-h-[85vh] shadow-2xl flex flex-col overflow-hidden text-right" dir="rtl">
+      
+      <!-- Header -->
+      <div class="px-5 py-4 border-b border-bh-border flex items-center justify-between bg-bh-cardhover shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-bh-yellow/20 text-bh-yellow flex items-center justify-center font-bold">
+            <i class="fa-solid fa-comments text-sm"></i>
+          </div>
+          <h3 class="font-bold text-white text-sm" data-i18n="messages_hub_title">الرسائل والمحادثات الخاصة</h3>
+        </div>
+        <button onclick="closeMessagesHubModal()" class="w-7 h-7 rounded-full bg-bh-bg hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Hub Navigation Tabs -->
+      <div class="flex items-center border-b border-bh-border px-5 pt-3 gap-3 bg-bh-bg text-xs shrink-0">
+        <button type="button" id="tabBtnActiveChats" onclick="switchMessagesHubTab('active')" class="pb-2.5 border-b-2 border-bh-yellow text-white font-bold transition flex items-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-inbox text-bh-yellow"></i>
+          <span>المحادثات النشطة</span>
+          <span id="activeChatsCountBadge" class="px-1.5 py-0.2 rounded-full bg-bh-yellow/20 text-bh-yellow text-[10px] font-mono">0</span>
+        </button>
+        <button type="button" id="tabBtnBlockedUsers" onclick="switchMessagesHubTab('blocked')" class="pb-2.5 border-b-2 border-transparent text-slate-400 hover:text-white font-semibold transition flex items-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-user-slash text-rose-400"></i>
+          <span>المستخدمون المحظورون</span>
+          <span id="blockedUsersCountBadge" class="px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-400 text-[10px] font-mono">0</span>
+        </button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="flex-1 p-4 overflow-y-auto space-y-2.5">
+        
+        <!-- Active Chats List View -->
+        <div id="viewActiveChatsList" class="space-y-2">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Blocked Users List View -->
+        <div id="viewBlockedUsersList" class="hidden space-y-2">
+          <!-- Populated by JS -->
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- APP-THEMED ALERT & CONFIRM MODAL (نافذة التنبيهات المخصصة للتطبيق)        -->
+  <!-- ========================================================================= -->
+  <div id="appNotificationModal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bg-bh-card border border-bh-border rounded-2xl max-w-sm w-full shadow-2xl p-5 space-y-4 text-center transform transition-all duration-200 scale-95" id="appNotificationBox" dir="rtl">
+      
+      <!-- Icon Wrapper -->
+      <div id="appNotifyIconWrapper" class="w-14 h-14 mx-auto rounded-2xl bg-bh-yellow/15 text-bh-yellow border border-bh-yellow/30 flex items-center justify-center text-2xl shadow-lg">
+        <i id="appNotifyIcon" class="fa-solid fa-circle-info"></i>
+      </div>
+
+      <!-- Title & Message -->
+      <div class="space-y-1.5">
+        <h4 id="appNotifyTitle" class="font-heading font-black text-white text-base">تنبيه</h4>
+        <p id="appNotifyMessage" class="text-xs text-slate-300 leading-relaxed whitespace-pre-line"></p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-center gap-2 pt-2">
+        <button type="button" id="btnAppNotifyCancel" class="hidden px-4 py-2 rounded-xl bg-bh-bg border border-bh-border hover:bg-slate-800 text-slate-300 text-xs font-semibold transition cursor-pointer">
+          إلغاء
+        </button>
+        <button type="button" id="btnAppNotifyConfirm" class="px-5 py-2 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold text-xs shadow-md hover:opacity-95 transition cursor-pointer active:scale-95">
+          حسناً
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FLOATING TOAST CONTAINER -->
+  <div id="appToastContainer"></div>
+
 </body>
 </html>
