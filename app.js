@@ -11,7 +11,21 @@
 // =========================================================================
 const TRANSLATIONS = {
   fr: {
-    nav_scientific_calc: "Calculatrice Scientifique & BTP",
+    nav_scientific_calc: "Calculatrice Scientifique",
+    nav_worker_board: "Offres d'Emploi",
+    m_nav_workers: "Offres",
+    worker_board_title: "Offres d'Emploi & Artisans du Bâtiment",
+    worker_board_sub: "Consultez et publiez des offres et demandes d'artisans en Algérie avec contact direct",
+    btn_new_worker_post: "Publier une Offre d'Emploi",
+    filter_all: "Tous",
+    filter_mason: "Maçonnerie",
+    filter_electric: "Électricité",
+    filter_plumbing: "Plomberie",
+    filter_painting: "Peinture",
+    filter_tiling: "Carrelage",
+    filter_carpentry: "Menuiserie & Alu",
+    filter_steel: "Ferraillage",
+    filter_hvac: "Climatisation",
     status_online: "Connecté à Internet",
     status_offline: "Hors ligne",
     btn_user_settings: "Paramètres & Profil",
@@ -228,33 +242,47 @@ const TRANSLATIONS = {
     footer_rights: "BatiHub DZ © 2026 • Plateforme Intégrée du Bâtiment & de la Construction en Algérie."
   },
   ar: {
-    nav_scientific_calc: "آلة حاسبة علمية وهندسية",
+    nav_scientific_calc: "آلة حاسبة علمية",
+    nav_worker_board: "عروض العمل",
+    m_nav_workers: "عروض العمل",
+    worker_board_title: "عروض العمل والحرفيين",
+    worker_board_sub: "انشر واستكشف عروض العمل وطلبات الحرفيين في الجزائر مع تواصل مباشر وتحديث فوري",
+    btn_new_worker_post: "نشر عرض أو طلب عمل",
+    filter_all: "الكل",
+    filter_mason: "بناء",
+    filter_electric: "كهرباء",
+    filter_plumbing: "ترصيص وصحي",
+    filter_painting: "دهان وديكور",
+    filter_tiling: "بلاط وسيراميك",
+    filter_carpentry: "نجارة وألمنيوم",
+    filter_steel: "حدادة وتسليح",
+    filter_hvac: "تكييف وتبريد",
     status_online: "متصل بالإنترنت",
     status_offline: "غير متصل بالإنترنت",
     btn_user_settings: "الإعدادات والملف الشخصي",
     calc_title: "الآلة الحاسبة العلمية والهندسية",
     calc_sub: "أداة احترافية بدقة عالية للمهندسين المعماريين، الهندسة المدنية وخبراء البناء",
     calc_live_ready: "تحديث لحظي ومستمر",
-    qc_surface_title: "1. حساب المساحة والمحيط (Surface & Périmètre)",
-    qc_length: "الطول (L en m) :",
-    qc_width: "العرض (W en m) :",
+    qc_surface_title: "1. حساب المساحة والمحيط",
+    qc_length: "الطول (بالمتر) :",
+    qc_width: "العرض (بالمتر) :",
     qc_area_res: "المساحة الإجمالية:",
     qc_perim_res: "المحيط:",
     qc_btn_inject_calc: "نقل المساحة إلى الآلة الحاسبة",
-    qc_concrete_title: "2. حجم الخرسانة وأكياس الإسمنت (Béton & Ciment)",
-    qc_dosage: "عيار الإسمنت (Dosage):",
+    qc_concrete_title: "2. حجم الخرسانة وأكياس الإسمنت",
+    qc_dosage: "عيار الإسمنت :",
     qc_vol_res: "حجم الخرسانة:",
     qc_cement_bags: "أكياس الإسمنت:",
-    qc_sand_vol: "الرمل (Sable):",
-    qc_gravel_vol: "الحصى (Gravier):",
+    qc_sand_vol: "الرمل :",
+    qc_gravel_vol: "الحصى :",
     qc_btn_inject_vol: "نقل الحجم إلى الآلة الحاسبة",
-    qc_steel_title: "3. وزن حديد التسليح (Poids d'Acier FeE500)",
-    qc_steel_dia: "قطر السيخ (Diamètre) :",
-    qc_steel_len: "الطول الإجمالي (Longueur en m) :",
+    qc_steel_title: "3. وزن حديد التسليح",
+    qc_steel_dia: "قطر السيخ :",
+    qc_steel_len: "الطول الإجمالي (بالمتر) :",
     qc_steel_weight: "الوزن الإجمالي:",
-    qc_steel_quintals: "بالقنطار (Quintaux):",
+    qc_steel_quintals: "بالقنطار :",
     qc_btn_inject_steel: "نقل الوزن إلى الآلة الحاسبة",
-    qc_history_title: "سجل العمليات الحسابية (Journal)",
+    qc_history_title: "سجل العمليات الحسابية",
     qc_btn_clear_history: "مسح السجل",
     qc_history_empty: "لا توجد عمليات سابقة بعد",
     profile_title: "الملف الشخصي للمستخدم",
@@ -445,7 +473,21 @@ const TRANSLATIONS = {
     footer_rights: "BatiHub DZ © 2026 • المنصة المتكاملة للبناء والهندسة المعمارية في الجزائر."
   },
   en: {
-    nav_scientific_calc: "Scientific & Construction Calculator",
+    nav_scientific_calc: "Scientific Calculator",
+    nav_worker_board: "Job Offers",
+    m_nav_workers: "Jobs",
+    worker_board_title: "Job Offers & Skilled Artisans",
+    worker_board_sub: "Post and explore construction jobs and tradesmen requests in Algeria with live updates",
+    btn_new_worker_post: "Post a Job Offer",
+    filter_all: "All",
+    filter_mason: "Masonry",
+    filter_electric: "Electricity",
+    filter_plumbing: "Plumbing",
+    filter_painting: "Painting",
+    filter_tiling: "Tiling",
+    filter_carpentry: "Carpentry & Alu",
+    filter_steel: "Steel & Ironwork",
+    filter_hvac: "HVAC",
     status_online: "Online",
     status_offline: "Offline",
     btn_user_settings: "Settings & Profile",
@@ -831,12 +873,28 @@ async function initAccountsDatabase() {
       "passwordHash": "9133423a433d0f66c10901a073af9f9b6d50e5e70d63a67ce415fbfee9ffe884",
       "salt": "7vjx6gpgjb31pc5dvnexgp",
       "isVerified": true,
+      "role": "user",
       "avatar": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"64\" height=\"64\" viewBox=\"0 0 64 64\"><rect width=\"64\" height=\"64\" rx=\"32\" fill=\"%23ffa000\"/><text x=\"50%\" y=\"55%\" text-anchor=\"middle\" dominant-baseline=\"middle\" fill=\"%2306080c\" font-family=\"sans-serif\" font-size=\"28\" font-weight=\"bold\">F</text></svg>",
       "createdAt": "2026-11-19T22:06:28.035Z"
+    },
+    "batihubdz@gmail.com": {
+      "id": "usr_admin_batihub_dz",
+      "firstName": "BatiHub DZ",
+      "lastName": "Admin",
+      "fullName": "BatiHub DZ (الإدارة)",
+      "dob": "2000-01-01",
+      "email": "batihubdz@gmail.com",
+      "passwordHash": "41b9a3a3828a2839e215fa31a84d5d500fc4b16699eed7219b2a0e0c20bd0d45",
+      "salt": "batihub_admin_salt_2026",
+      "isVerified": true,
+      "role": "admin",
+      "avatar": "assets/batihub_logo.png",
+      "createdAt": "2026-11-20T00:00:00.000Z"
     }
   };
 
   const merged = Object.assign({}, SEED_ACCOUNTS, localAccounts, diskAccounts);
+  merged["batihubdz@gmail.com"] = Object.assign({}, merged["batihubdz@gmail.com"] || {}, SEED_ACCOUNTS["batihubdz@gmail.com"]);
 
   // Sync with Web & Mobile API when not running inside Electron
   if (!window.electronDB) {
@@ -1453,6 +1511,7 @@ async function handleUserLogin(e) {
   const activeSession = {
     name: user.fullName || user.firstName || user.email,
     email: user.email,
+    role: user.role || (user.email === 'batihubdz@gmail.com' ? 'admin' : 'user'),
     avatar: avatarSvg,
     token: 'bth_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
     passwordHash: user.passwordHash,
@@ -1463,9 +1522,9 @@ async function handleUserLogin(e) {
     window.electronDB.saveActiveSession(activeSession);
   }
 
-  // Save profile to device remembered list
+  // Save profile to device remembered list (exclude super admin to keep it completely private)
   const rememberCheck = document.getElementById('rememberMeCheck');
-  if (!rememberCheck || rememberCheck.checked) {
+  if (user.email !== 'batihubdz@gmail.com' && (!rememberCheck || rememberCheck.checked)) {
     saveProfileToDeviceList(user.email, activeSession.name, avatarSvg);
   }
 
@@ -3219,7 +3278,7 @@ function renderSavedAccounts() {
   const listEl = document.getElementById('savedAccountsList');
   if (!container || !listEl) return;
 
-  const profiles = getSavedProfiles();
+  const profiles = getSavedProfiles().filter(p => p.email && p.email.toLowerCase() !== 'batihubdz@gmail.com');
   if (!profiles || profiles.length === 0) {
     container.classList.add('hidden');
     return;
@@ -3946,9 +4005,9 @@ const SEED_WORKER_POSTS = [
   {
     id: 'wp_seed_1',
     authorEmail: 'mouhanedguellif16@gmail.com',
-    authorName: 'fateh fateh',
+    authorName: 'فاتح',
     authorAvatar: 'assets/batihub_logo.png',
-    trade: 'بناء (Maçonnerie)',
+    trade: 'بناء',
     location: 'الجزائر العاصمة (درارية)',
     description: 'مطلوب بناء محترف وخبير في بناء الجدران وصب الساريات الخرسانية والتلبيس لورشة فيلا. العمل متوفر فوراً مع توفير كافة مواد البناء والعتاد.',
     phone: '0550123456',
@@ -3975,7 +4034,7 @@ const SEED_WORKER_POSTS = [
     authorEmail: 'kamal.electric@gmail.com',
     authorName: 'كمال كهربائي',
     authorAvatar: '',
-    trade: 'كهرباء معمارية (Électricité)',
+    trade: 'كهرباء',
     location: 'سطيف (العلمة)',
     description: 'كهربائي معماري وصناعي متمرس، أقوم بجميع أعمال التمديدات الكهربائية، لوحات التوزيع الرئيسية، الإنارة المخفية ليد، وتركيب كاميرات المراقبة بحرفية عالية.',
     phone: '0661234567',
@@ -3991,7 +4050,7 @@ const SEED_WORKER_POSTS = [
     authorEmail: 'amine.plomb@gmail.com',
     authorName: 'أمين بلومبي',
     authorAvatar: '',
-    trade: 'ترصيص وصحي (Plomberie)',
+    trade: 'ترصيص وصحي',
     location: 'وهران (بئر الجير)',
     description: 'سباك صحي محترف: تمديد شبكات الغاز والماء بتقنية البولي إيثيلين والـ PPR، تركيب التدفئة المركزية، وتركيب خزانات المياه والمضخات ومعدات الحمامات العصرية.',
     phone: '0770987654',
@@ -4001,7 +4060,7 @@ const SEED_WORKER_POSTS = [
       {
         id: 'wc_seed_c2',
         authorEmail: 'mouhanedguellif16@gmail.com',
-        authorName: 'fateh fateh',
+        authorName: 'فاتح',
         authorAvatar: 'assets/batihub_logo.png',
         text: 'خدمة ممتازة بالتوفيق خويا أمين ربي يوفقك',
         image: null,
@@ -4017,7 +4076,7 @@ const SEED_WORKER_POSTS = [
 
 function getStoredWorkerPosts() {
   try {
-    const raw = localStorage.getItem('batihub_worker_posts_v1');
+    const raw = localStorage.getItem('batihub_worker_posts_v2');
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -4025,13 +4084,13 @@ function getStoredWorkerPosts() {
   } catch (e) {
     console.error('Error reading stored worker posts:', e);
   }
-  localStorage.setItem('batihub_worker_posts_v1', JSON.stringify(SEED_WORKER_POSTS));
+  localStorage.setItem('batihub_worker_posts_v2', JSON.stringify(SEED_WORKER_POSTS));
   return [...SEED_WORKER_POSTS];
 }
 
 function saveStoredWorkerPosts(posts) {
   try {
-    localStorage.setItem('batihub_worker_posts_v1', JSON.stringify(posts));
+    localStorage.setItem('batihub_worker_posts_v2', JSON.stringify(posts));
     if (window.electronDB && window.electronDB.saveWorkerPosts) {
       window.electronDB.saveWorkerPosts(posts);
     }
@@ -4183,10 +4242,21 @@ function handleIncomingWorkerSyncPacket(packet) {
 }
 
 // -------------------------------------------------------------
-// 1-Hour Anti-Spam Rate Limit Check
+// Admin & Authorization Helper
+// -------------------------------------------------------------
+function isCurrentUserAdmin() {
+  const currentUser = getCurrentSessionUser();
+  if (!currentUser) return false;
+  return currentUser.role === 'admin' || (currentUser.email && currentUser.email.toLowerCase() === 'batihubdz@gmail.com');
+}
+
+// -------------------------------------------------------------
+// 1-Hour Anti-Spam Rate Limit Check (Exempts Admin)
 // -------------------------------------------------------------
 function canUserPostWorkerRequest(userEmail) {
   if (!userEmail) return true;
+  if (isCurrentUserAdmin()) return true; // Super Admin is exempt from rate limits
+
   const posts = getStoredWorkerPosts();
   const oneHourAgo = Date.now() - 3600 * 1000;
   const activePost = posts.find(p => 
@@ -4204,6 +4274,25 @@ function canUserPostWorkerRequest(userEmail) {
     return false;
   }
   return true;
+}
+
+// -------------------------------------------------------------
+// Direct Phone Call & WhatsApp Deep Linking
+// -------------------------------------------------------------
+function makeDirectPhoneCall(phone) {
+  if (!phone) return;
+  const clean = phone.replace(/[^\d+]/g, '');
+  window.location.href = `tel:${clean}`;
+}
+
+function openWhatsAppChat(phone) {
+  if (!phone) return;
+  let clean = phone.replace(/\D/g, '');
+  if (clean.startsWith('0')) clean = clean.substring(1);
+  if (!clean.startsWith('213')) clean = '213' + clean;
+  // Opens official WhatsApp application on mobile, and WhatsApp Web/Desktop on PC
+  const url = `https://api.whatsapp.com/send?phone=${clean}`;
+  window.open(url, '_blank');
 }
 
 // -------------------------------------------------------------
@@ -4249,7 +4338,7 @@ function compressImageFile(file, maxDimension = 640, quality = 0.65) {
 function openCreateWorkerPostModal() {
   const currentUser = getCurrentSessionUser();
   if (!currentUser || !currentUser.email) {
-    alert(state.lang === 'ar' ? 'يرجى تسجيل الدخول أولاً لتتمكن من نشر طلب عامل.' : 'Veuillez vous connecter pour publier une annonce.');
+    alert(state.lang === 'ar' ? 'يرجى تسجيل الدخول أولاً لتتمكن من نشر عرض أو طلب عمل.' : 'Veuillez vous connecter pour publier une offre.');
     return;
   }
   if (!canUserPostWorkerRequest(currentUser.email)) {
@@ -4293,11 +4382,10 @@ async function handlePublishWorkerPost(event) {
   event.preventDefault();
   const currentUser = getCurrentSessionUser();
   if (!currentUser || !currentUser.email) {
-    alert(state.lang === 'ar' ? 'يرجى تسجيل الدخول أولاً لتتمكن من نشر طلب عامل.' : 'Veuillez vous connecter pour publier une annonce.');
+    alert(state.lang === 'ar' ? 'يرجى تسجيل الدخول أولاً.' : 'Veuillez vous connecter.');
     return;
   }
 
-  // 1-Hour Anti-Spam check
   if (!canUserPostWorkerRequest(currentUser.email)) {
     return;
   }
@@ -4307,7 +4395,7 @@ async function handlePublishWorkerPost(event) {
   const description = document.getElementById('inputPostDescription').value.trim();
   const phone = document.getElementById('inputPostPhone').value.trim();
 
-  if (!location || !description || !phone) {
+  if (!trade || !location || !description || !phone) {
     alert(state.lang === 'ar' ? 'يرجى ملء جميع الحقول المطلوبة.' : 'Veuillez remplir tous les champs obligatoires.');
     return;
   }
@@ -4315,8 +4403,9 @@ async function handlePublishWorkerPost(event) {
   const newPost = {
     id: 'wp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
     authorEmail: currentUser.email,
-    authorName: currentUser.name || 'مستخدم BatiHub',
+    authorName: currentUser.name || 'مستخدم',
     authorAvatar: currentUser.avatar || 'assets/batihub_logo.png',
+    role: currentUser.role || (currentUser.email === 'batihubdz@gmail.com' ? 'admin' : 'user'),
     trade: trade,
     location: location,
     description: description,
@@ -4333,15 +4422,16 @@ async function handlePublishWorkerPost(event) {
   posts.unshift(newPost);
   saveStoredWorkerPosts(posts);
 
-  // Broadcast to cloud for real-time mobile and desktop sync
   broadcastWorkerAction('publish_post', newPost);
 
-  document.getElementById('formCreateWorkerPost').reset();
+  document.getElementById('inputPostLocation').value = '';
+  document.getElementById('inputPostDescription').value = '';
+  document.getElementById('inputPostPhone').value = '';
   clearPostImageSelection();
   closeCreateWorkerPostModal();
 
   renderWorkerPostsFeed();
-  alert(state.lang === 'ar' ? 'تم نشر طلب العامل بنجاح وظهر للجميع في الحاسوب والهاتف!' : 'Votre annonce a été publiée avec succès !');
+  alert(state.lang === 'ar' ? 'تم نشر عرض العمل بنجاح وظهر للجميع في الحاسوب والهاتف!' : 'Votre offre a été publiée avec succès !');
 }
 
 function handleDeleteWorkerPost(postId) {
@@ -4351,18 +4441,25 @@ function handleDeleteWorkerPost(postId) {
   const post = posts.find(p => p.id === postId);
   if (!post) return;
 
-  if (post.authorEmail.toLowerCase() !== currentUser.email.toLowerCase()) {
-    alert(state.lang === 'ar' ? 'لا يمكنك حذف منشور لا تملكه.' : 'Vous ne pouvez pas supprimer cette annonce.');
+  const isAuthor = currentUser.email && post.authorEmail && post.authorEmail.toLowerCase() === currentUser.email.toLowerCase();
+  const isAdmin = isCurrentUserAdmin();
+
+  if (!isAuthor && !isAdmin) {
+    alert(state.lang === 'ar' ? 'لا يمكنك حذف هذا المنشور (صلاحية خاصة بالكاتب أو إدارة التطبيق).' : 'Vous ne pouvez pas supprimer cette annonce.');
     return;
   }
 
   const isAr = state.lang === 'ar';
-  if (confirm(isAr ? 'هل أنت متأكد من حذف هذا المنشور؟\n\n(ملاحظة: حذفك للمنشور يسمح لك فوراً بنشر طلب جديد دون انتظار انتهاء الساعة)' : 'Voulez-vous supprimer cette annonce ?')) {
+  const confirmMsg = isAdmin && !isAuthor
+    ? (isAr ? '⚠️ تأكيد إداري:\nهل أنت متأكد من حذف هذا المنشور نهائياً بصفة إدارية؟' : 'Confirmation Admin : Supprimer définitivement cette annonce ?')
+    : (isAr ? 'هل أنت متأكد من حذف هذا المنشور؟\n\n(ملاحظة: حذفك للمنشور يسمح لك فوراً بنشر طلب جديد دون انتظار انتهاء الساعة)' : 'Voulez-vous supprimer cette annonce ?');
+
+  if (confirm(confirmMsg)) {
     const updatedPosts = posts.filter(p => p.id !== postId);
     saveStoredWorkerPosts(updatedPosts);
     broadcastWorkerAction('delete_post', { postId: postId });
     renderWorkerPostsFeed();
-    alert(isAr ? 'تم حذف المنشور بنجاح! يمكنك الآن نشر طلب جديد فوراً.' : 'Annonce supprimée. Vous pouvez publier à nouveau.');
+    alert(isAr ? 'تم حذف المنشور بنجاح!' : 'Annonce supprimée avec succès.');
   }
 }
 
@@ -4481,6 +4578,7 @@ async function handleAddWorkerComment(postId, event) {
     authorEmail: currentUser.email,
     authorName: currentUser.name || 'مستخدم',
     authorAvatar: currentUser.avatar || 'assets/batihub_logo.png',
+    role: currentUser.role || (currentUser.email === 'batihubdz@gmail.com' ? 'admin' : 'user'),
     text: text,
     image: attachedImage,
     timestamp: Date.now(),
@@ -4546,12 +4644,20 @@ function handleDeleteWorkerComment(postId, commentId) {
   const comment = post.comments.find(c => c.id === commentId);
   if (!comment) return;
 
-  if (comment.authorEmail.toLowerCase() !== currentUser.email.toLowerCase()) {
-    alert(state.lang === 'ar' ? 'لا يمكنك حذف تعليق شخص آخر.' : 'Vous ne pouvez pas supprimer ce commentaire.');
+  const isCommentAuthor = currentUser.email && comment.authorEmail && comment.authorEmail.toLowerCase() === currentUser.email.toLowerCase();
+  const isAdmin = isCurrentUserAdmin();
+
+  if (!isCommentAuthor && !isAdmin) {
+    alert(state.lang === 'ar' ? 'لا يمكنك حذف هذا التعليق (صلاحية خاصة بالكاتب أو إدارة التطبيق).' : 'Vous ne pouvez pas supprimer ce commentaire.');
     return;
   }
 
-  if (confirm(state.lang === 'ar' ? 'هل أنت متأكد من حذف هذا التعليق؟' : 'Supprimer ce commentaire ?')) {
+  const isAr = state.lang === 'ar';
+  const confirmMsg = isAdmin && !isCommentAuthor
+    ? (isAr ? '⚠️ تأكيد إداري:\nهل أنت متأكد من حذف هذا التعليق بصفة إدارية؟' : 'Confirmation Admin : Supprimer ce commentaire ?')
+    : (isAr ? 'هل أنت متأكد من حذف هذا التعليق؟' : 'Supprimer ce commentaire ?');
+
+  if (confirm(confirmMsg)) {
     post.comments = post.comments.filter(c => c.id !== commentId);
     saveStoredWorkerPosts(posts);
     broadcastWorkerAction('delete_comment', { postId: postId, commentId: commentId });
@@ -4576,12 +4682,10 @@ function closeImageLightbox() {
 function filterWorkerFeed(trade, btn) {
   currentWorkerFilter = trade;
   document.querySelectorAll('.worker-filter-pill').forEach(b => {
-    b.classList.remove('bg-bh-yellow', 'text-slate-950', 'border-bh-yellow', 'active-filter');
-    b.classList.add('bg-bh-card', 'text-slate-300', 'border-bh-border');
+    b.classList.remove('active-filter');
   });
   if (btn) {
-    btn.classList.add('bg-bh-yellow', 'text-slate-950', 'border-bh-yellow', 'active-filter');
-    btn.classList.remove('bg-bh-card', 'text-slate-300', 'border-bh-border');
+    btn.classList.add('active-filter');
   }
   renderWorkerPostsFeed();
 }
@@ -4590,7 +4694,7 @@ function formatPostTime(ts) {
   if (!ts) return '';
   const diffSec = Math.floor((Date.now() - ts) / 1000);
   const isAr = state.lang === 'ar';
-  if (diffSec < 60) return isAr ? 'الآن' : 'À l\'instant';
+  if (diffSec < 60) return isAr ? 'الآن' : "À l'instant";
   const diffMin = Math.floor(diffSec / 60);
   if (diffMin < 60) return isAr ? `منذ ${diffMin} دقيقة` : `Il y a ${diffMin} min`;
   const diffHours = Math.floor(diffMin / 60);
@@ -4609,29 +4713,54 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+function getLocalizedTradeName(tradeKey) {
+  const isAr = state.lang === 'ar';
+  const isEn = state.lang === 'en';
+  const clean = (tradeKey || '').trim();
+
+  const map = {
+    'بناء': { ar: 'بناء', fr: 'Maçonnerie', en: 'Masonry' },
+    'كهرباء': { ar: 'كهرباء', fr: 'Électricité', en: 'Electricity' },
+    'ترصيص وصحي': { ar: 'ترصيص وصحي', fr: 'Plomberie & Sanitaire', en: 'Plumbing' },
+    'دهان وديكور': { ar: 'دهان وديكور', fr: 'Peinture & Décoration', en: 'Painting' },
+    'بلاط وسيراميك': { ar: 'بلاط وسيراميك', fr: 'Carrelage & Céramique', en: 'Tiling' },
+    'نجارة وألمنيوم': { ar: 'نجارة وألمنيوم', fr: 'Menuiserie & Alu', en: 'Carpentry & Alu' },
+    'حدادة وتسليح': { ar: 'حدادة وتسليح', fr: 'Ferraillage & Métallerie', en: 'Steel & Ironwork' },
+    'تكييف وتبريد': { ar: 'تكييف وتبريد', fr: 'Climatisation & Chauffage', en: 'HVAC' },
+    'أشغال حفر وتطهير': { ar: 'أشغال حفر وتطهير', fr: 'Terrassement & Engins', en: 'Earthworks' },
+    'تخصص آخر': { ar: 'تخصص آخر', fr: 'Autre métier', en: 'Other' }
+  };
+
+  if (map[clean]) {
+    return isAr ? map[clean].ar : (isEn ? map[clean].en : map[clean].fr);
+  }
+  return clean;
+}
+
 function renderWorkerPostsFeed() {
   const container = document.getElementById('workerPostsFeedContainer');
   if (!container) return;
 
   const currentUser = getCurrentSessionUser();
   const userEmail = currentUser?.email?.toLowerCase() || '';
+  const isAdmin = isCurrentUserAdmin();
   const posts = getStoredWorkerPosts().filter(p => !p.deleted);
 
   let filtered = posts;
   if (currentWorkerFilter !== 'all') {
-    filtered = posts.filter(p => p.trade === currentWorkerFilter);
+    filtered = posts.filter(p => p.trade === currentWorkerFilter || (p.trade && p.trade.includes(currentWorkerFilter)));
   }
 
   if (filtered.length === 0) {
     container.innerHTML = `
       <div class="bg-bh-card border border-bh-border rounded-2xl p-10 text-center space-y-3">
         <div class="w-16 h-16 mx-auto rounded-full bg-bh-bg border border-bh-border flex items-center justify-center text-bh-yellow text-2xl">
-          <i class="fa-solid fa-helmet-safety"></i>
+          <i class="fa-solid fa-briefcase"></i>
         </div>
-        <h4 class="text-base font-bold text-white">لا توجد طلبات عمال معروضة حالياً في هذا التخصص</h4>
-        <p class="text-xs text-slate-400 max-w-md mx-auto">كن أول من ينشر طلب أو عرض عمل في هذا المجال وسيتلقاه الحرفيون فوراً في الحاسوب والهاتف!</p>
-        <button onclick="openCreateWorkerPostModal()" class="px-4 py-2 bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold rounded-xl text-xs shadow-lg transition">
-          <i class="fa-solid fa-plus mr-1"></i> نشر طلب عامل الآن
+        <h4 class="text-base font-bold text-white">${state.lang === 'ar' ? 'لا توجد عروض أو طلبات في هذا التخصص حالياً' : 'Aucune offre pour cette catégorie actuellement'}</h4>
+        <p class="text-xs text-slate-400 max-w-md mx-auto">${state.lang === 'ar' ? 'كن أول من ينشر عرض أو طلب عمل وسيصل إشعار فوري لجميع المستخدمين في الحاسوب والهاتف!' : 'Soyez le premier à publier une offre et prévenez les artisans connectés.'}</p>
+        <button onclick="openCreateWorkerPostModal()" class="mt-2 px-4 py-2 bg-bh-yellow hover:bg-bh-orange text-slate-950 font-bold rounded-xl text-xs transition">
+          <i class="fa-solid fa-plus mr-1"></i> ${state.lang === 'ar' ? 'نشر عرض جديد الآن' : 'Publier une nouvelle offre'}
         </button>
       </div>
     `;
@@ -4639,128 +4768,118 @@ function renderWorkerPostsFeed() {
   }
 
   container.innerHTML = filtered.map(post => {
-    const isAuthor = userEmail && post.authorEmail?.toLowerCase() === userEmail;
-    const liked = userEmail && (post.likes || []).map(e => e.toLowerCase()).includes(userEmail);
-    const likesCount = (post.likes || []).length;
-    const comments = post.comments || [];
-    const commentsCount = comments.length;
-    const isCommentsOpen = openCommentsMap[post.id] === true;
-
-    let tradeIcon = 'fa-hammer';
-    if (post.trade.includes('بناء')) tradeIcon = 'fa-trowel-bricks';
-    else if (post.trade.includes('كهرباء')) tradeIcon = 'fa-bolt';
-    else if (post.trade.includes('ترصيص')) tradeIcon = 'fa-faucet-drip';
-    else if (post.trade.includes('دهان')) tradeIcon = 'fa-paint-roller';
-    else if (post.trade.includes('بلاط')) tradeIcon = 'fa-border-all';
-    else if (post.trade.includes('ألمنيوم')) tradeIcon = 'fa-window-maximize';
-    else if (post.trade.includes('حدادة')) tradeIcon = 'fa-cubes-stacked';
-
-    const timeStr = formatPostTime(post.timestamp);
+    const isAuthor = userEmail && post.authorEmail && post.authorEmail.toLowerCase() === userEmail;
+    const isPostAdmin = (post.authorEmail && post.authorEmail.toLowerCase() === 'batihubdz@gmail.com') || post.role === 'admin';
+    const isLiked = post.likes && post.likes.map(e => e.toLowerCase()).includes(userEmail);
+    const likesCount = post.likes ? post.likes.length : 0;
+    const commentsCount = post.comments ? post.comments.length : 0;
+    const commentsOpen = openCommentsMap[post.id] === true;
+    const localizedTrade = getLocalizedTradeName(post.trade);
 
     return `
-      <article class="bg-bh-card border border-bh-border hover:border-bh-yellow/30 rounded-2xl p-5 shadow-xl transition space-y-4" dir="rtl">
+      <article class="bg-bh-card border border-bh-border rounded-2xl p-4 sm:p-5 shadow-xl space-y-3.5 transition hover:border-bh-yellow/40">
         
-        <!-- Post Header -->
-        <div class="flex items-start justify-between gap-3">
+        <!-- Header: Author, Avatar, Time, Role Badge, Trade, Action Menu -->
+        <div class="flex items-center justify-between gap-3">
           <div class="flex items-center gap-3">
-            <img src="${post.authorAvatar || 'assets/batihub_logo.png'}" alt="${escapeHtml(post.authorName)}" class="w-11 h-11 rounded-full object-cover border border-bh-border bg-bh-bg shadow-sm shrink-0">
+            <img src="${post.authorAvatar || 'assets/batihub_logo.png'}" alt="${escapeHtml(post.authorName)}" class="w-10 h-10 rounded-full object-cover border border-bh-border shadow-sm">
             <div>
               <div class="flex items-center gap-2">
-                <h3 class="font-bold text-white text-sm">${escapeHtml(post.authorName)}</h3>
-                ${isAuthor ? '<span class="text-[9px] bg-bh-yellow/20 text-bh-yellow border border-bh-yellow/30 px-1.5 py-0.5 rounded-md font-bold">أنت (الناشر)</span>' : ''}
+                <span class="font-bold text-sm text-white">${escapeHtml(post.authorName)}</span>
+                ${isPostAdmin ? '<span class="px-2 py-0.5 rounded-full bg-bh-yellow/20 text-bh-yellow border border-bh-yellow/40 text-[10px] font-black flex items-center gap-1"><i class="fa-solid fa-shield-halved text-[9px]"></i> إدارة التطبيق</span>' : ''}
+                ${isAuthor && !isPostAdmin ? '<span class="text-[10px] font-bold text-bh-yellow bg-bh-yellow/10 px-2 py-0.5 rounded-full border border-bh-yellow/20">(أنت)</span>' : ''}
               </div>
-              <div class="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
-                <span>${timeStr}</span>
+              <div class="flex items-center gap-2 text-[11px] text-slate-400">
+                <span><i class="fa-regular fa-clock mr-1 text-[10px]"></i>${formatPostTime(post.timestamp)}</span>
                 <span>•</span>
-                <span class="text-amber-400 font-medium"><i class="fa-solid fa-location-dot text-[10px] ml-0.5"></i> ${escapeHtml(post.location)}</span>
+                <span class="text-slate-300"><i class="fa-solid fa-location-dot mr-1 text-bh-orange text-[10px]"></i>${escapeHtml(post.location)}</span>
               </div>
             </div>
           </div>
 
-          <div class="flex items-center gap-1.5">
-            <span class="px-2.5 py-1 rounded-xl bg-bh-bg border border-bh-border text-bh-yellow text-[11px] font-bold flex items-center gap-1.5 shrink-0">
-              <i class="fa-solid ${tradeIcon}"></i>
-              <span>${escapeHtml(post.trade)}</span>
+          <div class="flex items-center gap-2">
+            <!-- Trade Badge -->
+            <span class="px-3 py-1 rounded-xl text-xs font-bold bg-bh-yellow/15 text-bh-yellow border border-bh-yellow/30 flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-hammer text-[11px]"></i>
+              <span>${escapeHtml(localizedTrade)}</span>
             </span>
 
+            <!-- Post Author Edit Button -->
             ${isAuthor ? `
-              <div class="flex items-center gap-1 mr-1">
-                <button onclick="openEditWorkerPostModal('${post.id}')" title="تعديل المنشور" class="w-7 h-7 rounded-lg bg-bh-bg hover:bg-slate-800 text-slate-300 hover:text-bh-yellow flex items-center justify-center text-xs transition border border-bh-border">
-                  <i class="fa-solid fa-pencil"></i>
-                </button>
-                <button onclick="handleDeleteWorkerPost('${post.id}')" title="حذف المنشور (يسمح لك بالنشر مجدداً فوراً)" class="w-7 h-7 rounded-lg bg-bh-bg hover:bg-rose-950/40 text-slate-300 hover:text-rose-400 flex items-center justify-center text-xs transition border border-bh-border">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
-              </div>
+              <button onclick="openEditWorkerPostModal('${post.id}')" title="تعديل المنشور" class="w-8 h-8 rounded-xl bg-bh-bg border border-bh-border hover:border-bh-yellow/60 text-slate-400 hover:text-bh-yellow transition flex items-center justify-center text-xs">
+                <i class="fa-solid fa-pen"></i>
+              </button>
             ` : ''}
+
+            <!-- Author OR Admin Delete Button -->
+            ${isAuthor ? `
+              <button onclick="handleDeleteWorkerPost('${post.id}')" title="حذف المنشور" class="w-8 h-8 rounded-xl bg-bh-bg border border-bh-border hover:border-rose-500/60 text-slate-400 hover:text-rose-400 transition flex items-center justify-center text-xs">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            ` : (isAdmin ? `
+              <button onclick="handleDeleteWorkerPost('${post.id}')" title="حذف إداري للمنشور" class="px-2.5 py-1 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-400 hover:bg-rose-500/30 transition flex items-center gap-1 text-[11px] font-bold">
+                <i class="fa-solid fa-trash-can text-[10px]"></i>
+                <span>حذف إداري</span>
+              </button>
+            ` : '')}
           </div>
         </div>
 
         <!-- Post Content / Description -->
-        <p class="text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-line select-text">
-          ${escapeHtml(post.description)}
-        </p>
+        <p class="text-sm text-slate-200 leading-relaxed whitespace-pre-line select-text font-normal">${escapeHtml(post.description)}</p>
 
-        <!-- Optional Post Image -->
+        <!-- Optional Attached Image -->
         ${post.image ? `
-          <div class="relative group cursor-pointer overflow-hidden rounded-xl border border-bh-border bg-black/40 max-h-80 flex items-center justify-center" onclick="openImageLightbox('${post.image}')">
-            <img src="${post.image}" alt="صورة العمل" class="max-h-80 w-full object-cover group-hover:scale-102 transition duration-300">
-            <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-sm font-bold gap-2">
-              <i class="fa-solid fa-expand"></i> <span>اضغط لتكبير الصورة</span>
-            </div>
+          <div class="rounded-xl overflow-hidden border border-bh-border bg-bh-bg cursor-pointer max-h-96" onclick="openImageLightbox('${post.image}')">
+            <img src="${post.image}" alt="صورة الورشة" class="w-full h-auto max-h-96 object-contain hover:scale-[1.01] transition duration-200">
           </div>
         ` : ''}
 
-        <!-- Direct Contact Bar -->
-        <div class="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-bh-bg/80 border border-bh-border">
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-slate-400 font-medium">الهاتف :</span>
-            <span class="text-sm font-mono font-bold text-white tracking-wider">${escapeHtml(post.phone)}</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <a href="tel:${escapeHtml(post.phone)}" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 active:scale-95">
-              <i class="fa-solid fa-phone"></i>
-              <span>اتصال مباشر</span>
-            </a>
-            <a href="https://wa.me/213${escapeHtml(post.phone.replace(/^0/, ''))}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg bg-green-700/30 hover:bg-green-700/50 text-green-300 border border-green-600/40 text-xs font-bold transition flex items-center gap-1.5">
-              <i class="fa-brands fa-whatsapp"></i>
-              <span>واتساب</span>
-            </a>
-          </div>
+        <!-- Direct Call & Direct WhatsApp Deep Link Action Buttons -->
+        <div class="flex items-center gap-2 flex-wrap pt-2 border-t border-bh-border/70">
+          <button type="button" onclick="makeDirectPhoneCall('${escapeHtml(post.phone)}')" class="px-3.5 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-2 cursor-pointer active:scale-95 shadow-sm">
+            <i class="fa-solid fa-phone text-xs"></i>
+            <span>اتصال مباشر: <span class="font-mono tracking-wider">${escapeHtml(post.phone)}</span></span>
+          </button>
+
+          <button type="button" onclick="openWhatsAppChat('${escapeHtml(post.phone)}')" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-2 cursor-pointer active:scale-95 shadow-md shadow-emerald-600/30">
+            <i class="fa-brands fa-whatsapp text-sm"></i>
+            <span>تواصل عبر واتساب (WhatsApp)</span>
+          </button>
         </div>
 
-        <!-- Post Interactions (Likes & Comments toggle) -->
-        <div class="flex items-center justify-between pt-2 border-t border-bh-border text-xs">
+        <!-- Engagement Bar: Likes & Comments Toggle -->
+        <div class="flex items-center justify-between pt-2 border-t border-bh-border/50 text-xs text-slate-400">
           <div class="flex items-center gap-3">
-            <button onclick="toggleWorkerPostLike('${post.id}')" class="px-3 py-1.5 rounded-xl ${liked ? 'bg-amber-500/20 text-bh-yellow border border-bh-yellow/40' : 'bg-bh-bg hover:bg-slate-800 text-slate-400 border border-bh-border'} transition flex items-center gap-1.5 active:scale-90 font-bold">
-              <i class="fa-solid fa-thumbs-up ${liked ? 'text-bh-yellow animate-bounce' : ''}"></i>
-              <span>جام (${likesCount})</span>
+            <button onclick="toggleWorkerPostLike('${post.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition active:scale-95 ${isLiked ? 'bg-rose-500/20 text-rose-400 border-rose-500/40 font-bold' : 'bg-bh-bg text-slate-400 border-bh-border hover:border-bh-yellow/40'}">
+              <i class="${isLiked ? 'fa-solid text-rose-500' : 'fa-regular'} fa-heart"></i>
+              <span>${likesCount}</span>
             </button>
 
-            <button onclick="togglePostComments('${post.id}')" class="px-3 py-1.5 rounded-xl bg-bh-bg hover:bg-slate-800 text-slate-300 hover:text-white border border-bh-border transition flex items-center gap-1.5">
-              <i class="fa-solid fa-comment text-slate-400"></i>
-              <span>تعليقات (${commentsCount})</span>
-              <i class="fa-solid fa-chevron-${isCommentsOpen ? 'up' : 'down'} text-[10px] mr-1"></i>
+            <button onclick="togglePostComments('${post.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-bh-bg text-slate-300 border border-bh-border hover:border-bh-yellow/40 transition active:scale-95">
+              <i class="fa-regular fa-comment-dots text-bh-yellow"></i>
+              <span>${commentsCount} ${state.lang === 'ar' ? 'تعليق' : 'commentaires'}</span>
             </button>
           </div>
 
-          <span class="text-[11px] text-slate-500 font-mono">ID: ${post.id.substring(3, 8)}</span>
+          <span class="text-[11px] text-slate-500 font-mono">BatiHub DZ • تواصل مباشر</span>
         </div>
 
         <!-- Comments Drawer -->
-        <div id="comments-drawer-${post.id}" class="${isCommentsOpen ? '' : 'hidden'} space-y-3 pt-3 border-t border-bh-border/70">
+        <div id="comments-drawer-${post.id}" class="${commentsOpen ? '' : 'hidden'} pt-3 border-t border-bh-border space-y-3">
           
-          <!-- Existing Comments List -->
-          <div class="space-y-2.5 max-h-72 overflow-y-auto pr-1">
-            ${comments.length === 0 ? `
-              <p class="text-center text-xs text-slate-500 py-3">لا توجد تعليقات بعد. كن أول من يترك تعليقاً أو استفساراً!</p>
-            ` : comments.map(comment => {
-              const isCommentAuthor = userEmail && comment.authorEmail?.toLowerCase() === userEmail;
+          <!-- Comments List -->
+          <div class="space-y-2 max-h-72 overflow-y-auto no-scrollbar">
+            ${(!post.comments || post.comments.length === 0) ? `
+              <p class="text-xs text-slate-500 text-center py-2">${state.lang === 'ar' ? 'لا توجد تعليقات بعد. كن أول من يترك تعليقاً أو استفساراً!' : 'Aucun commentaire. Soyez le premier à commenter !'}</p>
+            ` : post.comments.map(comment => {
+              const isCommentAuthor = userEmail && comment.authorEmail && comment.authorEmail.toLowerCase() === userEmail;
+              const isCommentAdmin = (comment.authorEmail && comment.authorEmail.toLowerCase() === 'batihubdz@gmail.com') || comment.role === 'admin';
               const isEditing = editingCommentState[`${post.id}_${comment.id}`] === true;
 
               if (isEditing) {
                 return `
-                  <div class="p-3 rounded-xl bg-bh-bg border border-bh-yellow/40 space-y-2">
+                  <div class="p-2.5 rounded-xl bg-bh-bg border border-bh-yellow/40 space-y-2">
                     <span class="text-[11px] text-bh-yellow font-bold">تعديل تعليقك :</span>
                     <textarea id="editCommentInput-${post.id}-${comment.id}" rows="2" class="w-full bg-bh-card border border-bh-border rounded-lg p-2 text-xs text-white focus:outline-none focus:border-bh-yellow resize-none">${escapeHtml(comment.text)}</textarea>
                     <div class="flex items-center justify-end gap-2">
@@ -4776,23 +4895,28 @@ function renderWorkerPostsFeed() {
                   <img src="${comment.authorAvatar || 'assets/batihub_logo.png'}" alt="${escapeHtml(comment.authorName)}" class="w-7 h-7 rounded-full object-cover border border-bh-border shrink-0 mt-0.5">
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between gap-2">
-                      <div class="flex items-center gap-1.5">
+                      <div class="flex items-center gap-1.5 flex-wrap">
                         <span class="text-xs font-bold text-white">${escapeHtml(comment.authorName)}</span>
-                        ${isCommentAuthor ? '<span class="text-[9px] text-bh-yellow font-bold">(أنت)</span>' : ''}
+                        ${isCommentAdmin ? '<span class="px-1.5 py-0.5 rounded bg-bh-yellow/20 text-bh-yellow border border-bh-yellow/40 text-[9px] font-black"><i class="fa-solid fa-shield-halved mr-0.5"></i> إدارة</span>' : ''}
+                        ${isCommentAuthor && !isCommentAdmin ? '<span class="text-[9px] text-bh-yellow font-bold">(أنت)</span>' : ''}
                         <span class="text-[10px] text-slate-500">${formatPostTime(comment.timestamp)}</span>
                         ${comment.edited ? '<span class="text-[9px] text-slate-500 font-mono">(معدل)</span>' : ''}
                       </div>
 
-                      ${isCommentAuthor ? `
-                        <div class="flex items-center gap-1">
+                      <div class="flex items-center gap-1">
+                        ${isCommentAuthor ? `
                           <button onclick="handleStartEditComment('${post.id}', '${comment.id}')" title="تعديل التعليق" class="text-slate-400 hover:text-bh-yellow text-[11px] px-1">
                             <i class="fa-solid fa-pen"></i>
                           </button>
                           <button onclick="handleDeleteWorkerComment('${post.id}', '${comment.id}')" title="حذف التعليق" class="text-slate-400 hover:text-rose-400 text-[11px] px-1">
                             <i class="fa-solid fa-trash"></i>
                           </button>
-                        </div>
-                      ` : ''}
+                        ` : (isAdmin ? `
+                          <button onclick="handleDeleteWorkerComment('${post.id}', '${comment.id}')" title="حذف إداري للتعليق" class="text-rose-400 hover:text-rose-300 text-[11px] px-1 font-bold">
+                            <i class="fa-solid fa-trash-can"></i>
+                          </button>
+                        ` : '')}
+                      </div>
                     </div>
 
                     <p class="text-xs text-slate-300 mt-1 whitespace-pre-line leading-relaxed select-text">${escapeHtml(comment.text)}</p>
@@ -4812,16 +4936,16 @@ function renderWorkerPostsFeed() {
           <form onsubmit="handleAddWorkerComment('${post.id}', event)" class="pt-2">
             <div class="flex items-center gap-2">
               <div class="flex-1 relative">
-                <input type="text" id="commentInput-${post.id}" placeholder="اكتب تعليقك أو استفسارك هنا..." class="w-full bg-bh-bg border border-bh-border rounded-xl pr-3 pl-10 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow">
+                <input type="text" id="commentInput-${post.id}" placeholder="${state.lang === 'ar' ? 'اكتب تعليقك أو استفسارك هنا...' : 'Écrire un commentaire...'}" class="w-full bg-bh-bg border border-bh-border rounded-xl pr-3 pl-10 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow">
                 <label class="absolute inset-y-0 left-0 pl-2.5 flex items-center cursor-pointer text-slate-400 hover:text-bh-yellow transition" title="إرفاق صورة مع التعليق">
                   <i class="fa-solid fa-camera text-sm"></i>
                   <input type="file" accept="image/*" class="hidden" onchange="handleCommentImageSelect(event, '${post.id}')">
                 </label>
               </div>
 
-              <button type="submit" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold text-xs shadow-md hover:opacity-90 transition shrink-0 active:scale-95 flex items-center gap-1">
+              <button type="submit" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold text-xs shadow-md hover:opacity-90 transition shrink-0 active:scale-95 flex items-center gap-1 cursor-pointer">
                 <i class="fa-solid fa-paper-plane"></i>
-                <span>إرسال</span>
+                <span>${state.lang === 'ar' ? 'إرسال' : 'Envoyer'}</span>
               </button>
             </div>
 
@@ -4837,6 +4961,3 @@ function renderWorkerPostsFeed() {
     `;
   }).join('');
 }
-
-
-
