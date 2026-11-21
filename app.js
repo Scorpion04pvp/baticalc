@@ -86,8 +86,8 @@ const I18N = {
     btn_cancel: 'إلغاء',
     btn_publish: 'نشر المنشور الآن',
     btn_save_office: 'اعتماد ونشر بطاقة المكتب',
-    net_online_wifi: 'متصل (واي فاي 📶)',
-    net_online_data: 'متصل (بيانات 4G 📶)',
+    net_online_wifi: 'متصل عبر واي فاي 📶',
+    net_online_data: 'متصل عبر بيانات الهاتف 📶',
     net_online: 'متصل بالإنترنت 📶',
     net_offline: 'غير متصل بالإنترنت ⚠️',
     unit_m2: 'دج / م²',
@@ -1293,96 +1293,93 @@ function applyLanguage(lang) {
 }
 
 /* ========================================================================= */
-/* 11. REALTIME MULTI-DEVICE SYNCHRONIZATION ENGINE                          */
+/* 11. REALTIME MULTI-DEVICE CLOUD SYNC ENGINE (EMQX MQTT + WEBSOCKET)       */
 /* ========================================================================= */
 
-const LIVE_SYNC_TOPIC = 'https://ntfy.sh/batihub_dz_live_sync_2026';
+const MQTT_BROKER_URL = 'wss://broker.emqx.io:8084/mqtt';
+const MQTT_TOPIC_BROADCAST = 'batihub_dz/v2/broadcast';
 const currentDeviceId = 'dev_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
-let liveEventSource = null;
-let lastSyncedPacketTime = Date.now() - 3600000;
+let mqttClient = null;
 
 async function broadcastLiveEvent(action, payload) {
-  try {
-    const packet = {
-      senderDeviceId: currentDeviceId,
-      timestamp: Date.now(),
-      action: action,
-      payload: payload
-    };
+  const packet = {
+    senderDeviceId: currentDeviceId,
+    timestamp: Date.now(),
+    action: action,
+    payload: payload
+  };
+  const jsonStr = JSON.stringify(packet);
 
-    await fetch(LIVE_SYNC_TOPIC, {
-      method: 'POST',
-      body: JSON.stringify(packet),
-      headers: {
-        'Title': 'BatiHub Live Sync',
-        'Priority': 'default'
+  // Send instantly via MQTT WebSocket
+  if (mqttClient && mqttClient.connected) {
+    try {
+      mqttClient.publish(MQTT_TOPIC_BROADCAST, jsonStr, { qos: 1 });
+    } catch (e) {
+      console.warn('[MQTT publish err]:', e);
+    }
+  } else {
+    // Retry shortly if connecting
+    setTimeout(() => {
+      if (mqttClient && mqttClient.connected) {
+        try {
+          mqttClient.publish(MQTT_TOPIC_BROADCAST, jsonStr, { qos: 1 });
+        } catch (e) {}
       }
-    });
-  } catch (err) {
-    console.warn('[Sync Broadcast Warning]:', err);
+    }, 400);
   }
-}
-
-async function parseLiveSyncPacketFromRaw(rawItem) {
-  if (rawItem.attachment && rawItem.attachment.url) {
-    try {
-      const attRes = await fetch(rawItem.attachment.url);
-      if (attRes.ok) return await attRes.json();
-    } catch (e) {}
-  }
-  if (rawItem.message) {
-    try {
-      return JSON.parse(rawItem.message);
-    } catch (e) {}
-  }
-  return null;
 }
 
 function initLiveSyncEngine() {
-  if (liveEventSource) return;
+  if (mqttClient) return;
 
-  // 1. Initial poll for recent events
-  pollLiveSyncHistory();
-
-  // 2. Real-time Server-Sent Events (SSE) connection
-  try {
-    liveEventSource = new EventSource(`${LIVE_SYNC_TOPIC}/sse`);
-    liveEventSource.onmessage = async (event) => {
+  const tryConnect = () => {
+    if (typeof window.mqtt !== 'undefined' && typeof window.mqtt.connect === 'function') {
       try {
-        const raw = JSON.parse(event.data);
-        const packet = await parseLiveSyncPacketFromRaw(raw);
-        if (!packet || packet.senderDeviceId === currentDeviceId) return;
-        handleIncomingLiveSyncPacket(packet);
-      } catch (e) {}
-    };
-    liveEventSource.onerror = () => {
-      // Reconnects automatically by browser SSE spec
-    };
-  } catch (e) {}
+        const clientId = 'bh_' + Math.random().toString(36).substring(2, 8) + '_' + Date.now();
+        mqttClient = window.mqtt.connect(MQTT_BROKER_URL, {
+          clientId: clientId,
+          clean: true,
+          connectTimeout: 10000,
+          reconnectPeriod: 2500,
+          keepalive: 60
+        });
 
-  // 3. Fallback polling every 3 seconds for lightning-fast cross-device updates
-  setInterval(pollLiveSyncHistory, 3000);
-}
+        mqttClient.on('connect', () => {
+          console.log('[BatiHub MQTT] Connected successfully to internet real-time broker!');
+          mqttClient.subscribe(MQTT_TOPIC_BROADCAST, { qos: 1 }, (err) => {
+            if (!err) {
+              console.log('[BatiHub MQTT] Subscribed to broadcast channel:', MQTT_TOPIC_BROADCAST);
+            }
+          });
+        });
 
-async function pollLiveSyncHistory() {
-  try {
-    const res = await fetch(`${LIVE_SYNC_TOPIC}/json?poll=1&since=20s`);
-    if (!res.ok) return;
-    const text = await res.text();
-    const lines = text.trim().split('\n');
+        mqttClient.on('message', (topic, message) => {
+          try {
+            const packet = JSON.parse(message.toString());
+            if (!packet || packet.senderDeviceId === currentDeviceId) return; // ignore own echo
+            handleIncomingLiveSyncPacket(packet);
+          } catch (e) {
+            console.warn('[MQTT message parse error]:', e);
+          }
+        });
 
-    for (const line of lines) {
-      if (!line.trim()) continue;
-      try {
-        const item = JSON.parse(line);
-        if (item.time && item.time * 1000 <= lastSyncedPacketTime) continue;
-        if (item.time) lastSyncedPacketTime = item.time * 1000;
-        const packet = await parseLiveSyncPacketFromRaw(item);
-        if (!packet || packet.senderDeviceId === currentDeviceId) continue;
-        handleIncomingLiveSyncPacket(packet);
-      } catch (e) {}
+        mqttClient.on('error', (err) => {
+          console.warn('[MQTT broker error]:', err);
+        });
+
+        mqttClient.on('reconnect', () => {
+          console.log('[BatiHub MQTT] Reconnecting to broker...');
+        });
+      } catch (err) {
+        console.warn('[MQTT init exception]:', err);
+      }
+    } else {
+      // If mqtt.min.js script is still loading, wait a moment and retry
+      setTimeout(tryConnect, 300);
     }
-  } catch (e) {}
+  };
+
+  tryConnect();
 }
 
 function handleIncomingLiveSyncPacket(packet) {
@@ -1459,6 +1456,28 @@ function handleIncomingLiveSyncPacket(packet) {
       } else {
         showToast('تم اعتماد ونشر عرض عمل جديد في المنصة!', 'info', 3000);
       }
+    }
+  }
+
+  // 3.5. Worker Post Edited
+  else if (action === 'edit_worker_post') {
+    let posts = getStorageJSON('batihub_worker_posts', []);
+    const idx = posts.findIndex(p => p.id === payload.id);
+    if (idx > -1) {
+      posts[idx] = { ...posts[idx], ...payload };
+    } else {
+      posts.unshift(payload);
+    }
+    setStorageJSON('batihub_worker_posts', posts);
+    updateAdminPendingBadge();
+    updateWorkerFilterPillsVisibility();
+    updateTopPendingCategoryNavigation();
+    renderWorkerPostsFeed();
+    renderAdminPendingRequestsSection();
+    renderDedicatedPendingPostsTab();
+
+    if (currentUser && currentUser.role === 'admin') {
+      showToast(`قام ${escapeHTML(payload.authorName || 'مستخدم')} بتحديث بيانات منشوره المعلق ✏️`, 'info', 4000);
     }
   }
 
@@ -2142,19 +2161,6 @@ function updateTopPendingCategoryNavigation() {
   }
 }
 
-function filterPendingTab(trade, btnElement) {
-  activePendingFilter = trade;
-  if (btnElement) {
-    document.querySelectorAll('.pending-filter-pill').forEach(b => {
-      b.classList.remove('bg-bh-yellow', 'text-slate-950', 'font-bold', 'active-filter');
-      b.classList.add('bg-bh-card', 'text-slate-400');
-    });
-    btnElement.classList.remove('bg-bh-card', 'text-slate-400');
-    btnElement.classList.add('bg-bh-yellow', 'text-slate-950', 'font-bold', 'active-filter');
-  }
-  renderDedicatedPendingPostsTab();
-}
-
 function renderDedicatedPendingPostsTab() {
   const container = document.getElementById('pendingPostsFeedContainer');
   if (!container) return;
@@ -2165,7 +2171,7 @@ function renderDedicatedPendingPostsTab() {
   // Update top navigation badges & header
   updateTopPendingCategoryNavigation();
 
-  // Filter pending posts
+  // Filter pending posts directly without trade restrictions
   let pendingPosts = allPosts.filter(p => p.status === 'pending');
 
   if (!isAdmin) {
@@ -2188,24 +2194,6 @@ function renderDedicatedPendingPostsTab() {
     }
     // Regular user only sees their own pending posts
     pendingPosts = pendingPosts.filter(p => p.authorId && p.authorId.toLowerCase() === currentUser.email.toLowerCase());
-  }
-
-  // Filter by trade if selected
-  if (activePendingFilter !== 'all') {
-    pendingPosts = pendingPosts.filter(p => p.trade === activePendingFilter);
-  }
-
-  // Filter by search query if any
-  const searchInput = document.getElementById('pendingSearchInput');
-  const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : '';
-  if (searchVal) {
-    pendingPosts = pendingPosts.filter(p => {
-      const name = (p.authorName || '').toLowerCase();
-      const text = (p.text || '').toLowerCase();
-      const trade = (p.trade || '').toLowerCase();
-      const wilaya = (p.wilaya || '').toLowerCase();
-      return name.includes(searchVal) || text.includes(searchVal) || trade.includes(searchVal) || wilaya.includes(searchVal);
-    });
   }
 
   if (pendingPosts.length === 0) {
@@ -2286,29 +2274,39 @@ function renderDedicatedPendingPostsTab() {
       `;
     }
 
-    // Action buttons inside card
+    // Action buttons inside card: View/Keep, Edit ("تعديل"), Delete ("حذف")
     let actionsHTML = '';
     if (isAdmin) {
       actionsHTML = `
-        <div class="pt-3 border-t border-bh-border/70 flex items-center gap-3 flex-wrap">
+        <div class="pt-3 border-t border-bh-border/70 flex items-center gap-2.5 flex-wrap">
           <button type="button" onclick="approveWorkerPost('${post.id}')" class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98">
             <i class="fa-solid fa-check text-sm"></i>
             <span>قبول واعتماد المنشور فوراً</span>
           </button>
+          <button type="button" onclick="openEditWorkerPostModal('${post.id}')" class="py-2.5 px-4 rounded-xl bg-bh-bg hover:bg-slate-800 text-bh-yellow border border-bh-yellow/40 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-95">
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span>تعديل</span>
+          </button>
           <button type="button" onclick="rejectWorkerPost('${post.id}')" class="flex-1 py-2.5 px-4 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98">
             <i class="fa-solid fa-xmark text-sm"></i>
-            <span>رفض وحذف المنشور نهائياً</span>
+            <span>رفض وحذف نهائياً</span>
           </button>
         </div>
       `;
     } else if (isOwner) {
       actionsHTML = `
-        <div class="pt-3 border-t border-bh-border/70 flex items-center justify-between gap-3">
+        <div class="pt-3 border-t border-bh-border/70 flex items-center justify-between flex-wrap gap-2">
           <span class="text-xs text-amber-400/90 font-medium">حالة المنشور: قيد التدقيق ⏳</span>
-          <button type="button" onclick="deleteWorkerPost('${post.id}')" class="py-2 px-3.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-            <i class="fa-regular fa-trash-can"></i>
-            <span>إلغاء وحذف المنشور</span>
-          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="openEditWorkerPostModal('${post.id}')" class="py-2 px-3.5 rounded-xl bg-bh-bg hover:bg-slate-800 text-bh-yellow border border-bh-yellow/40 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95">
+              <i class="fa-solid fa-pen-to-square"></i>
+              <span>تعديل المنشور</span>
+            </button>
+            <button type="button" onclick="deleteWorkerPost('${post.id}')" class="py-2 px-3.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer active:scale-95">
+              <i class="fa-regular fa-trash-can"></i>
+              <span>حذف المنشور</span>
+            </button>
+          </div>
         </div>
       `;
     }
@@ -2354,6 +2352,168 @@ function renderDedicatedPendingPostsTab() {
 
     container.appendChild(card);
   });
+}
+
+/* ========================================================================= */
+/* 12.6. EDIT WORKER POST MODAL LOGIC                                        */
+/* ========================================================================= */
+
+let cachedEditPostImageBase64 = null;
+
+function openEditWorkerPostModal(postId) {
+  const posts = getStorageJSON('batihub_worker_posts', []);
+  const post = posts.find(p => p.id === postId);
+  if (!post) {
+    showToast('المنشور غير موجود أو تم حذفه', 'error');
+    return;
+  }
+
+  // Check authorization
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  const isOwner = currentUser && post.authorId && currentUser.email.toLowerCase() === post.authorId.toLowerCase();
+  if (!isAdmin && !isOwner) {
+    showToast('غير مصرح لك بتعديل هذا المنشور', 'error');
+    return;
+  }
+
+  document.getElementById('editPostId').value = post.id;
+  document.getElementById('editPostTrade').value = post.trade || 'بناء';
+  document.getElementById('editPostPrice').value = post.price || '';
+  document.getElementById('editPostUnit').value = post.unit || 'm2';
+  document.getElementById('editPostPhone').value = post.phone || '';
+  document.getElementById('editPostText').value = post.text || '';
+
+  cachedEditPostImageBase64 = post.image || null;
+  const previewContainer = document.getElementById('editPostImagePreviewContainer');
+  const previewImg = document.getElementById('editPostImagePreview');
+  const fileInput = document.getElementById('editPostImageInput');
+
+  if (fileInput) fileInput.value = '';
+
+  if (cachedEditPostImageBase64 && previewContainer && previewImg) {
+    previewImg.src = cachedEditPostImageBase64;
+    previewContainer.classList.remove('hidden');
+  } else if (previewContainer) {
+    previewContainer.classList.add('hidden');
+  }
+
+  const modal = document.getElementById('modalEditWorkerPost');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeEditWorkerPostModal() {
+  const modal = document.getElementById('modalEditWorkerPost');
+  if (modal) modal.classList.add('hidden');
+}
+
+function handleEditPostImageSelect(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  if (file.size > 4 * 1024 * 1024) {
+    showToast('حجم الصورة كبير جداً! اختر صورة أصغر من 4 ميغابايت.', 'warning');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    cachedEditPostImageBase64 = e.target.result;
+    const previewContainer = document.getElementById('editPostImagePreviewContainer');
+    const previewImg = document.getElementById('editPostImagePreview');
+    if (previewContainer && previewImg) {
+      previewImg.src = cachedEditPostImageBase64;
+      previewContainer.classList.remove('hidden');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeEditPostImage() {
+  cachedEditPostImageBase64 = null;
+  const previewContainer = document.getElementById('editPostImagePreviewContainer');
+  const previewImg = document.getElementById('editPostImagePreview');
+  const fileInput = document.getElementById('editPostImageInput');
+
+  if (previewContainer) previewContainer.classList.add('hidden');
+  if (previewImg) previewImg.src = '';
+  if (fileInput) fileInput.value = '';
+}
+
+function handleEditWorkerPostSubmit(event) {
+  if (event) event.preventDefault();
+
+  const postId = document.getElementById('editPostId').value;
+  const posts = getStorageJSON('batihub_worker_posts', []);
+  const post = posts.find(p => p.id === postId);
+  if (!post) {
+    showToast('تعذر العثور على المنشور المطلوب', 'error');
+    return;
+  }
+
+  const trade = document.getElementById('editPostTrade').value;
+  const price = document.getElementById('editPostPrice').value.trim();
+  const unit = document.getElementById('editPostUnit').value;
+  const phone = document.getElementById('editPostPhone').value.trim();
+  const text = document.getElementById('editPostText').value.trim();
+
+  if (!text) {
+    showToast('يرجى كتابة نص المنشور', 'warning');
+    return;
+  }
+
+  post.trade = trade;
+  post.price = price;
+  post.unit = unit;
+  post.phone = phone;
+  post.text = text;
+  post.image = cachedEditPostImageBase64;
+  post.updatedAt = new Date().toISOString();
+
+  setStorageJSON('batihub_worker_posts', posts);
+  broadcastLiveEvent('edit_worker_post', post);
+
+  closeEditWorkerPostModal();
+  updateAdminPendingBadge();
+  updateTopPendingCategoryNavigation();
+  renderDedicatedPendingPostsTab();
+  renderWorkerPostsFeed();
+
+  showToast('تم حفظ التعديلات على المنشور بنجاح! تم تحديث البيانات للإدارة.', 'success');
+}
+
+/* ========================================================================= */
+/* 12.7. AUTOMATIC MOBILE APP UPDATER                                        */
+/* ========================================================================= */
+
+function initAutoAppUpdater() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+      reg.update().catch(() => {});
+      setInterval(() => {
+        reg.update().catch(() => {});
+      }, 30000);
+    }).catch(() => {});
+
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) {
+        refreshing = true;
+        window.location.reload();
+      }
+    });
+  }
+}
+
+function forceAppReloadUpdate() {
+  if ('caches' in window) {
+    caches.keys().then(keys => {
+      return Promise.all(keys.map(k => caches.delete(k)));
+    }).then(() => {
+      window.location.reload(true);
+    });
+  } else {
+    window.location.reload(true);
+  }
 }
 
 function renderWorkerPostsFeed() {
@@ -3775,6 +3935,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3. Start live clock & realtime multi-device sync
   startLiveClock();
   initLiveSyncEngine();
+  initAutoAppUpdater();
 
   // 4. Initialize calculator history tape and saved credentials
   renderCalcHistory();

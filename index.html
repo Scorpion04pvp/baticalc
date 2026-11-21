@@ -582,36 +582,7 @@
           </div>
         </div>
 
-        <!-- Filter & Search Toolbar inside Pending Tab -->
-        <div class="flex items-center justify-between flex-wrap gap-3 pb-1 border-b border-bh-border/50">
-          <div class="flex items-center gap-2 overflow-x-auto no-scrollbar text-xs py-1" id="pendingFilterPillsContainer">
-            <button type="button" onclick="filterPendingTab('all', this)" class="pending-filter-pill active-filter px-3 py-1.5 rounded-xl bg-bh-yellow text-slate-950 font-bold transition">
-              <span>الكل</span>
-            </button>
-            <button type="button" onclick="filterPendingTab('بناء', this)" class="pending-filter-pill px-3 py-1.5 rounded-xl bg-bh-card text-slate-400 hover:text-white border border-bh-border font-semibold transition">
-              <span>بناء</span>
-            </button>
-            <button type="button" onclick="filterPendingTab('كهرباء', this)" class="pending-filter-pill px-3 py-1.5 rounded-xl bg-bh-card text-slate-400 hover:text-white border border-bh-border font-semibold transition">
-              <span>كهرباء</span>
-            </button>
-            <button type="button" onclick="filterPendingTab('ترصيص وصحي', this)" class="pending-filter-pill px-3 py-1.5 rounded-xl bg-bh-card text-slate-400 hover:text-white border border-bh-border font-semibold transition">
-              <span>ترصيص وصحي</span>
-            </button>
-            <button type="button" onclick="filterPendingTab('دهان وديكور', this)" class="pending-filter-pill px-3 py-1.5 rounded-xl bg-bh-card text-slate-400 hover:text-white border border-bh-border font-semibold transition">
-              <span>دهان وديكور</span>
-            </button>
-            <button type="button" onclick="filterPendingTab('تكييف وتبريد', this)" class="pending-filter-pill px-3 py-1.5 rounded-xl bg-bh-card text-slate-400 hover:text-white border border-bh-border font-semibold transition">
-              <span>تكييف وتبريد</span>
-            </button>
-          </div>
-
-          <div class="relative w-full sm:w-64">
-            <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-            <input type="text" id="pendingSearchInput" oninput="renderDedicatedPendingPostsTab()" placeholder="بحث في المنشورات المعلقة..." class="w-full bg-bh-bg border border-bh-border rounded-xl pr-9 pl-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow">
-          </div>
-        </div>
-
-        <!-- Pending Posts Feed Container -->
+        <!-- Pending Posts Feed Container (Direct listing for user & admin) -->
         <div id="pendingPostsFeedContainer" class="space-y-4"></div>
 
       </div>
@@ -780,6 +751,95 @@
           <button type="submit" id="btnPublishWorkerPost" class="px-5 py-2 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 text-xs font-bold shadow-md hover:opacity-95 transition cursor-pointer flex items-center gap-1.5">
             <i class="fa-solid fa-paper-plane"></i>
             <span data-i18n="btn_publish">نشر المنشور الآن</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: EDIT WORKER POST (تعديل المنشور المعلق)                             -->
+  <!-- ========================================================================= -->
+  <div id="modalEditWorkerPost" class="modal-backdrop hidden">
+    <div class="modal-box max-w-lg w-full overflow-hidden relative text-right" dir="rtl">
+      <div class="px-5 py-4 border-b border-bh-border flex items-center justify-between bg-bh-cardhover">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-bh-yellow/20 text-bh-yellow flex items-center justify-center font-bold">
+            <i class="fa-solid fa-pen-to-square text-sm"></i>
+          </div>
+          <h3 class="font-bold text-white text-sm">تعديل المنشور المعلق</h3>
+        </div>
+        <button type="button" onclick="closeEditWorkerPostModal()" class="w-7 h-7 rounded-full bg-bh-bg hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleEditWorkerPostSubmit(event)" class="p-5 space-y-4">
+        <input type="hidden" id="editPostId">
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">التخصص المهني أو الحرفة :</label>
+          <select id="editPostTrade" required class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-bh-yellow">
+            <option value="بناء">بناء</option>
+            <option value="كهرباء">كهرباء</option>
+            <option value="ترصيص وصحي">ترصيص وصحي</option>
+            <option value="دهان وديكور">دهان وديكور</option>
+            <option value="بلاط وسيراميك">بلاط وسيراميك</option>
+            <option value="نجارة وألمنيوم">نجارة وألمنيوم</option>
+            <option value="حدادة وتسليح">حدادة وتسليح</option>
+            <option value="تكييف وتبريد">تكييف وتبريد</option>
+            <option value="أشغال حفر وتطهير">أشغال حفر وتطهير</option>
+            <option value="تخصص آخر">تخصص آخر</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">السعر أو الأجرة المقترحة :</label>
+            <input type="number" id="editPostPrice" placeholder="مثلاً: 800" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono text-left" dir="ltr">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">وحدة الحساب :</label>
+            <select id="editPostUnit" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-bh-yellow">
+              <option value="m2">لكل 1 متر مربع (دج / م²)</option>
+              <option value="linear_m">لكل متر خطي (دج / م)</option>
+              <option value="hour">للساعة الواحدة (دج / سا)</option>
+              <option value="day">لليوم الواحد (دج / يوم)</option>
+              <option value="global">مبلغ إجمالي للصفقة</option>
+              <option value="negotiable">قابل للتفاوض</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">رقم الهاتف للاتصال :</label>
+          <input type="tel" id="editPostPhone" placeholder="05 / 06 / 07..." class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono text-left" dir="ltr">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">نص وتفاصيل المنشور أو العرض :</label>
+          <textarea id="editPostText" rows="4" required placeholder="اكتب تفاصيل الخدمة أو الطلب..." class="w-full bg-bh-bg border border-bh-border rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow"></textarea>
+        </div>
+
+        <!-- Image edit / preview -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">الصورة المرفقة بالمنشور :</label>
+          <div id="editPostImagePreviewContainer" class="hidden mb-2 relative rounded-xl overflow-hidden border border-bh-border max-h-48 bg-bh-bg">
+            <img id="editPostImagePreview" src="" alt="Post Preview" class="w-full h-auto object-cover max-h-48">
+            <button type="button" onclick="removeEditPostImage()" class="absolute top-2 left-2 px-2.5 py-1 rounded-lg bg-rose-500/90 hover:bg-rose-600 text-white text-[11px] font-bold shadow-lg transition flex items-center gap-1 cursor-pointer">
+              <i class="fa-solid fa-trash"></i>
+              <span>حذف الصورة</span>
+            </button>
+          </div>
+          <input type="file" id="editPostImageInput" accept="image/*" onchange="handleEditPostImageSelect(event)" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-bh-card file:text-slate-300 hover:file:bg-slate-800 cursor-pointer">
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-bh-border">
+          <button type="button" onclick="closeEditWorkerPostModal()" class="px-4 py-2 rounded-xl bg-bh-bg hover:bg-slate-800 text-slate-300 text-xs font-semibold transition border border-bh-border cursor-pointer">
+            إلغاء
+          </button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 text-xs font-black shadow-lg hover:opacity-95 transition cursor-pointer">
+            حفظ التعديلات
           </button>
         </div>
       </form>
@@ -1100,6 +1160,8 @@
   <!-- FLOATING TOAST CONTAINER -->
   <div id="appToastContainer"></div>
 
+  <!-- Real-time MQTT Engine -->
+  <script src="assets/mqtt.min.js"></script>
   <!-- Main JavaScript File -->
   <script src="app.js"></script>
 </body>

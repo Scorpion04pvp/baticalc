@@ -1,11 +1,12 @@
 // BatiHub DZ - Progressive Web App Service Worker
-const CACHE_NAME = 'batihub-dz-cache-v1';
+const CACHE_NAME = 'batihub-dz-cache-v2-live';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
   './app.js',
   './manifest.json',
+  './assets/mqtt.min.js',
   './assets/batihub_logo.png',
   './assets/batihub_banner.jpg',
   './assets/icon-192.png',
@@ -30,6 +31,12 @@ self.addEventListener('activate', (event) => {
     })
   );
   self.clients.claim();
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.action === 'skipWaiting') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('fetch', (event) => {
