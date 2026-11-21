@@ -267,16 +267,11 @@ async function createWindow() {
     }
   });
 
-  // Clear cache to always load fresh code
-  try {
-    await mainWindow.webContents.session.clearCache();
-  } catch (e) {}
-
   mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
     logMail(`[RENDERER-CONSOLE] [L${level}] ${message} (line ${line})`);
   });
 
-  mainWindow.loadFile('index.html');
+  mainWindow.loadFile(path.join(__dirname, 'index.html'));
 
   // Handle external auth or links
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
