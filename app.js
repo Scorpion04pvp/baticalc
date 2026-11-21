@@ -1047,6 +1047,8 @@ function transitionToDashboard() {
   renderWorkerPostsFeed();
   renderStudyOfficesFeed();
   updateUnreadMessagesCount();
+  updateTopPendingCategoryNavigation();
+  renderDedicatedPendingPostsTab();
 }
 
 function updateUserProfileUI() {
@@ -1070,7 +1072,8 @@ function updateUserProfileUI() {
   if (headerAvatarImg) headerAvatarImg.src = avatarSrc;
   if (modalAvatarImg) modalAvatarImg.src = avatarSrc;
 
-  // Show/Hide Admin pending posts filter button
+  // Show/Hide Admin pending posts filter button & top navigation
+  updateTopPendingCategoryNavigation();
   const adminFilterBtn = document.getElementById('adminPendingFilterBtn');
   if (adminFilterBtn) {
     if (currentUser.role === 'admin') {
@@ -1220,6 +1223,7 @@ function switchTab(tabId) {
   const mNavMapping = {
     'tab-scientific-calculator': 'mNavCalc',
     'tab-worker-board': 'mNavWorkers',
+    'tab-pending-posts': 'mNavPending',
     'tab-study-offices': 'mNavOffices'
   };
 
@@ -1235,6 +1239,11 @@ function switchTab(tabId) {
       activeBtn.classList.remove('text-slate-400');
       activeBtn.classList.add('text-bh-yellow');
     }
+  }
+
+  // 5. If switching to dedicated pending posts tab, render it fresh
+  if (tabId === 'tab-pending-posts') {
+    renderDedicatedPendingPostsTab();
   }
 }
 
@@ -1418,8 +1427,10 @@ function handleIncomingLiveSyncPacket(packet) {
       setStorageJSON('batihub_worker_posts', posts);
       updateAdminPendingBadge();
       updateWorkerFilterPillsVisibility();
+      updateTopPendingCategoryNavigation();
       renderWorkerPostsFeed();
       renderAdminPendingRequestsSection();
+      renderDedicatedPendingPostsTab();
 
       if (currentUser && currentUser.role === 'admin') {
         showToast(`طلب منشور جديد بانتظار المراجعة من ${escapeHTML(payload.authorName)} ⏳`, 'warning', 5000);
@@ -1438,8 +1449,10 @@ function handleIncomingLiveSyncPacket(packet) {
       setStorageJSON('batihub_worker_posts', posts);
       updateAdminPendingBadge();
       updateWorkerFilterPillsVisibility();
+      updateTopPendingCategoryNavigation();
       renderWorkerPostsFeed();
       renderAdminPendingRequestsSection();
+      renderDedicatedPendingPostsTab();
 
       if (currentUser && post.authorId && currentUser.email.toLowerCase() === post.authorId.toLowerCase()) {
         showToast('تهانينا! تمت الموافقة على منشورك وأصبح ظاهراً للجميع في المنصة! 🎉', 'success', 6000);
@@ -1454,7 +1467,11 @@ function handleIncomingLiveSyncPacket(packet) {
     let posts = getStorageJSON('batihub_worker_posts', []);
     posts = posts.filter(p => p.id !== payload.postId);
     setStorageJSON('batihub_worker_posts', posts);
+    updateAdminPendingBadge();
+    updateWorkerFilterPillsVisibility();
+    updateTopPendingCategoryNavigation();
     renderWorkerPostsFeed();
+    renderDedicatedPendingPostsTab();
   }
 
   // 5. Post Like Toggled
@@ -2042,6 +2059,303 @@ function renderAdminPendingRequestsSection() {
   });
 }
 
+/* ========================================================================= */
+/* 12.5. TOP DEDICATED PENDING POSTS CATEGORY (المنشورات المعلقة - أعلى الواجهة) */
+/* ========================================================================= */
+
+let activePendingFilter = 'all';
+
+function updateTopPendingCategoryNavigation() {
+  const navTabBtn = document.getElementById('navTabPendingPosts');
+  const navTabText = document.getElementById('navTabPendingText');
+  const navTabIcon = document.getElementById('navTabPendingIcon');
+  const navTabBadge = document.getElementById('navTabPendingBadge');
+
+  const mNavBtn = document.getElementById('mNavPending');
+  const mNavText = document.getElementById('mNavPendingText');
+  const mNavIcon = document.getElementById('mNavPendingIcon');
+  const mNavBadge = document.getElementById('mNavPendingBadge');
+
+  const headerAdmin = document.getElementById('pendingTabHeaderAdmin');
+  const headerUser = document.getElementById('pendingTabHeaderUser');
+  const adminBadge = document.getElementById('pendingTabAdminBadge');
+
+  const posts = getStorageJSON('batihub_worker_posts', []);
+  const allPending = posts.filter(p => p.status === 'pending');
+  const isAdmin = currentUser && currentUser.role === 'admin';
+
+  let relevantCount = 0;
+  if (isAdmin) {
+    relevantCount = allPending.length;
+  } else if (currentUser) {
+    relevantCount = posts.filter(p => p.status === 'pending' && p.authorId && p.authorId.toLowerCase() === currentUser.email.toLowerCase()).length;
+  }
+
+  // Header update inside tab
+  if (headerAdmin && headerUser) {
+    if (isAdmin) {
+      headerAdmin.classList.remove('hidden');
+      headerUser.classList.add('hidden');
+      if (adminBadge) adminBadge.textContent = `${allPending.length} طلبات بانتظار المراجعة`;
+    } else {
+      headerAdmin.classList.add('hidden');
+      headerUser.classList.remove('hidden');
+    }
+  }
+
+  // Desktop navigation tab update
+  if (navTabText && navTabIcon && navTabBadge) {
+    if (isAdmin) {
+      navTabText.textContent = 'طلبات المراجعة المعلقة';
+      navTabIcon.className = 'fa-solid fa-shield-halved text-amber-400';
+    } else {
+      navTabText.textContent = 'منشوراتي المعلقة';
+      navTabIcon.className = 'fa-solid fa-hourglass-half text-amber-400';
+    }
+
+    if (relevantCount > 0) {
+      navTabBadge.textContent = String(relevantCount);
+      navTabBadge.classList.remove('hidden');
+    } else {
+      navTabBadge.textContent = '0';
+      navTabBadge.classList.add('hidden');
+    }
+  }
+
+  // Mobile navigation bottom item update
+  if (mNavText && mNavIcon && mNavBadge) {
+    if (isAdmin) {
+      mNavText.textContent = 'مراجعة';
+      mNavIcon.className = 'fa-solid fa-shield-halved text-base text-amber-400';
+    } else {
+      mNavText.textContent = 'معلقة';
+      mNavIcon.className = 'fa-solid fa-hourglass-half text-base text-amber-400';
+    }
+
+    if (relevantCount > 0) {
+      mNavBadge.textContent = String(relevantCount);
+      mNavBadge.classList.remove('hidden');
+    } else {
+      mNavBadge.textContent = '0';
+      mNavBadge.classList.add('hidden');
+    }
+  }
+}
+
+function filterPendingTab(trade, btnElement) {
+  activePendingFilter = trade;
+  if (btnElement) {
+    document.querySelectorAll('.pending-filter-pill').forEach(b => {
+      b.classList.remove('bg-bh-yellow', 'text-slate-950', 'font-bold', 'active-filter');
+      b.classList.add('bg-bh-card', 'text-slate-400');
+    });
+    btnElement.classList.remove('bg-bh-card', 'text-slate-400');
+    btnElement.classList.add('bg-bh-yellow', 'text-slate-950', 'font-bold', 'active-filter');
+  }
+  renderDedicatedPendingPostsTab();
+}
+
+function renderDedicatedPendingPostsTab() {
+  const container = document.getElementById('pendingPostsFeedContainer');
+  if (!container) return;
+
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  const allPosts = getStorageJSON('batihub_worker_posts', []);
+
+  // Update top navigation badges & header
+  updateTopPendingCategoryNavigation();
+
+  // Filter pending posts
+  let pendingPosts = allPosts.filter(p => p.status === 'pending');
+
+  if (!isAdmin) {
+    if (!currentUser) {
+      container.innerHTML = `
+        <div class="bg-bh-card border border-bh-border rounded-3xl p-10 text-center space-y-4">
+          <div class="w-16 h-16 mx-auto rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center text-3xl">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+          <div class="space-y-1">
+            <h3 class="font-bold text-white text-base">تسجيل الدخول مطلوب</h3>
+            <p class="text-xs text-slate-400 max-w-sm mx-auto">يرجى تسجيل الدخول بحسابك لعرض منشوراتك المعلقة ومتابعة حالة اعتمادها.</p>
+          </div>
+          <button type="button" onclick="switchAuthView('login'); transitionToAuth();" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold text-xs shadow-lg hover:opacity-95 transition">
+            تسجيل الدخول الآن
+          </button>
+        </div>
+      `;
+      return;
+    }
+    // Regular user only sees their own pending posts
+    pendingPosts = pendingPosts.filter(p => p.authorId && p.authorId.toLowerCase() === currentUser.email.toLowerCase());
+  }
+
+  // Filter by trade if selected
+  if (activePendingFilter !== 'all') {
+    pendingPosts = pendingPosts.filter(p => p.trade === activePendingFilter);
+  }
+
+  // Filter by search query if any
+  const searchInput = document.getElementById('pendingSearchInput');
+  const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : '';
+  if (searchVal) {
+    pendingPosts = pendingPosts.filter(p => {
+      const name = (p.authorName || '').toLowerCase();
+      const text = (p.text || '').toLowerCase();
+      const trade = (p.trade || '').toLowerCase();
+      const wilaya = (p.wilaya || '').toLowerCase();
+      return name.includes(searchVal) || text.includes(searchVal) || trade.includes(searchVal) || wilaya.includes(searchVal);
+    });
+  }
+
+  if (pendingPosts.length === 0) {
+    let emptyIcon = isAdmin ? 'fa-shield-halved' : 'fa-hourglass-half';
+    let emptyTitle = isAdmin ? 'رائع! لا توجد طلبات معلقة للمراجعة حالياً' : 'لا توجد لديك منشورات معلقة حالياً';
+    let emptyDesc = isAdmin
+      ? 'جميع عروض العمل المقدمة من المستخدمين تم اعتمادها أو معالجتها بنجاح.'
+      : 'جميع منشوراتك تم اعتمادها وتظهر مباشرة في قسم عروض العمل، أو يمكنك نشر عرض عمل جديد الآن.';
+
+    container.innerHTML = `
+      <div class="bg-bh-card border border-bh-border rounded-3xl p-10 text-center space-y-4">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center text-3xl">
+          <i class="fa-solid ${emptyIcon}"></i>
+        </div>
+        <div class="space-y-1">
+          <h3 class="font-bold text-white text-base">${emptyTitle}</h3>
+          <p class="text-xs text-slate-400 max-w-sm mx-auto">${emptyDesc}</p>
+        </div>
+        ${!isAdmin ? `
+          <button type="button" onclick="openCreateWorkerPostModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold text-xs shadow-lg hover:opacity-95 transition">
+            نشر عرض أو طلب عمل جديد
+          </button>
+        ` : ''}
+      </div>
+    `;
+    return;
+  }
+
+  // Render cards
+  container.innerHTML = '';
+  pendingPosts.forEach(post => {
+    const card = document.createElement('div');
+    card.className = 'bg-bh-card border border-amber-500/40 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 relative overflow-hidden transition hover:border-amber-500/60';
+
+    const isOwner = currentUser && post.authorId && currentUser.email.toLowerCase() === post.authorId.toLowerCase();
+    const avatarHTML = renderAvatarImgTag(post.authorAvatar, post.authorName, post.authorId, 'w-12 h-12 rounded-full object-cover border-2 border-amber-500/50 shadow-md');
+
+    let postImageHTML = '';
+    if (post.image) {
+      postImageHTML = `
+        <div class="rounded-2xl overflow-hidden border border-bh-border max-h-80 bg-bh-bg cursor-pointer" onclick="openImageLightbox('${escapeHTML(post.image)}')">
+          <img src="${post.image}" alt="Attached Work" class="w-full h-auto object-cover hover:scale-102 transition duration-300">
+        </div>
+      `;
+    }
+
+    const unitMap = {
+      m2: 'دج / م²',
+      linear_m: 'دج / م خطي',
+      hour: 'دج / ساعة',
+      day: 'دج / يوم',
+      global: 'مبلغ إجمالي',
+      negotiable: 'قابل للتفاوض'
+    };
+    const unitLabel = unitMap[post.unit] || 'دج / م²';
+
+    // Banner inside card
+    let cardBannerHTML = '';
+    if (isAdmin) {
+      cardBannerHTML = `
+        <div class="p-3 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-bold flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-shield-halved text-base text-amber-400"></i>
+            <span>طلب منشور معلق بانتظار قرار الإدارة</span>
+          </div>
+          <span class="text-[10px] text-amber-400/80 font-mono">${new Date(post.createdAt).toLocaleDateString()}</span>
+        </div>
+      `;
+    } else {
+      cardBannerHTML = `
+        <div class="p-3 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-bold flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-hourglass-half animate-spin text-sm text-amber-400"></i>
+            <span>منشورك قيد الفحص والمراجعة من قبل الإدارة، وسيظهر للجميع فور اعتماده</span>
+          </div>
+          <span class="text-[10px] text-amber-400/80 font-mono">${new Date(post.createdAt).toLocaleDateString()}</span>
+        </div>
+      `;
+    }
+
+    // Action buttons inside card
+    let actionsHTML = '';
+    if (isAdmin) {
+      actionsHTML = `
+        <div class="pt-3 border-t border-bh-border/70 flex items-center gap-3 flex-wrap">
+          <button type="button" onclick="approveWorkerPost('${post.id}')" class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98">
+            <i class="fa-solid fa-check text-sm"></i>
+            <span>قبول واعتماد المنشور فوراً</span>
+          </button>
+          <button type="button" onclick="rejectWorkerPost('${post.id}')" class="flex-1 py-2.5 px-4 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98">
+            <i class="fa-solid fa-xmark text-sm"></i>
+            <span>رفض وحذف المنشور نهائياً</span>
+          </button>
+        </div>
+      `;
+    } else if (isOwner) {
+      actionsHTML = `
+        <div class="pt-3 border-t border-bh-border/70 flex items-center justify-between gap-3">
+          <span class="text-xs text-amber-400/90 font-medium">حالة المنشور: قيد التدقيق ⏳</span>
+          <button type="button" onclick="deleteWorkerPost('${post.id}')" class="py-2 px-3.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-regular fa-trash-can"></i>
+            <span>إلغاء وحذف المنشور</span>
+          </button>
+        </div>
+      `;
+    }
+
+    card.innerHTML = `
+      ${cardBannerHTML}
+      <div class="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-bh-border/70">
+        <div class="flex items-center gap-3">
+          ${avatarHTML}
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h4 class="font-bold text-sm text-white">${escapeHTML(post.authorName || 'مستخدم')}</h4>
+              ${isOwner ? '<span class="text-[9px] font-bold text-bh-yellow bg-bh-yellow/10 px-2 py-0.5 rounded-full border border-bh-yellow/30">(أنت)</span>' : ''}
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 font-mono">قيد المعالجة ⏳</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-slate-400 mt-1">
+              <span class="text-bh-yellow font-bold">${escapeHTML(post.trade)}</span>
+              <span>•</span>
+              <span class="font-mono text-[11px]">${escapeHTML(post.wilaya || 'الجزائر')}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-left">
+          <span class="text-xs font-mono font-black text-bh-yellow block">${escapeHTML(post.price || '')} ${escapeHTML(unitLabel)}</span>
+          ${post.phone ? `
+            <a href="tel:${escapeHTML(post.phone)}" class="text-[11px] text-slate-400 font-mono hover:text-white transition flex items-center gap-1 mt-0.5 justify-end">
+              <i class="fa-solid fa-phone text-[10px] text-emerald-400"></i>
+              <span>${escapeHTML(post.phone)}</span>
+            </a>
+          ` : ''}
+        </div>
+      </div>
+
+      <div class="text-xs text-slate-200 leading-relaxed whitespace-pre-line py-1">
+        ${escapeHTML(post.text)}
+      </div>
+
+      ${postImageHTML}
+
+      ${actionsHTML}
+    `;
+
+    container.appendChild(card);
+  });
+}
+
 function renderWorkerPostsFeed() {
   renderAdminPendingRequestsSection();
 
@@ -2405,14 +2719,17 @@ function handleCreateWorkerPostSubmit(event) {
   closeCreateWorkerPostModal();
   updateAdminPendingBadge();
   updateWorkerFilterPillsVisibility();
+  updateTopPendingCategoryNavigation();
 
   if (isAdmin) {
     renderWorkerPostsFeed();
+    renderDedicatedPendingPostsTab();
     showToast(I18N[currentLanguage].post_published_admin_success, 'success');
   } else {
-    // Switch to user pending category to immediately show their pending post!
-    filterWorkerFeed('my_pending');
-    showToast('تم إرسال المنشور بنجاح! هو الآن في خانة (منشوراتي المعلقة ⏳) بانتظار فحص واعتماد الإدارة.', 'warning', 6000);
+    // Switch to top dedicated pending category to immediately show their pending post!
+    switchTab('tab-pending-posts');
+    renderDedicatedPendingPostsTab();
+    showToast('تم إرسال المنشور بنجاح! تم نقلك لتصنيف (المنشورات المعلقة ⏳) بالأعلى بانتظار فحص واعتماد الإدارة.', 'warning', 6000);
   }
 }
 
@@ -2541,7 +2858,9 @@ function approveWorkerPost(postId) {
   broadcastLiveEvent('approve_worker_post', { postId });
 
   updateAdminPendingBadge();
+  updateTopPendingCategoryNavigation();
   renderWorkerPostsFeed();
+  renderDedicatedPendingPostsTab();
   showToast('تمت الموافقة على المنشور ونشره للجميع بنجاح!', 'success');
 }
 
@@ -2561,7 +2880,9 @@ function deleteWorkerPost(postId) {
   broadcastLiveEvent('delete_worker_post', { postId });
 
   updateAdminPendingBadge();
+  updateTopPendingCategoryNavigation();
   renderWorkerPostsFeed();
+  renderDedicatedPendingPostsTab();
   showToast('تم حذف المنشور بنجاح', 'info');
 }
 

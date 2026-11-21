@@ -297,6 +297,11 @@
               <i class="fa-solid fa-briefcase text-bh-orange"></i>
               <span data-i18n="nav_worker_board">عروض العمل</span>
             </button>
+            <button class="nav-tab" id="navTabPendingPosts" data-tab="tab-pending-posts" onclick="switchTab('tab-pending-posts')">
+              <i id="navTabPendingIcon" class="fa-solid fa-hourglass-half text-amber-400"></i>
+              <span id="navTabPendingText">منشورات معلقة</span>
+              <span id="navTabPendingBadge" class="hidden px-1.5 py-0.5 rounded-full text-[9px] bg-amber-500 text-slate-950 font-black">0</span>
+            </button>
             <button class="nav-tab" data-tab="tab-study-offices" onclick="switchTab('tab-study-offices')">
               <i class="fa-solid fa-compass-drafting text-sky-400"></i>
               <span data-i18n="nav_study_offices">مكاتب دراسات</span>
@@ -527,6 +532,91 @@
       </div>
 
       <!-- ========================================================================= -->
+      <!-- TAB: DEDICATED PENDING POSTS CATEGORY (المنشورات المعلقة - أعلى الواجهة)      -->
+      <!-- ========================================================================= -->
+      <div id="tab-pending-posts" class="tab-content hidden space-y-6 text-right">
+
+        <!-- Top Header Card (Admin View) -->
+        <div id="pendingTabHeaderAdmin" class="hidden bg-gradient-to-r from-bh-card via-amber-950/20 to-bh-card border border-amber-500/40 rounded-3xl p-5 sm:p-6 shadow-2xl relative overflow-hidden">
+          <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center text-2xl shadow-lg shrink-0">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h2 class="font-heading font-black text-lg sm:text-xl text-white">مركز مراجعة واعتماد المنشورات المعلقة</h2>
+                  <span class="text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-mono">لوحة الإدارة 🛡️</span>
+                </div>
+                <p class="text-xs text-slate-300 mt-1">راجع كافة عروض العمل المرسلة من المستخدمين واقبل أو ارفض أي منشور بضغطة زر واحدة.</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-3.5 py-2 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-300 font-bold text-xs flex items-center gap-2">
+                <i class="fa-solid fa-hourglass-half animate-pulse"></i>
+                <span id="pendingTabAdminBadge">0 طلبات بانتظار المراجعة</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Header Card (Regular User View) -->
+        <div id="pendingTabHeaderUser" class="bg-gradient-to-r from-bh-card via-bh-cardhover to-bh-card border border-amber-500/30 rounded-3xl p-5 sm:p-6 shadow-2xl relative overflow-hidden">
+          <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center justify-center text-2xl shadow-lg shrink-0">
+                <i class="fa-solid fa-hourglass-half animate-pulse"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h2 class="font-heading font-black text-lg sm:text-xl text-white">منشوراتي المعلقة (قيد الفحص والمراجعة)</h2>
+                  <span class="text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-mono">حسابك الشخصي ⏳</span>
+                </div>
+                <p class="text-xs text-slate-300 mt-1">عروض العمل التي قمت بإنشائها وتنتظر حالياً موافقة الإدارة. ستظهر مباشرة للجميع فور اعتمادها.</p>
+              </div>
+            </div>
+            <button type="button" onclick="openCreateWorkerPostModal()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-black text-xs shadow-lg hover:opacity-95 transition flex items-center gap-2 cursor-pointer">
+              <i class="fa-solid fa-plus"></i>
+              <span>نشر عرض أو طلب عمل جديد</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter & Search Toolbar inside Pending Tab -->
+        <div class="flex items-center justify-between flex-wrap gap-3 pb-1 border-b border-bh-border/50">
+          <div class="flex items-center gap-2 overflow-x-auto no-scrollbar text-xs py-1" id="pendingFilterPillsContainer">
+            <button type="button" onclick="filterPendingTab('all', this)" class="pending-filter-pill active-filter px-3 py-1.5 rounded-xl bg-bh-yellow text-slate-950 font-bold transition">
+              <span>الكل</span>
+            </button>
+            <button type="button" onclick="filterPendingTab('بناء', this)" class="pending-filter-pill px-3 py-1.5 rounded-xl bg-bh-card text-slate-400 hover:text-white border border-bh-border font-semibold transition">
+              <span>بناء</span>
+            </button>
+            <button type="button" onclick="filterPendingTab('كهرباء', this)" class="pending-filter-pill px-3 py-1.5 rounded-xl bg-bh-card text-slate-400 hover:text-white border border-bh-border font-semibold transition">
+              <span>كهرباء</span>
+            </button>
+            <button type="button" onclick="filterPendingTab('ترصيص وصحي', this)" class="pending-filter-pill px-3 py-1.5 rounded-xl bg-bh-card text-slate-400 hover:text-white border border-bh-border font-semibold transition">
+              <span>ترصيص وصحي</span>
+            </button>
+            <button type="button" onclick="filterPendingTab('دهان وديكور', this)" class="pending-filter-pill px-3 py-1.5 rounded-xl bg-bh-card text-slate-400 hover:text-white border border-bh-border font-semibold transition">
+              <span>دهان وديكور</span>
+            </button>
+            <button type="button" onclick="filterPendingTab('تكييف وتبريد', this)" class="pending-filter-pill px-3 py-1.5 rounded-xl bg-bh-card text-slate-400 hover:text-white border border-bh-border font-semibold transition">
+              <span>تكييف وتبريد</span>
+            </button>
+          </div>
+
+          <div class="relative w-full sm:w-64">
+            <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="pendingSearchInput" oninput="renderDedicatedPendingPostsTab()" placeholder="بحث في المنشورات المعلقة..." class="w-full bg-bh-bg border border-bh-border rounded-xl pr-9 pl-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow">
+          </div>
+        </div>
+
+        <!-- Pending Posts Feed Container -->
+        <div id="pendingPostsFeedContainer" class="space-y-4"></div>
+
+      </div>
+
+      <!-- ========================================================================= -->
       <!-- TAB 3: STUDY OFFICES & ENGINEERING (مكاتب دراسات وهندسة)                  -->
       <!-- ========================================================================= -->
       <div id="tab-study-offices" class="tab-content hidden space-y-6 text-right">
@@ -585,6 +675,12 @@
       <button type="button" onclick="switchTab('tab-worker-board')" id="mNavWorkers" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
         <i class="fa-solid fa-briefcase text-base"></i>
         <span class="text-[9px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_workers">عروض العمل</span>
+      </button>
+
+      <button type="button" onclick="switchTab('tab-pending-posts')" id="mNavPending" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2 rounded-xl text-slate-400 hover:text-white transition active:scale-90 relative">
+        <i id="mNavPendingIcon" class="fa-solid fa-hourglass-half text-base text-amber-400"></i>
+        <span id="mNavPendingBadge" class="hidden absolute top-0.5 right-2 px-1 rounded-full text-[8px] bg-amber-500 text-slate-950 font-black">0</span>
+        <span id="mNavPendingText" class="text-[9px] font-semibold mt-0.5 tracking-tight">معلقة</span>
       </button>
 
       <button type="button" onclick="switchTab('tab-study-offices')" id="mNavOffices" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
