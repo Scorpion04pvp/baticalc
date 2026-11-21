@@ -2663,6 +2663,7 @@ function handleEditWorkerPostSubmit(event) {
 /* ========================================================================= */
 
 function initAutoAppUpdater() {
+  if (window.location.protocol !== 'http:' && window.location.protocol !== 'https:') return;
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').then(reg => {
       reg.update().catch(() => {});
