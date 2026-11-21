@@ -250,7 +250,7 @@ ipcMain.handle('db-get-worker-posts', async () => {
   return null;
 });
 
-function createWindow() {
+async function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 920,
@@ -268,7 +268,9 @@ function createWindow() {
   });
 
   // Clear cache to always load fresh code
-  mainWindow.webContents.session.clearCache();
+  try {
+    await mainWindow.webContents.session.clearCache();
+  } catch (e) {}
 
   mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
     logMail(`[RENDERER-CONSOLE] [L${level}] ${message} (line ${line})`);
