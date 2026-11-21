@@ -1,12 +1,12 @@
 // BatiHub DZ - Progressive Web App Service Worker
-const CACHE_NAME = 'batihub-dz-cache-v3-live';
+const CACHE_NAME = 'batihub-dz-v5-force-update';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './style.css',
-  './app.js',
+  './style.css?v=3.5.0',
+  './app.js?v=3.5.0',
   './manifest.json',
-  './assets/mqtt.min.js',
+  './assets/mqtt.min.js?v=3.5.0',
   './assets/batihub_logo.png',
   './assets/batihub_banner.jpg',
   './assets/icon-192.png',
@@ -41,18 +41,35 @@ self.addEventListener('message', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  // Network first, falling back to cache
+  const url = new URL(event.request.url);
+  const isCodeAsset = url.pathname.endsWith('.js') || url.pathname.endsWith('.html') || url.pathname.endsWith('.css') || url.pathname === '/' || url.pathname.endsWith('/baticalc/') || url.pathname.endsWith('/baticalc');
+
+  if (isCodeAsset) {
+    // ALWAYS force fresh network fetch for code assets
+    event.respondWith(
+      fetch(event.request, { cache: 'no-cache' })
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const clone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Other assets (images, icons)
   event.respondWith(
-    fetch(event.request)
-      .then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+    caches.match(event.request).then((cached) => {
+      return cached || fetch(event.request).then((resp) => {
+        if (resp && resp.status === 200) {
+          const clone = resp.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
-        return networkResponse;
-      })
-      .catch(() => caches.match(event.request))
+        return resp;
+      });
+    })
   );
 });

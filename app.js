@@ -952,34 +952,52 @@ async function handleUserRegister(event) {
     return;
   }
 
-  // Generate 6-digit OTP
-  const generatedOtp = String(Math.floor(100000 + Math.random() * 900000));
-  pendingRegistration = {
+  // Create salted SHA-256 hash immediately for protected vault storage
+  const salt = SEED_SALT;
+  const passwordHash = await sha256Hash(password + salt);
+  const newAccount = {
+    id: 'usr_' + Date.now(),
     firstName,
     lastName,
     fullName: `${firstName} ${lastName}`,
     dob,
     email,
-    password,
-    otp: generatedOtp
+    passwordHash,
+    salt,
+    isVerified: true,
+    role: 'user',
+    avatar: null,
+    createdAt: new Date().toISOString()
   };
 
-  showToast('جاري إرسال رمز التحقق إلى بريدك الإلكتروني عبر Gmail...', 'info', 3000);
+  // 1. Commit immediately to registered accounts database vault
+  accounts[email] = newAccount;
+  setStorageJSON('batihub_registered_accounts', accounts);
 
-  // Send real email via Gmail SMTP
-  const mailRes = await sendOtpEmail(email, generatedOtp, 'registration');
-
-  switchAuthView('otp');
-  const otpInput = document.getElementById('otpCodeInput');
-
-  if (mailRes && mailRes.success && !mailRes.fallback) {
-    showToast(`تم إرسال رمز التحقق إلى ${email} بنجاح! تفقد بريدك الوارد أو الترويجي.`, 'success', 6000);
-    if (otpInput) otpInput.value = '';
-  } else {
-    // If on web / fallback mode, also show/auto-fill for ease of testing
-    if (otpInput) otpInput.value = generatedOtp;
-    showToast(`رمز التحقق الخاص بك هو: ${generatedOtp}`, 'info', 6000);
+  // 2. Commit immediately to Electron disk database if available
+  if (window.electronDB && typeof window.electronDB.saveAccounts === 'function') {
+    try { window.electronDB.saveAccounts(accounts); } catch (e) {}
   }
+
+  // 3. Broadcast to all other devices in real-time
+  broadcastLiveEvent('new_registered_account', newAccount);
+
+  // 4. Log in immediately and remember credentials on this device
+  currentUser = { ...newAccount };
+  setStorageJSON('batihub_current_user', currentUser);
+  setStorageJSON('batihub_saved_login_cred', {
+    email: newAccount.email,
+    password: password,
+    passwordHash: passwordHash,
+    autoLogin: true
+  });
+
+  // 5. Send welcome email with verification code asynchronously in background
+  const welcomeOtp = String(Math.floor(100000 + Math.random() * 900000));
+  sendOtpEmail(email, welcomeOtp, 'registration').catch(() => {});
+
+  showToast('تم إنشاء وتأمين حسابك في قاعدة البيانات بنجاح! مرحباً بك في BatiHub DZ.', 'success', 5000);
+  transitionToDashboard();
 }
 
 async function handleVerifyOtp(event) {
@@ -1399,6 +1417,10 @@ function initLiveSyncEngine() {
           mqttClient.subscribe(MQTT_TOPIC_BROADCAST, { qos: 1 }, (err) => {
             if (!err) {
               console.log('[BatiHub MQTT] Subscribed to broadcast channel:', MQTT_TOPIC_BROADCAST);
+              // Request vault synchronization from any online peer
+              setTimeout(() => {
+                broadcastLiveEvent('vault_request', { requester: currentUser ? currentUser.email : 'guest' });
+              }, 400);
             }
           });
         });
@@ -1628,6 +1650,52 @@ function handleIncomingLiveSyncPacket(packet) {
     if (!accounts[payload.email]) {
       accounts[payload.email] = payload;
       setStorageJSON('batihub_registered_accounts', accounts);
+      if (window.electronDB && typeof window.electronDB.saveAccounts === 'function') {
+        try { window.electronDB.saveAccounts(accounts); } catch (e) {}
+      }
+    }
+  }
+
+  // 12. Real-time Vault Request: Another device connected and requests data synchronization
+  else if (action === 'vault_request') {
+    const accs = initAccountsDatabase();
+    const psts = getStorageJSON('batihub_worker_posts', []);
+    broadcastLiveEvent('vault_response', { accounts: accs, posts: psts });
+  }
+
+  // 13. Real-time Vault Response: Merge incoming accounts and posts non-destructively
+  else if (action === 'vault_response' && payload) {
+    if (payload.accounts && typeof payload.accounts === 'object') {
+      let currentAccs = initAccountsDatabase();
+      let changed = false;
+      for (const [em, acc] of Object.entries(payload.accounts)) {
+        if (!currentAccs[em]) {
+          currentAccs[em] = acc;
+          changed = true;
+        }
+      }
+      if (changed) {
+        setStorageJSON('batihub_registered_accounts', currentAccs);
+        if (window.electronDB && typeof window.electronDB.saveAccounts === 'function') {
+          try { window.electronDB.saveAccounts(currentAccs); } catch (e) {}
+        }
+      }
+    }
+
+    if (Array.isArray(payload.posts) && payload.posts.length > 0) {
+      let currentPosts = getStorageJSON('batihub_worker_posts', []);
+      const map = new Map();
+      payload.posts.forEach(p => map.set(p.id, p));
+      currentPosts.forEach(p => map.set(p.id, p)); // Local modifications take precedence
+      const merged = Array.from(map.values());
+      if (merged.length !== currentPosts.length) {
+        setStorageJSON('batihub_worker_posts', merged);
+        if (currentActiveTab === 'tab-worker-board') {
+          renderWorkerPostsFeed();
+        } else if (currentActiveTab === 'tab-pending-posts') {
+          renderDedicatedPendingPostsTab();
+        }
+      }
     }
   }
 }
@@ -4031,9 +4099,54 @@ function startLiveClock() {
 /* ========================================================================= */
 
 document.addEventListener('DOMContentLoaded', () => {
+  // 0. Cache-Busting & Mobile Force Refresh Engine (Bypasses stale browser cache)
+  const CURRENT_APP_VERSION = '3.5.0';
+  const storedVersion = localStorage.getItem('batihub_app_version');
+  if (storedVersion !== CURRENT_APP_VERSION) {
+    localStorage.setItem('batihub_app_version', CURRENT_APP_VERSION);
+    if ('caches' in window) {
+      caches.keys().then((names) => {
+        names.forEach((name) => {
+          if (name !== 'batihub-dz-v5-force-update') {
+            caches.delete(name);
+          }
+        });
+      });
+    }
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach((reg) => reg.update());
+      });
+    }
+  }
+
   // 1. Initialize databases & seed accounts
   initAccountsDatabase();
   initDefaultFeedsIfEmpty();
+
+  // Load persistent database from Electron disk if available
+  if (window.electronDB) {
+    if (typeof window.electronDB.getAccounts === 'function') {
+      window.electronDB.getAccounts().then(diskAccs => {
+        if (diskAccs && typeof diskAccs === 'object' && Object.keys(diskAccs).length > 0) {
+          let curr = initAccountsDatabase();
+          let merged = { ...diskAccs, ...curr };
+          setStorageJSON('batihub_registered_accounts', merged);
+        }
+      }).catch(() => {});
+    }
+    if (typeof window.electronDB.getWorkerPosts === 'function') {
+      window.electronDB.getWorkerPosts().then(diskPosts => {
+        if (Array.isArray(diskPosts) && diskPosts.length > 0) {
+          let currPosts = getStorageJSON('batihub_worker_posts', []);
+          const map = new Map();
+          diskPosts.forEach(p => map.set(p.id, p));
+          currPosts.forEach(p => map.set(p.id, p));
+          setStorageJSON('batihub_worker_posts', Array.from(map.values()));
+        }
+      }).catch(() => {});
+    }
+  }
 
   // 2. Restore language preference
   const savedLang = localStorage.getItem('batihub_lang') || 'ar';
