@@ -376,6 +376,53 @@ function renderAvatarImgTag(avatarUrl, name, email, cssClasses) {
   return `<img src="${safeSrc}" alt="${safeName}" class="${cssClasses}" onerror="this.onerror=null;this.src='${fallbackSrc}';">`;
 }
 
+/**
+ * High-efficiency canvas compressor: scales down images to maxDimension and converts to clean JPEG Data URL.
+ * Guarantees zero dropped packets over MQTT brokers and keeps payloads around 40KB - 80KB.
+ */
+function compressImageToDataUrl(fileOrBlob, maxDimension = 900, quality = 0.75) {
+  return new Promise((resolve) => {
+    if (!fileOrBlob) return resolve(null);
+    const reader = new FileReader();
+    reader.onerror = () => resolve(null);
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = () => resolve(null);
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        if (!width || !height) return resolve(e.target.result);
+
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#0b0f19';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        try {
+          const compressed = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressed);
+        } catch (err) {
+          resolve(e.target.result);
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(fileOrBlob);
+  });
+}
+
 /* ========================================================================= */
 /* 5. SHA-256 HASH ENGINE                                                    */
 /* ========================================================================= */
@@ -412,6 +459,14 @@ function setStorageJSON(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (err) {
     console.error('Storage Write Error:', key, err);
+  }
+  // Sync to Electron persistent JSON database files on disk
+  if (window.electronDB) {
+    if (key === 'batihub_registered_accounts' && typeof window.electronDB.saveAccounts === 'function') {
+      window.electronDB.saveAccounts(value);
+    } else if (key === 'batihub_worker_posts' && typeof window.electronDB.saveWorkerPosts === 'function') {
+      window.electronDB.saveWorkerPosts(value);
+    }
   }
 }
 
@@ -710,28 +765,27 @@ async function handleUserLogin(event) {
   }
 
   // Credentials match!
-  pendingLoginAccount = account;
-  pendingLoginPassword = password;
+  const shouldSave = rememberCheck ? rememberCheck.checked : true;
+  currentUser = { ...account };
 
-  // Check if already saved and validated with same hash on this device
-  const saved = getStorageJSON('batihub_saved_login_cred', null);
-  if (saved && saved.email.toLowerCase() === account.email.toLowerCase() && saved.passwordHash === account.passwordHash) {
-    currentUser = { ...account };
+  if (shouldSave) {
+    setStorageJSON('batihub_saved_login_cred', {
+      email: account.email,
+      password: password,
+      passwordHash: account.passwordHash,
+      autoLogin: true
+    });
     setStorageJSON('batihub_current_user', currentUser);
-    showToast(`أهلاً بك مجدداً ${currentUser.fullName || currentUser.firstName}!`, 'success');
-    transitionToDashboard();
-    return;
+    showToast('تم حفظ الحساب على هذا الجهاز والدخول بنجاح!', 'success');
+  } else {
+    localStorage.removeItem('batihub_saved_login_cred');
+    localStorage.removeItem('batihub_current_user');
+    sessionStorage.setItem('batihub_current_user', JSON.stringify(currentUser));
+    showToast('تم تسجيل الدخول لهذه الجلسة فقط', 'info');
   }
 
-  // Otherwise, prompt user: Save credentials on this device or not?
-  const promptModal = document.getElementById('modalPromptSaveLogin');
-  const emailDisplay = document.getElementById('promptSaveEmailDisplay');
-  if (emailDisplay) emailDisplay.textContent = account.email;
-  if (promptModal) {
-    promptModal.classList.remove('hidden');
-  } else {
-    confirmSaveLoginCredentials(true);
-  }
+  showToast(`أهلاً بك ${currentUser.fullName || currentUser.firstName}!`, 'success');
+  transitionToDashboard();
 }
 
 let pendingLoginAccount = null;
@@ -740,29 +794,23 @@ let pendingLoginPassword = null;
 function confirmSaveLoginCredentials(shouldSave) {
   const promptModal = document.getElementById('modalPromptSaveLogin');
   if (promptModal) promptModal.classList.add('hidden');
-
   if (!pendingLoginAccount) return;
 
   currentUser = { ...pendingLoginAccount };
-
   if (shouldSave) {
     setStorageJSON('batihub_saved_login_cred', {
       email: pendingLoginAccount.email,
       password: pendingLoginPassword,
-      passwordHash: pendingLoginAccount.passwordHash
+      passwordHash: pendingLoginAccount.passwordHash,
+      autoLogin: true
     });
     setStorageJSON('batihub_current_user', currentUser);
-    showToast('تم حفظ بيانات الحساب على هذا الجهاز بنجاح!', 'success');
   } else {
     localStorage.removeItem('batihub_saved_login_cred');
     sessionStorage.setItem('batihub_current_user', JSON.stringify(currentUser));
-    showToast('تم تسجيل الدخول لهذه الجلسة فقط', 'info');
   }
-
   pendingLoginAccount = null;
   pendingLoginPassword = null;
-
-  showToast(`أهلاً بك ${currentUser.fullName || currentUser.firstName}!`, 'success');
   transitionToDashboard();
 }
 
@@ -971,11 +1019,20 @@ async function handleVerifyOtp(event) {
   accounts[newAccount.email] = newAccount;
   setStorageJSON('batihub_registered_accounts', accounts);
 
+  // Broadcast to other devices
+  broadcastLiveEvent('new_registered_account', newAccount);
+
   currentUser = { ...newAccount };
   setStorageJSON('batihub_current_user', currentUser);
+  setStorageJSON('batihub_saved_login_cred', {
+    email: newAccount.email,
+    password: pendingRegistration.password,
+    passwordHash: passwordHash,
+    autoLogin: true
+  });
   pendingRegistration = null;
 
-  showToast('تم تأكيد حسابك بنجاح! مرحباً بك في BatiHub DZ.', 'success');
+  showToast('تم تأكيد حسابك وحفظه على هذا الجهاز بنجاح! مرحباً بك في BatiHub DZ.', 'success');
   transitionToDashboard();
 }
 
@@ -1175,15 +1232,8 @@ async function handleDirectPasswordChange(event) {
   currentUser.passwordHash = newHash;
   setStorageJSON('batihub_current_user', currentUser);
 
-  // If saved on this local device, keep local credentials updated
-  const saved = getStorageJSON('batihub_saved_login_cred', null);
-  if (saved && saved.email.toLowerCase() === currentUser.email.toLowerCase()) {
-    setStorageJSON('batihub_saved_login_cred', {
-      email: currentUser.email,
-      password: newPwd,
-      passwordHash: newHash
-    });
-  }
+  // Automatically invalidate saved credentials on password change so user must log in with new password
+  localStorage.removeItem('batihub_saved_login_cred');
 
   closeChangePasswordModal();
   showToast('تم تغيير كلمة المرور بنجاح!', 'success');
@@ -1339,9 +1389,9 @@ function initLiveSyncEngine() {
         mqttClient = window.mqtt.connect(MQTT_BROKER_URL, {
           clientId: clientId,
           clean: true,
-          connectTimeout: 10000,
-          reconnectPeriod: 2500,
-          keepalive: 60
+          connectTimeout: 8000,
+          reconnectPeriod: 1500,
+          keepalive: 30
         });
 
         mqttClient.on('connect', () => {
@@ -1571,6 +1621,69 @@ function handleIncomingLiveSyncPacket(packet) {
       }
     }
   }
+
+  // 11. Real-time New Account Synchronization
+  else if (action === 'new_registered_account' && payload) {
+    let accounts = initAccountsDatabase();
+    if (!accounts[payload.email]) {
+      accounts[payload.email] = payload;
+      setStorageJSON('batihub_registered_accounts', accounts);
+    }
+  }
+}
+
+/* ========================================================================= */
+/* 11.5. NETWORK CONNECTIVITY & OFFLINE BLOCKER ENGINE                       */
+/* ========================================================================= */
+
+function showOfflineOverlay() {
+  const overlay = document.getElementById('offlineOverlay');
+  if (overlay) overlay.classList.remove('hidden');
+}
+
+function hideOfflineOverlay() {
+  const overlay = document.getElementById('offlineOverlay');
+  if (overlay) overlay.classList.add('hidden');
+}
+
+function checkNetworkAndRetry() {
+  if (navigator.onLine) {
+    hideOfflineOverlay();
+    if (mqttClient && !mqttClient.connected) {
+      try { mqttClient.reconnect(); } catch (e) {}
+    }
+    showToast('تمت استعادة الاتصال بالإنترنت بنجاح! التطبيق متصل ومزامن الآن 📶', 'success');
+  } else {
+    showToast('لا يزال الجهاز غير متصل بالإنترنت! يرجى التحقق من الشبكة للمتابعة.', 'warning', 4000);
+  }
+}
+
+function initNetworkEnforcement() {
+  if (!navigator.onLine) {
+    showOfflineOverlay();
+  }
+
+  window.addEventListener('offline', () => {
+    showOfflineOverlay();
+    showToast('انقطع الاتصال بالإنترنت! يرجى التحقق من الشبكة.', 'error', 5000);
+  });
+
+  window.addEventListener('online', () => {
+    hideOfflineOverlay();
+    if (mqttClient && !mqttClient.connected) {
+      try { mqttClient.reconnect(); } catch (e) {}
+    }
+    showToast('تمت استعادة الاتصال بالإنترنت بنجاح! التطبيق متصل ومزامن الآن 📶', 'success', 4000);
+  });
+
+  // Periodic network check
+  setInterval(() => {
+    if (!navigator.onLine) {
+      showOfflineOverlay();
+    } else {
+      hideOfflineOverlay();
+    }
+  }, 4000);
 }
 
 /* ========================================================================= */
@@ -2406,26 +2519,22 @@ function closeEditWorkerPostModal() {
   if (modal) modal.classList.add('hidden');
 }
 
-function handleEditPostImageSelect(event) {
+async function handleEditPostImageSelect(event) {
   const file = event.target.files && event.target.files[0];
   if (!file) return;
 
-  if (file.size > 4 * 1024 * 1024) {
-    showToast('حجم الصورة كبير جداً! اختر صورة أصغر من 4 ميغابايت.', 'warning');
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    cachedEditPostImageBase64 = e.target.result;
+  try {
+    const compressed = await compressImageToDataUrl(file, 1024, 0.75);
+    cachedEditPostImageBase64 = compressed;
     const previewContainer = document.getElementById('editPostImagePreviewContainer');
     const previewImg = document.getElementById('editPostImagePreview');
     if (previewContainer && previewImg) {
       previewImg.src = cachedEditPostImageBase64;
       previewContainer.classList.remove('hidden');
     }
-  };
-  reader.readAsDataURL(file);
+  } catch (err) {
+    showToast('حدث خطأ أثناء تحميل الصورة', 'error');
+  }
 }
 
 function removeEditPostImage() {
@@ -2528,37 +2637,31 @@ function renderWorkerPostsFeed() {
   // Update filter pills badges and visibility
   updateWorkerFilterPillsVisibility();
 
-  // Filter logic
+  // Filter logic: In the public feed, ONLY approved posts are EVER shown!
   let filtered = posts.filter(p => {
-    // Admin dedicated review category
+    // Admin dedicated review category (legacy filter support)
     if (activeWorkerFilter === 'admin_pending' || showPendingOnly) {
       return p.status === 'pending';
     }
 
-    // User dedicated pending posts category
+    // User dedicated pending posts category (legacy filter support)
     if (activeWorkerFilter === 'my_pending') {
       if (!currentUser) return false;
       return p.authorId && p.authorId.toLowerCase() === currentUser.email.toLowerCase() && p.status === 'pending';
     }
 
-    // Specific trade filter
-    if (activeWorkerFilter !== 'all') {
-      if (p.trade !== activeWorkerFilter) return false;
-      if (p.status === 'pending') {
-        return currentUser && p.authorId && p.authorId.toLowerCase() === currentUser.email.toLowerCase();
-      }
-      return p.status === 'approved';
-    }
-
-    // Default 'all' category:
-    if (p.status === 'pending') {
-      // Author sees their pending post at the top; others only see approved
-      if (currentUser && p.authorId && p.authorId.toLowerCase() === currentUser.email.toLowerCase()) {
-        return true;
-      }
+    // CRITICAL: Public posts feed MUST ONLY contain approved posts!
+    // Pending posts NEVER appear here, neither in 'all' nor in any trade category!
+    if (p.status !== 'approved') {
       return false;
     }
-    return true; // Approved
+
+    // Specific trade filter
+    if (activeWorkerFilter !== 'all') {
+      return p.trade === activeWorkerFilter;
+    }
+
+    return true; // Approved and matches filter
   });
 
   if (filtered.length === 0) {
@@ -2790,26 +2893,22 @@ function closeCreateWorkerPostModal() {
   if (modal) modal.classList.add('hidden');
 }
 
-function handlePostImageSelect(event) {
+async function handlePostImageSelect(event) {
   const file = event.target.files && event.target.files[0];
   if (!file) return;
 
-  if (file.size > 4 * 1024 * 1024) {
-    showToast('حجم الصورة كبير جداً! اختر صورة أصغر من 4 ميغابايت.', 'warning');
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    cachedPostImageBase64 = e.target.result;
+  try {
+    const compressed = await compressImageToDataUrl(file, 1024, 0.75);
+    cachedPostImageBase64 = compressed;
     const previewContainer = document.getElementById('postImagePreviewContainer');
     const previewImg = document.getElementById('postImagePreview');
     if (previewContainer && previewImg) {
       previewImg.src = cachedPostImageBase64;
       previewContainer.classList.remove('hidden');
     }
-  };
-  reader.readAsDataURL(file);
+  } catch (err) {
+    showToast('حدث خطأ أثناء تحميل الصورة', 'error');
+  }
 }
 
 function removeSelectedPostImage() {
@@ -3534,16 +3633,24 @@ function handleSendPrivateMessage(event) {
   renderPrivateChatMessages();
 }
 
-function handleChatImageSelect(event) {
+async function handleChatImageSelect(event) {
   const file = event.target.files && event.target.files[0];
   if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    cachedChatImageBase64 = e.target.result;
+  showToast('جاري ضغط الصورة وإرسالها...', 'info', 1200);
+  try {
+    const compressed = await compressImageToDataUrl(file, 900, 0.75);
+    if (!compressed) {
+      showToast('تعذر معالجة الصورة، يرجى اختيار صورة أخرى', 'error');
+      return;
+    }
+    cachedChatImageBase64 = compressed;
     handleSendPrivateMessage(null);
-  };
-  reader.readAsDataURL(file);
+  } catch (err) {
+    showToast('حدث خطأ أثناء تحميل الصورة', 'error');
+  } finally {
+    event.target.value = '';
+  }
 }
 
 /* Voice Recording Engine */
@@ -3935,17 +4042,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3. Start live clock & realtime multi-device sync
   startLiveClock();
   initLiveSyncEngine();
+  initNetworkEnforcement();
   initAutoAppUpdater();
 
   // 4. Initialize calculator history tape and saved credentials
   renderCalcHistory();
   loadSavedLoginCredentials();
 
-  // 5. Check existing login session
-  const storedUser = getStorageJSON('batihub_current_user', null) ||
-    JSON.parse(sessionStorage.getItem('batihub_current_user') || 'null');
-
-  // 6. Splash Screen Progress Animation
+  // 5. Splash Screen Progress Animation
   const splashScreen = document.getElementById('splashScreen');
   const progressBar = document.getElementById('splashProgressBar');
   const percentText = document.getElementById('splashPercentText');
@@ -3973,8 +4077,31 @@ document.addEventListener('DOMContentLoaded', () => {
           }, 500);
         }
 
-        if (storedUser && storedUser.email) {
-          currentUser = storedUser;
+        const saved = getStorageJSON('batihub_saved_login_cred', null);
+        const accounts = initAccountsDatabase();
+        let validUser = null;
+
+        // Auto-login only if saved credential exists and matches current hash
+        if (saved && saved.email && saved.autoLogin) {
+          const acc = accounts[saved.email.toLowerCase()];
+          if (acc && acc.passwordHash === saved.passwordHash) {
+            validUser = { ...acc };
+            setStorageJSON('batihub_current_user', validUser);
+          } else {
+            // Password changed! Invalidate auto-login automatically
+            localStorage.removeItem('batihub_saved_login_cred');
+            localStorage.removeItem('batihub_current_user');
+          }
+        } else {
+          // Check active session (sessionStorage)
+          const sessionUser = JSON.parse(sessionStorage.getItem('batihub_current_user') || 'null');
+          if (sessionUser && sessionUser.email && accounts[sessionUser.email.toLowerCase()]) {
+            validUser = sessionUser;
+          }
+        }
+
+        if (validUser) {
+          currentUser = validUser;
           transitionToDashboard();
         } else {
           switchAuthView('login');

@@ -134,10 +134,10 @@
             </div>
           </div>
 
-          <div class="flex items-center justify-between text-[11px] text-slate-400">
-            <label class="flex items-center gap-1.5 cursor-pointer">
-              <input type="checkbox" id="rememberMeCheck" checked class="rounded border-bh-border text-bh-yellow focus:ring-0 bg-bh-bg">
-              <span>تذكر بيانات تسجيل الدخول على هذا الجهاز</span>
+          <div class="flex items-center justify-between text-xs text-slate-300 py-1">
+            <label class="flex items-center gap-2 cursor-pointer select-none">
+              <input type="checkbox" id="rememberMeCheck" checked class="w-4 h-4 rounded border-bh-border text-bh-yellow focus:ring-0 bg-bh-bg cursor-pointer">
+              <span class="font-semibold text-slate-300 hover:text-white transition">حفظ الحساب على هذا الجهاز (تسجيل الدخول التلقائي)</span>
             </label>
           </div>
           <div id="savedCredNotice" class="hidden"></div>
@@ -1153,6 +1153,32 @@
       <div class="flex items-center justify-center gap-2 pt-2">
         <button type="button" id="btnAppNotifyCancel" class="hidden flex-1 py-2 rounded-xl bg-bh-bg hover:bg-slate-800 text-slate-300 text-xs font-semibold cursor-pointer">إلغاء</button>
         <button type="button" id="btnAppNotifyConfirm" class="flex-1 py-2 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 text-xs font-bold cursor-pointer">حسناً</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- OFFLINE FULLSCREEN BLOCKER OVERLAY (INTERNET REQUIRED)                   -->
+  <!-- ========================================================================= -->
+  <div id="offlineOverlay" class="fixed inset-0 z-[99999] bg-slate-950/95 backdrop-blur-xl flex items-center justify-center p-4 hidden" dir="rtl">
+    <div class="bg-bh-card border-2 border-rose-500/40 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-5 shadow-2xl animate-fade-in">
+      <div class="w-20 h-20 mx-auto rounded-3xl bg-rose-500/15 text-rose-400 border border-rose-500/30 flex items-center justify-center text-4xl shadow-lg">
+        <i class="fa-solid fa-wifi"></i>
+      </div>
+      <div class="space-y-2">
+        <h2 class="text-xl font-heading font-black text-white">لا يوجد اتصال بالإنترنت ⚠️</h2>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          يتطلب تطبيق <strong class="text-bh-yellow">BatiHub DZ</strong> اتصالاً نشطاً بالإنترنت لمزامنة عروض العمل والمحادثات المباشرة بين المستخدمين.
+        </p>
+        <p class="text-[11px] text-slate-400">
+          يرجى التحقق من اتصال الواي فاي أو تفعيل بيانات الهاتف للمتابعة.
+        </p>
+      </div>
+      <div class="pt-2">
+        <button type="button" onclick="checkNetworkAndRetry()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-black text-xs shadow-xl hover:opacity-95 transition flex items-center justify-center gap-2 cursor-pointer active:scale-98">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span>إعادة المحاولة والتحقق من الاتصال</span>
+        </button>
       </div>
     </div>
   </div>

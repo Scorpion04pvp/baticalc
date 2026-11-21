@@ -1,5 +1,5 @@
 // BatiHub DZ - Progressive Web App Service Worker
-const CACHE_NAME = 'batihub-dz-cache-v2-live';
+const CACHE_NAME = 'batihub-dz-cache-v3-live';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
