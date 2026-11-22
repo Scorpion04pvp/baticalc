@@ -681,204 +681,296 @@ function showAppModalAlert(title, message, isConfirm = false, onConfirm = null) 
 /* 8. AUTHENTICATION & SESSION MANAGEMENT                                    */
 /* ========================================================================= */
 
+// =========================================================================
+// 8. GOOGLE AUTHENTICATION & TRUSTED DEVICE MANAGEMENT
+// =========================================================================
+
+function getTrustedDevicesMap() {
+  try {
+    return JSON.parse(localStorage.getItem('batihub_trusted_devices') || '{}');
+  } catch (e) {
+    return {};
+  }
+}
+
+function isDeviceTrustedForEmail(email) {
+  if (!email) return false;
+  const cleanEmail = email.trim().toLowerCase();
+  const map = getTrustedDevicesMap();
+  return Boolean(map[cleanEmail] && map[cleanEmail].trusted);
+}
+
+function markDeviceAsTrusted(email, trusted = true) {
+  if (!email) return;
+  const cleanEmail = email.trim().toLowerCase();
+  const map = getTrustedDevicesMap();
+  if (trusted) {
+    map[cleanEmail] = {
+      trusted: true,
+      timestamp: Date.now()
+    };
+  } else {
+    delete map[cleanEmail];
+  }
+  localStorage.setItem('batihub_trusted_devices', JSON.stringify(map));
+}
+
+function deriveNameFromGmail(email) {
+  if (!email) return 'مستخدم BatiHub';
+  const cleanEmail = email.trim().toLowerCase();
+  if (cleanEmail === 'batihubdz@gmail.com') {
+    return 'BatiHub DZ (الإدارة)';
+  }
+  if (typeof SEED_ACCOUNTS !== 'undefined' && SEED_ACCOUNTS[cleanEmail] && SEED_ACCOUNTS[cleanEmail].fullName) {
+    return SEED_ACCOUNTS[cleanEmail].fullName;
+  }
+  const prefix = cleanEmail.split('@')[0] || 'مستخدم';
+  const noDigits = prefix.replace(/\d+$/, '');
+  const rawParts = noDigits.split(/[._-]+/).filter(Boolean);
+  if (rawParts.length === 0) {
+    return prefix;
+  }
+  return rawParts.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+}
+
+function renderTrustedAccountsPills() {
+  const container = document.getElementById('trustedAccountsPillsList');
+  const section = document.getElementById('trustedAccountsSection');
+  if (!container) return;
+
+  const trustedMap = getTrustedDevicesMap();
+  const accounts = initAccountsDatabase();
+
+  const emails = new Set([
+    'batihubdz@gmail.com',
+    'mouhanedguellif16@gmail.com',
+    ...Object.keys(trustedMap),
+    ...Object.keys(accounts)
+  ]);
+
+  const list = Array.from(emails).filter(e => e && e.includes('@'));
+  if (list.length === 0) {
+    if (section) section.classList.add('hidden');
+    return;
+  }
+
+  if (section) section.classList.remove('hidden');
+  container.innerHTML = '';
+
+  list.forEach(email => {
+    const clean = email.toLowerCase();
+    const isAdmin = (clean === 'batihubdz@gmail.com');
+    const isTrusted = isDeviceTrustedForEmail(clean);
+    const pill = document.createElement('button');
+    pill.type = 'button';
+    pill.className = `px-3 py-1.5 rounded-xl border text-xs font-mono transition flex items-center gap-2 cursor-pointer active:scale-95 ${
+      isAdmin 
+        ? 'bg-amber-500/10 border-amber-500/40 text-amber-300 hover:bg-amber-500/20' 
+        : 'bg-bh-card border-bh-border hover:border-bh-yellow/60 text-slate-200 hover:text-white'
+    }`;
+
+    pill.innerHTML = `
+      <span class="w-2 h-2 rounded-full ${isAdmin ? 'bg-amber-400' : (isTrusted ? 'bg-emerald-400' : 'bg-slate-400')}"></span>
+      <span dir="ltr">${escapeHTML(clean)}</span>
+      <span class="text-[10px] text-slate-400">${isAdmin ? '(إدارة)' : (isTrusted ? '(موثوق)' : '(مستخدم)')}</span>
+    `;
+
+    pill.onclick = () => {
+      const input = document.getElementById('authGmailInput');
+      if (input) {
+        input.value = clean;
+        if (isTrusted) {
+          handleGoogleAuthSubmit();
+        }
+      }
+    };
+
+    container.appendChild(pill);
+  });
+}
+
 function switchAuthView(viewName) {
-  const views = {
-    login: document.getElementById('viewLogin'),
-    register: document.getElementById('viewRegister'),
-    otp: document.getElementById('viewOtp'),
-    forgot: document.getElementById('viewForgot')
-  };
+  const viewGoogle = document.getElementById('viewGoogleAuth') || document.getElementById('viewLogin');
+  const viewOtp = document.getElementById('viewOtp');
+  const viewRegister = document.getElementById('viewRegister');
+  const viewForgot = document.getElementById('viewForgot');
 
   const headerTitle = document.getElementById('authScreenHeaderTitle');
   const headerSub = document.getElementById('authScreenHeaderSub');
 
-  Object.values(views).forEach(el => el && el.classList.add('hidden'));
+  [viewGoogle, viewOtp, viewRegister, viewForgot].forEach(el => el && el.classList.add('hidden'));
 
-  if (viewName === 'login') {
-    views.login.classList.remove('hidden');
-    if (headerTitle) headerTitle.textContent = 'BatiHub DZ • تسجيل الدخول';
-    if (headerSub) headerSub.textContent = 'منصة المحترفين وأصحاب المشاريع وعروض العمل في الجزائر';
-    loadSavedLoginCredentials();
-  } else if (viewName === 'register') {
-    views.register.classList.remove('hidden');
-    if (headerTitle) headerTitle.textContent = 'إنشاء حساب جديد في BatiHub DZ';
-    if (headerSub) headerSub.textContent = 'سجل بياناتك للبدء في نشر عروضك والتواصل المباشر';
+  if (viewName === 'google' || viewName === 'login' || viewName === 'register') {
+    if (viewGoogle) viewGoogle.classList.remove('hidden');
+    if (headerTitle) headerTitle.textContent = 'BatiHub DZ • تسجيل الدخول بـ Google';
+    if (headerSub) headerSub.textContent = 'أدخل بريد Google (Gmail) لتسجيل الدخول المباشر أو تأكيد جهازك الجديد';
+    renderTrustedAccountsPills();
   } else if (viewName === 'otp') {
-    views.otp.classList.remove('hidden');
-    if (headerTitle) headerTitle.textContent = 'تأكيد الحساب • رمز التحقق';
-    if (headerSub) headerSub.textContent = 'أدخل الرمز المكون من 6 أرقام لتفعيل حسابك';
-  } else if (viewName === 'forgot') {
-    views.forgot.classList.remove('hidden');
-    if (headerTitle) headerTitle.textContent = 'استعادة كلمة المرور';
-    if (headerSub) headerSub.textContent = 'أدخل بريدك الإلكتروني لإعادة تعيين كلمة المرور';
+    if (viewOtp) viewOtp.classList.remove('hidden');
+    if (headerTitle) headerTitle.textContent = 'تحقق أمان Google • تأكيد جهاز جديد';
+    if (headerSub) headerSub.textContent = 'أدخل رمز الأمان المكون من 6 أرقام المرسل إلى بريدك لتأكيد هذا الجهاز';
   }
 }
 
-function togglePasswordVisibility(inputId, btn) {
-  const input = document.getElementById(inputId);
-  if (!input) return;
-  const icon = btn.querySelector('i');
-  if (input.type === 'password') {
-    input.type = 'text';
-    if (icon) {
-      icon.classList.remove('fa-eye');
-      icon.classList.add('fa-eye-slash');
-    }
-  } else {
-    input.type = 'password';
-    if (icon) {
-      icon.classList.remove('fa-eye-slash');
-      icon.classList.add('fa-eye');
-    }
-  }
-}
+let pendingGoogleOtp = null;
 
-async function handleUserLogin(event) {
+async function handleGoogleAuthSubmit(event) {
   if (event) event.preventDefault();
 
-  const emailInput = document.getElementById('loginEmail');
-  const passwordInput = document.getElementById('loginPassword');
-  const rememberCheck = document.getElementById('rememberMeCheck');
+  const input = document.getElementById('authGmailInput');
+  const rememberCheck = document.getElementById('authTrustedDeviceCheck');
+  if (!input) return;
 
-  const email = (emailInput.value || '').trim().toLowerCase();
-  const password = passwordInput.value || '';
-
-  if (!email || !password) {
-    showToast('يرجى ملء جميع الحقول المطلوبة', 'warning');
+  const email = (input.value || '').trim().toLowerCase();
+  if (!email || !email.includes('@')) {
+    showToast('يرجى إدخال عنوان بريد إلكتروني صحيح (Gmail)', 'warning');
     return;
   }
 
-  const accounts = initAccountsDatabase();
-  const account = accounts[email];
+  const shouldTrust = rememberCheck ? rememberCheck.checked : true;
+  const isTrusted = isDeviceTrustedForEmail(email);
 
-  if (!account) {
-    showToast('الحساب غير موجود! تحقق من البريد أو قم بإنشاء حساب جديد.', 'error');
+  if (isTrusted) {
+    // Trusted device: Instant direct login!
+    logInGoogleUserDirectly(email, true);
     return;
   }
 
-  // Calculate hash
-  const computedHash = await sha256Hash(password + (account.salt || SEED_SALT));
+  // Untrusted / New device: Generate 6-digit security code and send via Gmail
+  const otpCode = String(Math.floor(100000 + Math.random() * 900000));
+  pendingGoogleOtp = {
+    email: email,
+    code: otpCode,
+    shouldTrust: shouldTrust,
+    timestamp: Date.now()
+  };
 
-  if (computedHash !== account.passwordHash) {
-    showToast('كلمة المرور غير صحيحة! يرجى المحاولة مرة أخرى.', 'error');
-    return;
+  const targetEmailDisplay = document.getElementById('otpTargetEmailDisplay');
+  if (targetEmailDisplay) targetEmailDisplay.textContent = email;
+
+  const otpInput = document.getElementById('otpCodeInput');
+  if (otpInput) {
+    otpInput.value = '';
+    setTimeout(() => otpInput.focus(), 300);
   }
 
-  // Credentials match!
-  const shouldSave = rememberCheck ? rememberCheck.checked : true;
-  currentUser = { ...account };
+  switchAuthView('otp');
+  showToast('جاري إرسال رمز أمان Google إلى بريدك الإلكتروني...', 'info', 3000);
 
-  if (shouldSave) {
-    setStorageJSON('batihub_saved_login_cred', {
-      email: account.email,
-      password: password,
-      passwordHash: account.passwordHash,
-      autoLogin: true
-    });
-    setStorageJSON('batihub_current_user', currentUser);
-    showToast('تم حفظ الحساب على هذا الجهاز والدخول بنجاح!', 'success');
-  } else {
-    localStorage.removeItem('batihub_saved_login_cred');
-    localStorage.removeItem('batihub_current_user');
-    sessionStorage.setItem('batihub_current_user', JSON.stringify(currentUser));
-    showToast('تم تسجيل الدخول لهذه الجلسة فقط', 'info');
-  }
-
-  showToast(`أهلاً بك ${currentUser.fullName || currentUser.firstName}!`, 'success');
-  transitionToDashboard();
-}
-
-let pendingLoginAccount = null;
-let pendingLoginPassword = null;
-
-function confirmSaveLoginCredentials(shouldSave) {
-  const promptModal = document.getElementById('modalPromptSaveLogin');
-  if (promptModal) promptModal.classList.add('hidden');
-  if (!pendingLoginAccount) return;
-
-  currentUser = { ...pendingLoginAccount };
-  if (shouldSave) {
-    setStorageJSON('batihub_saved_login_cred', {
-      email: pendingLoginAccount.email,
-      password: pendingLoginPassword,
-      passwordHash: pendingLoginAccount.passwordHash,
-      autoLogin: true
-    });
-    setStorageJSON('batihub_current_user', currentUser);
-  } else {
-    localStorage.removeItem('batihub_saved_login_cred');
-    sessionStorage.setItem('batihub_current_user', JSON.stringify(currentUser));
-  }
-  pendingLoginAccount = null;
-  pendingLoginPassword = null;
-  transitionToDashboard();
-}
-
-/**
- * Loads device-local saved credentials if remembered and validates hash against database
- */
-function loadSavedLoginCredentials() {
-  const emailInput = document.getElementById('loginEmail');
-  const passwordInput = document.getElementById('loginPassword');
-  const rememberCheck = document.getElementById('rememberMeCheck');
-  const savedNotice = document.getElementById('savedCredNotice');
-  if (!emailInput || !passwordInput) return;
-
-  const saved = getStorageJSON('batihub_saved_login_cred', null);
-  if (!saved || !saved.email) {
-    if (savedNotice) savedNotice.classList.add('hidden');
-    return;
-  }
-
-  const accounts = initAccountsDatabase();
-  const account = accounts[saved.email.toLowerCase()];
-
-  // If account still exists and password hash has NOT changed
-  if (account && account.passwordHash === saved.passwordHash) {
-    emailInput.value = saved.email;
-    passwordInput.value = saved.password || '';
-    if (rememberCheck) rememberCheck.checked = true;
-    if (savedNotice) {
-      savedNotice.classList.remove('hidden');
-      savedNotice.innerHTML = `
-        <div class="flex items-center justify-between p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[11px]">
-          <span class="flex items-center gap-1.5 font-semibold"><i class="fa-solid fa-circle-check"></i> تم حفظ بيانات الدخول تلقائياً على هذا الجهاز</span>
-          <button type="button" onclick="forgetSavedLoginCredentials()" class="text-[10px] text-slate-400 hover:text-rose-400 underline cursor-pointer">إلغاء الحفظ</button>
-        </div>
-      `;
+  // Send real email via SMTP
+  sendOtpEmail(email, otpCode, 'login').then(res => {
+    if (res && res.success && !res.fallback) {
+      showToast(`تم إرسال رمز الأمان المكون من 6 أرقام إلى ${email} بنجاح!`, 'success', 5000);
+    } else {
+      showToast(`رمز التحقق المرسل إلى ${email} هو: ${otpCode}`, 'info', 7000);
     }
-  } else {
-    // Password has changed! Invalidate old saved credentials on this device
-    localStorage.removeItem('batihub_saved_login_cred');
-    emailInput.value = saved.email;
-    passwordInput.value = '';
-    if (rememberCheck) rememberCheck.checked = false;
-    if (savedNotice) savedNotice.classList.add('hidden');
-    showToast('تم تغيير كلمة المرور سابقاً لهذا الحساب. يرجى إدخال كلمة المرور الجديدة لتسجيل الدخول.', 'warning', 4500);
-  }
+  }).catch(() => {
+    showToast(`رمز التحقق المرسل إلى ${email} هو: ${otpCode}`, 'info', 7000);
+  });
 }
 
-/**
- * Erases local saved credentials on this device
- */
+async function handleVerifyGoogleOtp(event) {
+  if (event) event.preventDefault();
+
+  if (!pendingGoogleOtp) {
+    showToast('لا توجد جلسة تحقق قيد الانتظار! يرجى إدخال البريد مجدداً.', 'error');
+    switchAuthView('google');
+    return;
+  }
+
+  const otpInput = document.getElementById('otpCodeInput');
+  const enteredCode = (otpInput ? otpInput.value : '').trim();
+
+  if (enteredCode !== pendingGoogleOtp.code) {
+    showToast('رمز الأمان غير صحيح! يرجى التأكد وإعادة المحاولة.', 'error');
+    return;
+  }
+
+  const email = pendingGoogleOtp.email;
+  const shouldTrust = pendingGoogleOtp.shouldTrust;
+
+  if (shouldTrust) {
+    markDeviceAsTrusted(email, true);
+  }
+
+  logInGoogleUserDirectly(email, shouldTrust);
+  pendingGoogleOtp = null;
+}
+
+function logInGoogleUserDirectly(email, trusted = true) {
+  const cleanEmail = email.trim().toLowerCase();
+  const accounts = initAccountsDatabase();
+  const isAdmin = (cleanEmail === 'batihubdz@gmail.com');
+
+  let account = accounts[cleanEmail];
+  if (!account) {
+    account = {
+      id: 'usr_' + Date.now(),
+      firstName: deriveNameFromGmail(cleanEmail).split(' ')[0] || 'مستخدم',
+      lastName: deriveNameFromGmail(cleanEmail).split(' ').slice(1).join(' ') || '',
+      fullName: deriveNameFromGmail(cleanEmail),
+      email: cleanEmail,
+      isVerified: true,
+      role: isAdmin ? 'admin' : 'user',
+      avatar: isAdmin ? 'assets/batihub_logo.png' : null,
+      createdAt: new Date().toISOString()
+    };
+    accounts[cleanEmail] = account;
+    setStorageJSON('batihub_registered_accounts', accounts);
+
+    if (window.electronDB && typeof window.electronDB.saveAccounts === 'function') {
+      window.electronDB.saveAccounts(accounts).catch(() => {});
+    }
+
+    broadcastLiveEvent('new_registered_account', account);
+  } else {
+    if (isAdmin && account.role !== 'admin') {
+      account.role = 'admin';
+      accounts[cleanEmail] = account;
+      setStorageJSON('batihub_registered_accounts', accounts);
+    }
+  }
+
+  currentUser = { ...account };
+  setStorageJSON('batihub_current_user', currentUser);
+  sessionStorage.setItem('batihub_current_user', JSON.stringify(currentUser));
+
+  if (trusted) {
+    markDeviceAsTrusted(cleanEmail, true);
+    setStorageJSON('batihub_saved_login_cred', {
+      email: cleanEmail,
+      autoLogin: true
+    });
+  }
+
+  renderTrustedAccountsPills();
+  showToast(`مرحباً بك ${currentUser.fullName || currentUser.firstName}! تم تسجيل الدخول بنجاح.`, 'success', 4000);
+  transitionToDashboard();
+}
+
+function cancelOtpAndGoBack() {
+  pendingGoogleOtp = null;
+  switchAuthView('google');
+}
+
+// Backwards-compatible aliases
+function handleUserLogin(event) { return handleGoogleAuthSubmit(event); }
+function handleUserRegister(event) { return handleGoogleAuthSubmit(event); }
+function handleVerifyOtp(event) { return handleVerifyGoogleOtp(event); }
+function loadSavedLoginCredentials() { renderTrustedAccountsPills(); }
 function forgetSavedLoginCredentials() {
+  localStorage.removeItem('batihub_trusted_devices');
   localStorage.removeItem('batihub_saved_login_cred');
-  const emailInput = document.getElementById('loginEmail');
-  const passwordInput = document.getElementById('loginPassword');
-  const rememberCheck = document.getElementById('rememberMeCheck');
-  const savedNotice = document.getElementById('savedCredNotice');
-  if (emailInput) emailInput.value = '';
-  if (passwordInput) passwordInput.value = '';
-  if (rememberCheck) rememberCheck.checked = false;
-  if (savedNotice) savedNotice.classList.add('hidden');
-  showToast('تمت إزالة الحفظ التلقائي لهذا الجهاز بنجاح', 'info');
+  renderTrustedAccountsPills();
+  showToast('تمت إزالة الأجهزة الموثوقة المحفوظة بنجاح', 'info');
+}
+function togglePasswordVisibility() {}
+async function handleSendPasswordResetCode() {
+  showToast('يتم تسجيل الدخول مباشرة برمز التحقق عبر Gmail', 'info');
 }
 
 async function sendOtpEmail(toEmail, otpCode, purpose = 'registration') {
-  const isReg = (purpose === 'registration');
-  const subject = isReg 
-    ? 'BatiHub DZ • رمز تأكيد الحساب وتفعيله'
-    : 'BatiHub DZ • رمز استعادة كلمة المرور';
+  const subject = 'BatiHub DZ • رمز أمان Google وتأكيد الجهاز';
 
   const html = `
     <div dir="rtl" style="font-family: Arial, Tahoma, sans-serif; background-color: #07090e; color: #f1f5f9; padding: 25px; border-radius: 16px; max-width: 520px; margin: auto; border: 1px solid #1c2638;">
@@ -887,15 +979,15 @@ async function sendOtpEmail(toEmail, otpCode, purpose = 'registration') {
         <p style="color: #94a3b8; font-size: 12px; margin-top: 5px;">منصة المحترفين وعروض العمل في الجزائر</p>
       </div>
       <div style="background-color: #0f1520; padding: 20px; border-radius: 12px; border: 1px solid #1c2638; text-align: center;">
-        <h3 style="color: #ffffff; font-size: 16px; margin-top: 0;">${isReg ? 'رمز تفعيل حسابك الجديد' : 'رمز إعادة تعيين كلمة المرور'}</h3>
-        <p style="color: #94a3b8; font-size: 13px;">أدخل هذا الرمز المكون من 6 أرقام لإكمال العملية:</p>
+        <h3 style="color: #ffffff; font-size: 16px; margin-top: 0;">رمز أمان Google وتأكيد الجهاز الجديد</h3>
+        <p style="color: #94a3b8; font-size: 13px;">أدخل هذا الرمز المكون من 6 أرقام لتأكيد حسابك وتوثيق هذا الجهاز:</p>
         <div style="display: inline-block; background: linear-gradient(135deg, #ffa000, #ff6d00); color: #07090e; font-size: 32px; font-weight: bold; letter-spacing: 8px; padding: 12px 28px; border-radius: 12px; margin: 15px 0; font-family: monospace;">
           ${otpCode}
         </div>
         <p style="color: #64748b; font-size: 11px; margin-bottom: 0;">هذا الرمز صالح لمدة 15 دقيقة. لا تشاركه مع أي شخص لحماية حسابك.</p>
       </div>
       <p style="text-align: center; font-size: 11px; color: #64748b; margin-top: 20px;">
-        BatiHub DZ Official Support • Developed by Mouhaned Guellif
+        BatiHub DZ Official Support • batihubdz@gmail.com
       </p>
     </div>
   `;
@@ -905,7 +997,7 @@ async function sendOtpEmail(toEmail, otpCode, purpose = 'registration') {
       const res = await window.electronMailAPI.sendMail({
         to: toEmail,
         subject: subject,
-        text: `رمز التحقق الخاص بك هو: ${otpCode}`,
+        text: `رمز أمان BatiHub DZ الخاص بك هو: ${otpCode}`,
         html: html
       });
       return res;
@@ -915,179 +1007,7 @@ async function sendOtpEmail(toEmail, otpCode, purpose = 'registration') {
     }
   }
 
-  // Web / PWA fallback
   return { success: true, fallback: true };
-}
-
-async function handleUserRegister(event) {
-  if (event) event.preventDefault();
-
-  const firstName = document.getElementById('regFirstName').value.trim();
-  const lastName = document.getElementById('regLastName').value.trim();
-  const dob = document.getElementById('regDob').value;
-  const email = document.getElementById('regEmail').value.trim().toLowerCase();
-  const password = document.getElementById('regPassword').value;
-  const confirmPassword = document.getElementById('regConfirmPassword').value;
-
-  if (!firstName || !lastName || !dob || !email || !password) {
-    showToast('يرجى ملء جميع بيانات التسجيل', 'warning');
-    return;
-  }
-
-  if (password.length < 6) {
-    showToast('يجب أن تتكون كلمة المرور من 6 أحرف على الأقل', 'warning');
-    return;
-  }
-
-  if (password !== confirmPassword) {
-    showToast('كلمة المرور وتأكيدها غير متطابقين!', 'error');
-    return;
-  }
-
-  const accounts = initAccountsDatabase();
-  if (accounts[email]) {
-    showToast('هذا البريد الإلكتروني مسجل بالفعل! يمكنك تسجيل الدخول مباشرة.', 'warning');
-    switchAuthView('login');
-    document.getElementById('loginEmail').value = email;
-    return;
-  }
-
-  // Create salted SHA-256 hash immediately for protected vault storage
-  const salt = SEED_SALT;
-  const passwordHash = await sha256Hash(password + salt);
-  const newAccount = {
-    id: 'usr_' + Date.now(),
-    firstName,
-    lastName,
-    fullName: `${firstName} ${lastName}`,
-    dob,
-    email,
-    passwordHash,
-    salt,
-    isVerified: true,
-    role: 'user',
-    avatar: null,
-    createdAt: new Date().toISOString()
-  };
-
-  // 1. Commit immediately to registered accounts database vault
-  accounts[email] = newAccount;
-  setStorageJSON('batihub_registered_accounts', accounts);
-
-  // 2. Commit immediately to Electron disk database if available
-  if (window.electronDB && typeof window.electronDB.saveAccounts === 'function') {
-    try { window.electronDB.saveAccounts(accounts); } catch (e) {}
-  }
-
-  // 3. Broadcast to all other devices in real-time
-  broadcastLiveEvent('new_registered_account', newAccount);
-
-  // 4. Log in immediately and remember credentials on this device
-  const regRememberCheck = document.getElementById('regRememberMeCheck');
-  const shouldRemember = regRememberCheck ? regRememberCheck.checked : true;
-
-  currentUser = { ...newAccount };
-  setStorageJSON('batihub_current_user', currentUser);
-
-  if (shouldRemember) {
-    setStorageJSON('batihub_saved_login_cred', {
-      email: newAccount.email,
-      password: password,
-      passwordHash: passwordHash,
-      autoLogin: true
-    });
-  } else {
-    localStorage.removeItem('batihub_saved_login_cred');
-  }
-
-  // 5. Send welcome email with verification code asynchronously in background
-  const welcomeOtp = String(Math.floor(100000 + Math.random() * 900000));
-  sendOtpEmail(email, welcomeOtp, 'registration').catch(() => {});
-
-  showToast('تم إنشاء وتأمين حسابك في قاعدة البيانات بنجاح! مرحباً بك في BatiHub DZ.', 'success', 5000);
-  transitionToDashboard();
-}
-
-async function handleVerifyOtp(event) {
-  if (event) event.preventDefault();
-
-  if (!pendingRegistration) {
-    showToast('لا توجد عملية تسجيل معلقة! يرجى إعادة إدخال البيانات.', 'error');
-    switchAuthView('register');
-    return;
-  }
-
-  const enteredCode = (document.getElementById('otpCodeInput').value || '').trim();
-  if (enteredCode !== pendingRegistration.otp) {
-    showToast('رمز التحقق غير صحيح! يرجى التأكد وإعادة المحاولة.', 'error');
-    return;
-  }
-
-  // Create and save account
-  const salt = SEED_SALT;
-  const passwordHash = await sha256Hash(pendingRegistration.password + salt);
-  const newAccount = {
-    id: 'usr_' + Date.now(),
-    firstName: pendingRegistration.firstName,
-    lastName: pendingRegistration.lastName,
-    fullName: pendingRegistration.fullName,
-    dob: pendingRegistration.dob,
-    email: pendingRegistration.email,
-    passwordHash: passwordHash,
-    salt: salt,
-    isVerified: true,
-    role: 'user',
-    avatar: null,
-    createdAt: new Date().toISOString()
-  };
-
-  const accounts = initAccountsDatabase();
-  accounts[newAccount.email] = newAccount;
-  setStorageJSON('batihub_registered_accounts', accounts);
-
-  // Broadcast to other devices
-  broadcastLiveEvent('new_registered_account', newAccount);
-
-  currentUser = { ...newAccount };
-  setStorageJSON('batihub_current_user', currentUser);
-  setStorageJSON('batihub_saved_login_cred', {
-    email: newAccount.email,
-    password: pendingRegistration.password,
-    passwordHash: passwordHash,
-    autoLogin: true
-  });
-  pendingRegistration = null;
-
-  showToast('تم تأكيد حسابك وحفظه على هذا الجهاز بنجاح! مرحباً بك في BatiHub DZ.', 'success');
-  transitionToDashboard();
-}
-
-async function handleSendPasswordResetCode() {
-  const emailInput = document.getElementById('forgotEmail');
-  const email = (emailInput.value || '').trim().toLowerCase();
-
-  if (!email) {
-    showToast('يرجى إدخال عنوان البريد الإلكتروني', 'warning');
-    return;
-  }
-
-  const accounts = initAccountsDatabase();
-  if (!accounts[email]) {
-    showToast('البريد الإلكتروني المدخل غير مسجل لدينا.', 'error');
-    return;
-  }
-
-  const resetOtp = String(Math.floor(100000 + Math.random() * 900000));
-  showToast('جاري إرسال رمز إعادة التعيين إلى بريدك الإلكتروني...', 'info', 3000);
-
-  const mailRes = await sendOtpEmail(email, resetOtp, 'reset');
-  if (mailRes && mailRes.success && !mailRes.fallback) {
-    showToast(`تم إرسال رمز استعادة كلمة المرور إلى ${email} بنجاح!`, 'success', 5000);
-  } else {
-    showToast(`رمز استعادة كلمة المرور هو: ${resetOtp}`, 'info', 5000);
-  }
-
-  setTimeout(() => switchAuthView('login'), 2000);
 }
 
 function handleSignOut() {
@@ -1106,7 +1026,8 @@ function handleSignOut() {
     authGate.style.display = 'flex';
   }
 
-  switchAuthView('login');
+  switchAuthView('google');
+  renderTrustedAccountsPills();
   showToast('تم تسجيل الخروج بنجاح', 'info');
 }
 
@@ -1562,6 +1483,58 @@ function handleIncomingLiveSyncPacket(packet) {
     } else {
       showToast('تم اعتماد ونشر عرض عمل جديد في المنصة! 🚀', 'info', 3500);
     }
+  }
+
+  // 3.6. Study Office Sync (Created, Approved, Rejected)
+  else if (action === 'new_study_office') {
+    let offices = getStorageJSON('batihub_study_offices', []);
+    if (!offices.some(o => o.id === payload.id)) {
+      offices.unshift(payload);
+      setStorageJSON('batihub_study_offices', offices);
+      renderStudyOfficesFeed();
+      renderDedicatedPendingPostsTab();
+      updateTopPendingCategoryNavigation();
+      updateAdminPendingBadge();
+
+      if (currentUser && currentUser.role === 'admin') {
+        showToast(`طلب إضافة مكتب دراسات جديد بانتظار المراجعة من ${escapeHTML(payload.authorName || 'مستخدم')} 🏛️`, 'warning', 5000);
+      }
+    }
+  }
+
+  else if (action === 'approve_study_office') {
+    let offices = getStorageJSON('batihub_study_offices', []);
+    const idx = offices.findIndex(o => o.id === payload.officeId);
+    let officeToDisplay = null;
+    if (idx > -1) {
+      offices[idx].status = 'approved';
+      if (payload.office) offices[idx] = { ...offices[idx], ...payload.office, status: 'approved' };
+      officeToDisplay = offices[idx];
+    } else if (payload.office) {
+      officeToDisplay = { ...payload.office, status: 'approved' };
+      offices.unshift(officeToDisplay);
+    }
+    setStorageJSON('batihub_study_offices', offices);
+    renderStudyOfficesFeed();
+    renderDedicatedPendingPostsTab();
+    updateTopPendingCategoryNavigation();
+    updateAdminPendingBadge();
+
+    if (currentUser && officeToDisplay && officeToDisplay.authorId && currentUser.email.toLowerCase() === officeToDisplay.authorId.toLowerCase()) {
+      showToast('تهانينا! تمت الموافقة على بطاقة مكتب الدراسات الخاص بك وأصبحت معتمدة في المنصة! 🎉', 'success', 6000);
+    } else {
+      showToast('تم اعتماد مكتب دراسات هندسي جديد في المنصة! 🏛️', 'info', 3500);
+    }
+  }
+
+  else if (action === 'reject_study_office') {
+    let offices = getStorageJSON('batihub_study_offices', []);
+    offices = offices.filter(o => o.id !== payload.officeId);
+    setStorageJSON('batihub_study_offices', offices);
+    renderStudyOfficesFeed();
+    renderDedicatedPendingPostsTab();
+    updateTopPendingCategoryNavigation();
+    updateAdminPendingBadge();
   }
 
   // 3.5. Worker Post Edited
@@ -2211,7 +2184,10 @@ function updateAdminPendingBadge() {
   if (!badge) return;
 
   const posts = getStorageJSON('batihub_worker_posts', []);
-  const pendingCount = posts.filter(p => p.status === 'pending').length;
+  const offices = getStorageJSON('batihub_study_offices', []);
+  const pendingPostsCount = posts.filter(p => p.status === 'pending').length;
+  const pendingOfficesCount = offices.filter(o => o.status === 'pending').length;
+  const pendingCount = pendingPostsCount + pendingOfficesCount;
   badge.textContent = String(pendingCount);
 }
 
@@ -2349,14 +2325,20 @@ function updateTopPendingCategoryNavigation() {
   const adminBadge = document.getElementById('pendingTabAdminBadge');
 
   const posts = getStorageJSON('batihub_worker_posts', []);
-  const allPending = posts.filter(p => p.status === 'pending');
-  const isAdmin = currentUser && currentUser.role === 'admin';
+  const offices = getStorageJSON('batihub_study_offices', []);
+  const allPendingPosts = posts.filter(p => p.status === 'pending');
+  const allPendingOffices = offices.filter(o => o.status === 'pending');
+  const totalAllPending = allPendingPosts.length + allPendingOffices.length;
+
+  const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.email.toLowerCase() === 'batihubdz@gmail.com');
 
   let relevantCount = 0;
   if (isAdmin) {
-    relevantCount = allPending.length;
+    relevantCount = totalAllPending;
   } else if (currentUser) {
-    relevantCount = posts.filter(p => p.status === 'pending' && p.authorId && p.authorId.toLowerCase() === currentUser.email.toLowerCase()).length;
+    const userPosts = posts.filter(p => p.status === 'pending' && p.authorId && p.authorId.toLowerCase() === currentUser.email.toLowerCase()).length;
+    const userOffices = offices.filter(o => o.status === 'pending' && o.authorId && o.authorId.toLowerCase() === currentUser.email.toLowerCase()).length;
+    relevantCount = userPosts + userOffices;
   }
 
   // Header update inside tab
@@ -2364,48 +2346,62 @@ function updateTopPendingCategoryNavigation() {
     if (isAdmin) {
       headerAdmin.classList.remove('hidden');
       headerUser.classList.add('hidden');
-      if (adminBadge) adminBadge.textContent = `${allPending.length} طلبات بانتظار المراجعة`;
+      if (adminBadge) adminBadge.textContent = `${totalAllPending} طلبات بانتظار المراجعة`;
     } else {
       headerAdmin.classList.add('hidden');
       headerUser.classList.remove('hidden');
     }
   }
 
-  // Desktop navigation tab update
-  if (navTabText && navTabIcon && navTabBadge) {
+  // Show/Update Tab Buttons
+  if (navTabBtn) {
     if (isAdmin) {
-      navTabText.textContent = 'طلبات المراجعة المعلقة';
-      navTabIcon.className = 'fa-solid fa-shield-halved text-amber-400';
+      navTabBtn.classList.remove('hidden');
+      if (navTabText) navTabText.textContent = 'مراجعة المعلق';
+      if (navTabIcon) navTabIcon.className = 'fa-solid fa-shield-halved text-amber-400';
+    } else if (currentUser && relevantCount > 0) {
+      navTabBtn.classList.remove('hidden');
+      if (navTabText) navTabText.textContent = 'منشوراتي المعلقة';
+      if (navTabIcon) navTabIcon.className = 'fa-solid fa-hourglass-half text-amber-400';
+    } else if (currentUser) {
+      navTabBtn.classList.remove('hidden');
+      if (navTabText) navTabText.textContent = 'منشوراتي المعلقة';
+      if (navTabIcon) navTabIcon.className = 'fa-solid fa-hourglass-half text-amber-400';
     } else {
-      navTabText.textContent = 'منشوراتي المعلقة';
-      navTabIcon.className = 'fa-solid fa-hourglass-half text-amber-400';
+      navTabBtn.classList.add('hidden');
     }
 
-    if (relevantCount > 0) {
-      navTabBadge.textContent = String(relevantCount);
-      navTabBadge.classList.remove('hidden');
-    } else {
-      navTabBadge.textContent = '0';
-      navTabBadge.classList.add('hidden');
+    if (navTabBadge) {
+      if (relevantCount > 0) {
+        navTabBadge.textContent = String(relevantCount);
+        navTabBadge.classList.remove('hidden');
+      } else {
+        navTabBadge.classList.add('hidden');
+      }
     }
   }
 
-  // Mobile navigation bottom item update
-  if (mNavText && mNavIcon && mNavBadge) {
+  // Mobile Bottom Navigation Bar Update
+  if (mNavBtn) {
     if (isAdmin) {
-      mNavText.textContent = 'مراجعة';
-      mNavIcon.className = 'fa-solid fa-shield-halved text-base text-amber-400';
+      mNavBtn.classList.remove('hidden');
+      if (mNavText) mNavText.textContent = 'مراجعة';
+      if (mNavIcon) mNavIcon.className = 'fa-solid fa-shield-halved text-base';
+    } else if (currentUser) {
+      mNavBtn.classList.remove('hidden');
+      if (mNavText) mNavText.textContent = 'المعلقة';
+      if (mNavIcon) mNavIcon.className = 'fa-solid fa-hourglass-half text-base';
     } else {
-      mNavText.textContent = 'معلقة';
-      mNavIcon.className = 'fa-solid fa-hourglass-half text-base text-amber-400';
+      mNavBtn.classList.add('hidden');
     }
 
-    if (relevantCount > 0) {
-      mNavBadge.textContent = String(relevantCount);
-      mNavBadge.classList.remove('hidden');
-    } else {
-      mNavBadge.textContent = '0';
-      mNavBadge.classList.add('hidden');
+    if (mNavBadge) {
+      if (relevantCount > 0) {
+        mNavBadge.textContent = String(relevantCount);
+        mNavBadge.classList.remove('hidden');
+      } else {
+        mNavBadge.classList.add('hidden');
+      }
     }
   }
 }
@@ -2414,14 +2410,16 @@ function renderDedicatedPendingPostsTab() {
   const container = document.getElementById('pendingPostsFeedContainer');
   if (!container) return;
 
-  const isAdmin = currentUser && currentUser.role === 'admin';
+  const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.email.toLowerCase() === 'batihubdz@gmail.com');
   const allPosts = getStorageJSON('batihub_worker_posts', []);
+  const allOffices = getStorageJSON('batihub_study_offices', []);
 
   // Update top navigation badges & header
   updateTopPendingCategoryNavigation();
 
   // Filter pending posts directly without trade restrictions
   let pendingPosts = allPosts.filter(p => p.status === 'pending');
+  let pendingOffices = allOffices.filter(o => o.status === 'pending');
 
   if (!isAdmin) {
     if (!currentUser) {
@@ -2434,23 +2432,26 @@ function renderDedicatedPendingPostsTab() {
             <h3 class="font-bold text-white text-base">تسجيل الدخول مطلوب</h3>
             <p class="text-xs text-slate-400 max-w-sm mx-auto">يرجى تسجيل الدخول بحسابك لعرض منشوراتك المعلقة ومتابعة حالة اعتمادها.</p>
           </div>
-          <button type="button" onclick="switchAuthView('login'); transitionToAuth();" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold text-xs shadow-lg hover:opacity-95 transition">
+          <button type="button" onclick="switchAuthView('google'); transitionToAuth();" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold text-xs shadow-lg hover:opacity-95 transition cursor-pointer">
             تسجيل الدخول الآن
           </button>
         </div>
       `;
       return;
     }
-    // Regular user only sees their own pending posts
+    // Regular user only sees their own pending posts & offices
     pendingPosts = pendingPosts.filter(p => p.authorId && p.authorId.toLowerCase() === currentUser.email.toLowerCase());
+    pendingOffices = pendingOffices.filter(o => o.authorId && o.authorId.toLowerCase() === currentUser.email.toLowerCase());
   }
 
-  if (pendingPosts.length === 0) {
+  const totalPending = pendingPosts.length + pendingOffices.length;
+
+  if (totalPending === 0) {
     let emptyIcon = isAdmin ? 'fa-shield-halved' : 'fa-hourglass-half';
     let emptyTitle = isAdmin ? 'رائع! لا توجد طلبات معلقة للمراجعة حالياً' : 'لا توجد لديك منشورات معلقة حالياً';
     let emptyDesc = isAdmin
-      ? 'جميع عروض العمل المقدمة من المستخدمين تم اعتمادها أو معالجتها بنجاح.'
-      : 'جميع منشوراتك تم اعتمادها وتظهر مباشرة في قسم عروض العمل، أو يمكنك نشر عرض عمل جديد الآن.';
+      ? 'جميع عروض العمل ومكاتب الدراسات المقدمة من المستخدمين تم اعتمادها أو معالجتها بنجاح.'
+      : 'جميع منشوراتك تم اعتمادها وتظهر مباشرة في الأقسام المخصصة، أو يمكنك نشر عرض عمل جديد الآن.';
 
     container.innerHTML = `
       <div class="bg-bh-card border border-bh-border rounded-3xl p-10 text-center space-y-4">
@@ -2462,9 +2463,14 @@ function renderDedicatedPendingPostsTab() {
           <p class="text-xs text-slate-400 max-w-sm mx-auto">${emptyDesc}</p>
         </div>
         ${!isAdmin ? `
-          <button type="button" onclick="openCreateWorkerPostModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold text-xs shadow-lg hover:opacity-95 transition">
-            نشر عرض أو طلب عمل جديد
-          </button>
+          <div class="flex items-center justify-center gap-3 flex-wrap">
+            <button type="button" onclick="openCreateWorkerPostModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-black text-xs shadow-lg hover:opacity-95 transition cursor-pointer">
+              نشر عرض أو طلب عمل جديد
+            </button>
+            <button type="button" onclick="openAddStudyOfficeModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-400 to-blue-500 text-slate-950 font-black text-xs shadow-lg hover:opacity-95 transition cursor-pointer">
+              تسجيل مكتب دراسات جديد
+            </button>
+          </div>
         ` : ''}
       </div>
     `;
@@ -2473,6 +2479,8 @@ function renderDedicatedPendingPostsTab() {
 
   // Render cards
   container.innerHTML = '';
+
+  // 1. Render Pending Worker Posts
   pendingPosts.forEach(post => {
     const card = document.createElement('div');
     card.className = 'bg-bh-card border border-amber-500/40 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 relative overflow-hidden transition hover:border-amber-500/60';
@@ -2499,7 +2507,6 @@ function renderDedicatedPendingPostsTab() {
     };
     const unitLabel = unitMap[post.unit] || 'دج / م²';
 
-    // Banner inside card
     let cardBannerHTML = '';
     if (isAdmin) {
       cardBannerHTML = `
@@ -2523,7 +2530,6 @@ function renderDedicatedPendingPostsTab() {
       `;
     }
 
-    // Action buttons inside card: View/Keep, Edit ("تعديل"), Delete ("حذف")
     let actionsHTML = '';
     if (isAdmin) {
       actionsHTML = `
@@ -2569,7 +2575,7 @@ function renderDedicatedPendingPostsTab() {
             <div class="flex items-center gap-2 flex-wrap">
               <h4 class="font-bold text-sm text-white">${escapeHTML(post.authorName || 'مستخدم')}</h4>
               ${isOwner ? '<span class="text-[9px] font-bold text-bh-yellow bg-bh-yellow/10 px-2 py-0.5 rounded-full border border-bh-yellow/30">(أنت)</span>' : ''}
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 font-mono">قيد المعالجة ⏳</span>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 font-mono">عرض عمل 🛠️</span>
             </div>
             <div class="flex items-center gap-2 text-xs text-slate-400 mt-1">
               <span class="text-bh-yellow font-bold">${escapeHTML(post.trade)}</span>
@@ -2578,36 +2584,123 @@ function renderDedicatedPendingPostsTab() {
             </div>
           </div>
         </div>
-
-        <div class="text-left">
-          <span class="text-xs font-mono font-black text-bh-yellow block">${escapeHTML(post.price || '')} ${escapeHTML(unitLabel)}</span>
-          ${post.phone ? `
-            <a href="tel:${escapeHTML(post.phone)}" class="text-[11px] text-slate-400 font-mono hover:text-white transition flex items-center gap-1 mt-0.5 justify-end">
-              <i class="fa-solid fa-phone text-[10px] text-emerald-400"></i>
-              <span>${escapeHTML(post.phone)}</span>
-            </a>
-          ` : ''}
+        <div class="text-left font-mono">
+          <div class="text-base font-black text-bh-yellow">${post.price ? Number(post.price).toLocaleString('fr-FR') : '0'} <span class="text-xs font-normal text-slate-400">${unitLabel}</span></div>
         </div>
       </div>
-
-      <div class="text-xs text-slate-200 leading-relaxed whitespace-pre-line py-1">
-        ${escapeHTML(post.text)}
+      <div class="space-y-2">
+        <p class="text-xs text-slate-300 leading-relaxed">${escapeHTML(post.description)}</p>
+        ${postImageHTML}
+        <div class="flex items-center gap-4 text-xs text-slate-400 pt-1 font-mono">
+          <span><i class="fa-solid fa-phone text-emerald-400 ml-1"></i> ${escapeHTML(post.phone)}</span>
+          ${post.experience ? `<span><i class="fa-solid fa-award text-bh-yellow ml-1"></i> ${escapeHTML(post.experience)} سنوات خبرة</span>` : ''}
+        </div>
       </div>
+      ${actionsHTML}
+    `;
 
-      ${postImageHTML}
+    container.appendChild(card);
+  });
 
+  // 2. Render Pending Study Offices
+  pendingOffices.forEach(office => {
+    const card = document.createElement('div');
+    card.className = 'bg-bh-card border border-sky-500/40 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 relative overflow-hidden transition hover:border-sky-500/60';
+
+    const isOwner = currentUser && office.authorId && currentUser.email.toLowerCase() === office.authorId.toLowerCase();
+
+    let officeBannerHTML = '';
+    if (isAdmin) {
+      officeBannerHTML = `
+        <div class="p-3 rounded-2xl bg-sky-500/15 border border-sky-500/40 text-sky-300 text-xs font-bold flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-compass-drafting text-base text-sky-400"></i>
+            <span>طلب تسجيل مكتب دراسات وهندسة معلق بانتظار قرار الإدارة</span>
+          </div>
+          <span class="text-[10px] text-sky-400/80 font-mono">${new Date(office.createdAt).toLocaleDateString()}</span>
+        </div>
+      `;
+    } else {
+      officeBannerHTML = `
+        <div class="p-3 rounded-2xl bg-sky-500/15 border border-sky-500/40 text-sky-300 text-xs font-bold flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-hourglass-half animate-spin text-sm text-sky-400"></i>
+            <span>بطاقة مكتب الدراسات الخاص بك قيد الفحص والمراجعة، وستظهر للجميع فور اعتمادها</span>
+          </div>
+          <span class="text-[10px] text-sky-400/80 font-mono">${new Date(office.createdAt).toLocaleDateString()}</span>
+        </div>
+      `;
+    }
+
+    let actionsHTML = '';
+    if (isAdmin) {
+      actionsHTML = `
+        <div class="pt-3 border-t border-bh-border/70 flex items-center gap-2.5 flex-wrap">
+          <button type="button" onclick="approveStudyOffice('${office.id}')" class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98">
+            <i class="fa-solid fa-check text-sm"></i>
+            <span>قبول واعتماد مكتب الدراسات فوراً</span>
+          </button>
+          <button type="button" onclick="rejectStudyOffice('${office.id}')" class="flex-1 py-2.5 px-4 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98">
+            <i class="fa-solid fa-xmark text-sm"></i>
+            <span>رفض وحذف نهائياً</span>
+          </button>
+        </div>
+      `;
+    } else if (isOwner) {
+      actionsHTML = `
+        <div class="pt-3 border-t border-bh-border/70 flex items-center justify-between flex-wrap gap-2">
+          <span class="text-xs text-sky-400/90 font-medium">حالة بطاقة المكتب: قيد التدقيق ⏳</span>
+          <button type="button" onclick="deleteStudyOffice('${office.id}')" class="py-2 px-3.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer active:scale-95">
+            <i class="fa-regular fa-trash-can"></i>
+            <span>حذف البطاقة</span>
+          </button>
+        </div>
+      `;
+    }
+
+    const engTypeMap = {
+      architect: 'هندسة معمارية (Architecture)',
+      civil: 'هندسة مدنية (Génie Civil)',
+      mep: 'كهروميكانيك وتكييف (MEP)',
+      topography: 'طبوغرافيا ومسح أراضي (Topographie)',
+      all: 'مكتب دراسات شامل متكامل'
+    };
+    const engTypeLabel = engTypeMap[office.engType] || office.engType || 'هندسة معمارية';
+
+    card.innerHTML = `
+      ${officeBannerHTML}
+      <div class="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-bh-border/70">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-400 border border-sky-500/40 flex items-center justify-center text-xl shrink-0 shadow-md">
+            <i class="fa-solid fa-compass-drafting"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h4 class="font-bold text-sm text-white">${escapeHTML(office.name)}</h4>
+              ${isOwner ? '<span class="text-[9px] font-bold text-sky-400 bg-sky-400/10 px-2 py-0.5 rounded-full border border-sky-400/30">(أنت)</span>' : ''}
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30 font-mono">مكتب دراسات 🏛️</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-slate-400 mt-1">
+              <span class="text-sky-300 font-bold">${escapeHTML(engTypeLabel)}</span>
+              <span>•</span>
+              <span class="font-mono text-[11px]">${escapeHTML(office.address)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="space-y-2">
+        <p class="text-xs text-slate-300 leading-relaxed">${escapeHTML(office.services)}</p>
+        <div class="flex items-center gap-4 text-xs text-slate-400 pt-1 font-mono">
+          <span><i class="fa-solid fa-phone text-sky-400 ml-1"></i> ${escapeHTML(office.phone)}</span>
+          ${office.authorName ? `<span><i class="fa-solid fa-user text-slate-500 ml-1"></i> ${escapeHTML(office.authorName)}</span>` : ''}
+        </div>
+      </div>
       ${actionsHTML}
     `;
 
     container.appendChild(card);
   });
 }
-
-/* ========================================================================= */
-/* 12.6. EDIT WORKER POST MODAL LOGIC                                        */
-/* ========================================================================= */
-
-let cachedEditPostImageBase64 = null;
 
 function openEditWorkerPostModal(postId) {
   const posts = getStorageJSON('batihub_worker_posts', []);
@@ -3304,6 +3397,8 @@ function renderStudyOfficesFeed() {
   const dict = I18N[currentLanguage] || I18N.ar;
   let offices = getStorageJSON('batihub_study_offices', []);
 
+  offices = offices.filter(o => o.status === 'approved' || !o.status);
+
   if (activeOfficeFilter !== 'all') {
     offices = offices.filter(o => o.engType === activeOfficeFilter);
   }
@@ -3514,6 +3609,9 @@ function handleCreateStudyOfficeSubmit(event) {
     return;
   }
 
+  const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.email.toLowerCase() === 'batihubdz@gmail.com');
+  const status = isAdmin ? 'approved' : 'pending';
+
   const offices = getStorageJSON('batihub_study_offices', []);
   const newOffice = {
     id: 'office_' + Date.now(),
@@ -3526,6 +3624,7 @@ function handleCreateStudyOfficeSubmit(event) {
     image: cachedOfficeImageBase64,
     authorId: currentUser.email,
     authorName: currentUser.fullName || currentUser.firstName,
+    status: status,
     createdAt: new Date().toISOString()
   };
 
@@ -3536,7 +3635,42 @@ function handleCreateStudyOfficeSubmit(event) {
 
   closeAddStudyOfficeModal();
   renderStudyOfficesFeed();
-  showToast(I18N[currentLanguage].office_published_success, 'success');
+  renderDedicatedPendingPostsTab();
+  updateTopPendingCategoryNavigation();
+  updateAdminPendingBadge();
+
+  if (status === 'pending') {
+    showToast('تم إرسال بطاقة مكتب الدراسات بنجاح! المنشور قيد المراجعة وسيظهر للجميع فور موافقة الإدارة.', 'info', 5000);
+  } else {
+    showToast(I18N[currentLanguage].office_published_success, 'success');
+  }
+}
+
+function approveStudyOffice(officeId) {
+  const offices = getStorageJSON('batihub_study_offices', []);
+  const target = offices.find(o => o.id === officeId);
+  if (target) {
+    target.status = 'approved';
+    setStorageJSON('batihub_study_offices', offices);
+    broadcastLiveEvent('approve_study_office', { officeId, office: target });
+    renderStudyOfficesFeed();
+    renderDedicatedPendingPostsTab();
+    updateTopPendingCategoryNavigation();
+    updateAdminPendingBadge();
+    showToast('تم اعتماد ونشر بطاقة مكتب الدراسات بنجاح!', 'success');
+  }
+}
+
+function rejectStudyOffice(officeId) {
+  const offices = getStorageJSON('batihub_study_offices', []);
+  const updated = offices.filter(o => o.id !== officeId);
+  setStorageJSON('batihub_study_offices', updated);
+  broadcastLiveEvent('reject_study_office', { officeId });
+  renderStudyOfficesFeed();
+  renderDedicatedPendingPostsTab();
+  updateTopPendingCategoryNavigation();
+  updateAdminPendingBadge();
+  showToast('تم رفض وحذف بطاقة مكتب الدراسات نهائياً.', 'info');
 }
 
 function deleteStudyOffice(officeId) {
@@ -3547,6 +3681,9 @@ function deleteStudyOffice(officeId) {
   broadcastLiveEvent('delete_study_office', { officeId });
 
   renderStudyOfficesFeed();
+  renderDedicatedPendingPostsTab();
+  updateTopPendingCategoryNavigation();
+  updateAdminPendingBadge();
   showToast('تم حذف بطاقة مكتب الدراسات', 'info');
 }
 
@@ -4263,19 +4400,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const accounts = initAccountsDatabase();
         let validUser = null;
 
-        // Auto-login only if saved credential exists and matches current hash
-        if (saved && saved.email && saved.autoLogin) {
-          const acc = accounts[saved.email.toLowerCase()];
-          if (acc && acc.passwordHash === saved.passwordHash) {
-            validUser = { ...acc };
-            setStorageJSON('batihub_current_user', validUser);
-          } else {
-            // Password changed! Invalidate auto-login automatically
-            localStorage.removeItem('batihub_saved_login_cred');
-            localStorage.removeItem('batihub_current_user');
+        // Auto-login if device is trusted or saved session exists
+        if (saved && saved.email && (saved.autoLogin || isDeviceTrustedForEmail(saved.email))) {
+          const cleanEmail = saved.email.toLowerCase();
+          let acc = accounts[cleanEmail];
+          if (!acc) {
+            acc = {
+              id: 'usr_' + Date.now(),
+              fullName: deriveNameFromGmail(cleanEmail),
+              email: cleanEmail,
+              role: cleanEmail === 'batihubdz@gmail.com' ? 'admin' : 'user',
+              isVerified: true,
+              createdAt: new Date().toISOString()
+            };
+            accounts[cleanEmail] = acc;
+            setStorageJSON('batihub_registered_accounts', accounts);
           }
+          validUser = { ...acc };
+          setStorageJSON('batihub_current_user', validUser);
         } else {
-          // Check active session (sessionStorage)
           const sessionUser = JSON.parse(sessionStorage.getItem('batihub_current_user') || 'null');
           if (sessionUser && sessionUser.email && accounts[sessionUser.email.toLowerCase()]) {
             validUser = sessionUser;
@@ -4286,7 +4429,8 @@ document.addEventListener('DOMContentLoaded', () => {
           currentUser = validUser;
           transitionToDashboard();
         } else {
-          switchAuthView('login');
+          switchAuthView('google');
+          renderTrustedAccountsPills();
         }
       }, 350);
     }

@@ -109,135 +109,73 @@
         </div>
       </div>
 
-      <!-- VIEW 1: LOGIN -->
-      <div id="viewLogin" class="space-y-4 text-right">
-        <form onsubmit="handleUserLogin(event)" class="space-y-3.5">
+      <!-- VIEW 1: GOOGLE / GMAIL AUTH -->
+      <div id="viewGoogleAuth" class="space-y-4 text-right">
+        <form onsubmit="handleGoogleAuthSubmit(event)" class="space-y-4">
           <div>
-            <label class="block text-[11px] font-semibold text-slate-300 mb-1">عنوان البريد الإلكتروني :</label>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">عنوان بريد Google (Gmail) الخاص بك :</label>
             <div class="relative">
-              <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-500">
-                <i class="fa-solid fa-envelope"></i>
+              <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-bh-yellow">
+                <i class="fa-brands fa-google text-base"></i>
               </span>
-              <input type="email" id="loginEmail" required placeholder="mouhanedguellif16@gmail.com" class="w-full bg-bh-bg border border-bh-border rounded-xl pr-9 pl-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono text-left" dir="ltr">
+              <input type="email" id="authGmailInput" required placeholder="mouhanedguellif16@gmail.com" class="w-full bg-bh-bg border border-bh-border rounded-xl pr-10 pl-3 py-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono text-left" dir="ltr">
             </div>
-          </div>
-
-          <div>
-            <div class="flex items-center justify-between mb-1">
-              <label class="text-[11px] font-semibold text-slate-300">كلمة المرور :</label>
-              <button type="button" onclick="switchAuthView('forgot')" class="text-[10px] text-bh-yellow hover:underline">نسيت كلمة المرور؟</button>
-            </div>
-            <div class="relative">
-              <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-500">
-                <i class="fa-solid fa-lock"></i>
-              </span>
-              <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full bg-bh-bg border border-bh-border rounded-xl pr-9 pl-10 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono text-left" dir="ltr">
-              <button type="button" onclick="togglePasswordVisibility('loginPassword', this)" class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 hover:text-slate-300">
-                <i class="fa-solid fa-eye"></i>
-              </button>
-            </div>
+            <p class="text-[10px] text-slate-400 mt-1">يُشترط استخدام بريد Gmail لتأكيد الهوية ومزامنة بياناتك بأمان عبر الأجهزة.</p>
           </div>
 
           <div class="flex items-center justify-between text-xs text-slate-300 py-1">
             <label class="flex items-center gap-2 cursor-pointer select-none">
-              <input type="checkbox" id="rememberMeCheck" checked class="w-4 h-4 rounded border-bh-border text-bh-yellow focus:ring-0 bg-bh-bg cursor-pointer">
-              <span class="font-semibold text-slate-300 hover:text-white transition">حفظ الحساب على هذا الجهاز (تسجيل الدخول التلقائي)</span>
-            </label>
-          </div>
-          <div id="savedCredNotice" class="hidden"></div>
-
-          <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
-            <i class="fa-solid fa-arrow-right-to-bracket"></i>
-            <span>تسجيل الدخول</span>
-          </button>
-        </form>
-
-        <div class="text-center pt-2">
-          <span class="text-xs text-slate-400">ليس لديك حساب؟</span>
-          <button type="button" onclick="switchAuthView('register')" class="text-xs font-bold text-bh-yellow hover:underline mr-1 cursor-pointer">إنشاء حساب جديد الآن</button>
-        </div>
-      </div>
-
-      <!-- VIEW 2: REGISTER -->
-      <div id="viewRegister" class="hidden space-y-4 text-right">
-        <form onsubmit="handleUserRegister(event)" class="space-y-3">
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-300 mb-1">الاسم :</label>
-              <input type="text" id="regFirstName" required placeholder="الاسم" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow">
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-300 mb-1">اللقب :</label>
-              <input type="text" id="regLastName" required placeholder="اللقب" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-semibold text-slate-300 mb-1">تاريخ الميلاد :</label>
-            <input type="date" id="regDob" required class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-bh-yellow font-mono text-left" dir="ltr">
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-semibold text-slate-300 mb-1">عنوان البريد الإلكتروني :</label>
-            <input type="email" id="regEmail" required placeholder="name@gmail.com" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono text-left" dir="ltr">
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-semibold text-slate-300 mb-1">كلمة المرور :</label>
-            <input type="password" id="regPassword" required minlength="6" placeholder="6 أحرف على الأقل" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono text-left" dir="ltr">
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-semibold text-slate-300 mb-1">تأكيد كلمة المرور :</label>
-            <input type="password" id="regConfirmPassword" required minlength="6" placeholder="أعد إدخال كلمة المرور" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono text-left" dir="ltr">
-          </div>
-
-          <div class="flex items-center justify-between text-xs text-slate-300 py-1">
-            <label class="flex items-center gap-2 cursor-pointer select-none">
-              <input type="checkbox" id="regRememberMeCheck" checked class="w-4 h-4 rounded border-bh-border text-bh-yellow focus:ring-0 bg-bh-bg cursor-pointer">
-              <span class="font-semibold text-slate-300 hover:text-white transition">حفظ الحساب على هذا الجهاز (تسجيل الدخول التلقائي دائماً)</span>
+              <input type="checkbox" id="authTrustedDeviceCheck" checked class="w-4 h-4 rounded border-bh-border text-bh-yellow focus:ring-0 bg-bh-bg cursor-pointer">
+              <span class="font-semibold text-slate-300 hover:text-white transition">توثيق هذا الجهاز (الدخول المباشر دائماً دون طلب رمز مجدداً)</span>
             </label>
           </div>
 
-          <button type="submit" id="btnRegisterSubmit" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
-            <i class="fa-solid fa-user-plus"></i>
-            <span>إنشاء الحساب وتأمينه والدخول فوراً</span>
+          <button type="submit" id="btnGoogleAuthSubmit" class="w-full py-3 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-black rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer active:scale-98">
+            <i class="fa-brands fa-google text-sm"></i>
+            <span>المتابعة باستخدام حساب Google (Gmail)</span>
           </button>
         </form>
 
-        <div class="text-center pt-2">
-          <span class="text-xs text-slate-400">لديك حساب بالفعل؟</span>
-          <button type="button" onclick="switchAuthView('login')" class="text-xs font-bold text-bh-yellow hover:underline mr-1 cursor-pointer">تسجيل الدخول</button>
+        <!-- Quick Trusted Accounts on this device -->
+        <div id="trustedAccountsSection" class="hidden pt-3 border-t border-bh-border/70 text-right space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-mobile-screen-button text-emerald-400"></i>
+              <span>الحسابات الموثقة على هذا الجهاز (انقر للدخول المباشر) :</span>
+            </span>
+          </div>
+          <div id="trustedAccountsPillsList" class="flex flex-wrap gap-2"></div>
         </div>
       </div>
 
-      <!-- VIEW 3: OTP VERIFICATION -->
+      <!-- VIEW 2: OTP SECURITY CODE VERIFICATION -->
       <div id="viewOtp" class="hidden space-y-4 text-center">
-        <div class="w-14 h-14 mx-auto rounded-2xl bg-bh-yellow/15 text-bh-yellow border border-bh-yellow/30 flex items-center justify-center text-2xl shadow-lg">
-          <i class="fa-solid fa-shield-halved"></i>
+        <div class="w-16 h-16 mx-auto rounded-3xl bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center justify-center text-3xl shadow-xl">
+          <i class="fa-solid fa-shield-halved animate-pulse"></i>
         </div>
-        <div>
-          <h3 class="font-bold text-white text-base">رمز تأكيد الحساب</h3>
-          <p class="text-xs text-slate-400 mt-1">أدخل رمز التحقق المكون من 6 أرقام لتأكيد حسابك</p>
+        <div class="space-y-1">
+          <h3 class="font-heading font-black text-white text-base">تحقق أمان Google • تأكيد جهاز جديد</h3>
+          <p class="text-xs text-slate-300">أدخل رمز الأمان المكون من 6 أرقام المرسل إلى بريدك :</p>
+          <p id="otpTargetEmailDisplay" class="font-mono font-bold text-xs text-bh-yellow" dir="ltr">user@gmail.com</p>
         </div>
 
-        <form onsubmit="handleVerifyOtp(event)" class="space-y-4">
-          <input type="text" id="otpCodeInput" maxlength="6" required placeholder="------" class="w-48 mx-auto text-center bg-bh-bg border border-bh-border rounded-xl py-3 text-2xl font-mono font-black text-bh-yellow tracking-widest focus:outline-none focus:border-bh-yellow">
-          <button type="submit" id="btnOtpSubmit" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition cursor-pointer">تأكيد ودخول التطبيق</button>
+        <form onsubmit="handleVerifyGoogleOtp(event)" class="space-y-4">
+          <div>
+            <input type="text" id="otpCodeInput" maxlength="6" required placeholder="------" class="w-52 mx-auto text-center bg-bh-bg border-2 border-bh-border focus:border-bh-yellow rounded-2xl py-3.5 text-2xl font-mono font-black text-bh-yellow tracking-widest focus:outline-none shadow-inner" dir="ltr" autocomplete="one-time-code">
+            <p class="text-[11px] text-slate-400 mt-2">تفقّد صندوق الوارد أو البريد الترويجي (Spam) للوصول إلى الرمز.</p>
+          </div>
+
+          <button type="submit" id="btnOtpSubmit" class="w-full py-3 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-black rounded-xl text-xs shadow-lg transition cursor-pointer active:scale-98 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>تأكيد الرمز وتوثيق هذا الجهاز</span>
+          </button>
         </form>
 
-        <button type="button" onclick="switchAuthView('login')" class="text-xs text-slate-400 hover:text-white cursor-pointer">العودة لشاشة الدخول</button>
-      </div>
-
-      <!-- VIEW 4: FORGOT PASSWORD -->
-      <div id="viewForgot" class="hidden space-y-4 text-right">
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-300 mb-1">البريد الإلكتروني لحسابك :</label>
-          <input type="email" id="forgotEmail" required placeholder="name@gmail.com" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono text-left" dir="ltr">
-        </div>
-        <button type="button" onclick="handleSendPasswordResetCode()" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold rounded-xl text-xs transition cursor-pointer">إرسال رمز إعادة التعيين</button>
-        <div class="text-center pt-2">
-          <button type="button" onclick="switchAuthView('login')" class="text-xs text-slate-400 hover:text-white cursor-pointer">العودة لتسجيل الدخول</button>
+        <div class="pt-2">
+          <button type="button" onclick="cancelOtpAndGoBack()" class="text-xs text-slate-400 hover:text-white transition cursor-pointer flex items-center justify-center gap-1 mx-auto">
+            <i class="fa-solid fa-arrow-right"></i>
+            <span>العودة وتغيير عنوان البريد الإلكتروني</span>
+          </button>
         </div>
       </div>
 
