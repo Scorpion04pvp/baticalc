@@ -1,12 +1,12 @@
 // BatiHub DZ - Progressive Web App Service Worker
-const CACHE_NAME = 'batihub-dz-v5-force-update';
+const CACHE_NAME = 'batihub-dz-v6-force-update';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './style.css?v=3.5.0',
-  './app.js?v=3.5.0',
+  './style.css?v=3.6.0',
+  './app.js?v=3.6.0',
   './manifest.json',
-  './assets/mqtt.min.js?v=3.5.0',
+  './assets/mqtt.min.js?v=3.6.0',
   './assets/batihub_logo.png',
   './assets/batihub_banner.jpg',
   './assets/icon-192.png',

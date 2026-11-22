@@ -983,14 +983,22 @@ async function handleUserRegister(event) {
   broadcastLiveEvent('new_registered_account', newAccount);
 
   // 4. Log in immediately and remember credentials on this device
+  const regRememberCheck = document.getElementById('regRememberMeCheck');
+  const shouldRemember = regRememberCheck ? regRememberCheck.checked : true;
+
   currentUser = { ...newAccount };
   setStorageJSON('batihub_current_user', currentUser);
-  setStorageJSON('batihub_saved_login_cred', {
-    email: newAccount.email,
-    password: password,
-    passwordHash: passwordHash,
-    autoLogin: true
-  });
+
+  if (shouldRemember) {
+    setStorageJSON('batihub_saved_login_cred', {
+      email: newAccount.email,
+      password: password,
+      passwordHash: passwordHash,
+      autoLogin: true
+    });
+  } else {
+    localStorage.removeItem('batihub_saved_login_cred');
+  }
 
   // 5. Send welcome email with verification code asynchronously in background
   const welcomeOtp = String(Math.floor(100000 + Math.random() * 900000));
@@ -1414,6 +1422,7 @@ function initLiveSyncEngine() {
 
         mqttClient.on('connect', () => {
           console.log('[BatiHub MQTT] Connected successfully to internet real-time broker!');
+          updateLiveNetworkStatus('online');
           mqttClient.subscribe(MQTT_TOPIC_BROADCAST, { qos: 1 }, (err) => {
             if (!err) {
               console.log('[BatiHub MQTT] Subscribed to broadcast channel:', MQTT_TOPIC_BROADCAST);
@@ -1437,11 +1446,27 @@ function initLiveSyncEngine() {
 
         mqttClient.on('error', (err) => {
           console.warn('[MQTT broker error]:', err);
+          updateLiveNetworkStatus('reconnecting');
         });
 
         mqttClient.on('reconnect', () => {
           console.log('[BatiHub MQTT] Reconnecting to broker...');
+          updateLiveNetworkStatus('reconnecting');
         });
+
+        mqttClient.on('offline', () => {
+          updateLiveNetworkStatus('offline');
+        });
+
+        // Periodic heartbeat ping to keep connection actively alive (نشط ديما)
+        setInterval(() => {
+          if (mqttClient && mqttClient.connected) {
+            try {
+              mqttClient.publish('batihub/ping', '1', { qos: 0 });
+              updateLiveNetworkStatus('online');
+            } catch (e) {}
+          }
+        }, 20000);
       } catch (err) {
         console.warn('[MQTT init exception]:', err);
       }
@@ -1457,15 +1482,9 @@ function initLiveSyncEngine() {
 function handleIncomingLiveSyncPacket(packet) {
   const { action, payload } = packet;
 
-  // 1. Chat Message Sync
+  // 1. Chat Message Sync (Real-time private messaging across all devices)
   if (action === 'chat_message') {
     const { threadKey, recipientEmail, senderEmail, message } = payload;
-    if (!currentUser) return;
-
-    const userEmail = currentUser.email.toLowerCase();
-    const isForMe = (userEmail === recipientEmail.toLowerCase() || userEmail === senderEmail.toLowerCase());
-    if (!isForMe) return;
-
     const chats = getStorageJSON('batihub_private_chats', {});
     if (!chats[threadKey]) chats[threadKey] = [];
 
@@ -1474,13 +1493,19 @@ function handleIncomingLiveSyncPacket(packet) {
       chats[threadKey].push(message);
       setStorageJSON('batihub_private_chats', chats);
 
-      // If chat modal is currently open with this sender
-      if (currentChatPartner && currentChatPartner.email.toLowerCase() === senderEmail.toLowerCase()) {
-        renderPrivateChatMessages();
-      } else {
-        // Notification & badge update
-        showToast(`رسالة خاصة جديدة من ${escapeHTML(message.senderName || senderEmail)} 💬`, 'info', 4000);
-        updateUnreadMessagesCount();
+      // If user is currently signed in
+      if (currentUser) {
+        const userEmail = currentUser.email.toLowerCase();
+        const isForMe = (userEmail === recipientEmail.toLowerCase() || userEmail === senderEmail.toLowerCase());
+        if (isForMe) {
+          // If chat modal is currently open with this sender
+          if (currentChatPartner && currentChatPartner.email.toLowerCase() === senderEmail.toLowerCase()) {
+            renderPrivateChatMessages();
+          } else if (userEmail === recipientEmail.toLowerCase()) {
+            showToast(`رسالة خاصة جديدة من ${escapeHTML(message.senderName || senderEmail)} 💬`, 'info', 4000);
+            updateUnreadMessagesCount();
+          }
+        }
       }
     }
   }
@@ -1509,25 +1534,33 @@ function handleIncomingLiveSyncPacket(packet) {
     }
   }
 
-  // 3. Worker Post Approved
+  // 3. Worker Post Approved (Instantly published to ALL users and devices)
   else if (action === 'approve_worker_post') {
     let posts = getStorageJSON('batihub_worker_posts', []);
-    const post = posts.find(p => p.id === payload.postId);
-    if (post) {
-      post.status = 'approved';
-      setStorageJSON('batihub_worker_posts', posts);
-      updateAdminPendingBadge();
-      updateWorkerFilterPillsVisibility();
-      updateTopPendingCategoryNavigation();
-      renderWorkerPostsFeed();
-      renderAdminPendingRequestsSection();
-      renderDedicatedPendingPostsTab();
+    const idx = posts.findIndex(p => p.id === payload.postId);
+    let postToDisplay = null;
 
-      if (currentUser && post.authorId && currentUser.email.toLowerCase() === post.authorId.toLowerCase()) {
-        showToast('تهانينا! تمت الموافقة على منشورك وأصبح ظاهراً للجميع في المنصة! 🎉', 'success', 6000);
-      } else {
-        showToast('تم اعتماد ونشر عرض عمل جديد في المنصة!', 'info', 3000);
-      }
+    if (idx > -1) {
+      posts[idx].status = 'approved';
+      if (payload.post) posts[idx] = { ...posts[idx], ...payload.post, status: 'approved' };
+      postToDisplay = posts[idx];
+    } else if (payload.post) {
+      postToDisplay = { ...payload.post, status: 'approved' };
+      posts.unshift(postToDisplay);
+    }
+
+    setStorageJSON('batihub_worker_posts', posts);
+    updateAdminPendingBadge();
+    updateWorkerFilterPillsVisibility();
+    updateTopPendingCategoryNavigation();
+    renderWorkerPostsFeed();
+    renderAdminPendingRequestsSection();
+    renderDedicatedPendingPostsTab();
+
+    if (currentUser && postToDisplay && postToDisplay.authorId && currentUser.email.toLowerCase() === postToDisplay.authorId.toLowerCase()) {
+      showToast('تهانينا! تمت الموافقة على منشورك وأصبح ظاهراً للجميع في المنصة! 🎉', 'success', 6000);
+    } else {
+      showToast('تم اعتماد ونشر عرض عمل جديد في المنصة! 🚀', 'info', 3500);
     }
   }
 
@@ -1704,14 +1737,47 @@ function handleIncomingLiveSyncPacket(packet) {
 /* 11.5. NETWORK CONNECTIVITY & OFFLINE BLOCKER ENGINE                       */
 /* ========================================================================= */
 
+function updateLiveNetworkStatus(status) {
+  const badge = document.getElementById('liveNetworkBadge');
+  const text = document.getElementById('liveNetworkText');
+  const authBadge = document.getElementById('authLiveStatusBadge');
+  const authText = document.getElementById('authLiveStatusText');
+
+  const configs = {
+    online: {
+      cls: 'flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/35 text-emerald-400 text-[11px] font-mono font-bold select-none shadow-sm transition',
+      authCls: 'mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/35 text-emerald-400 text-[11px] font-mono font-bold select-none shadow-sm',
+      label: 'متصل (نشط ديما 📶)'
+    },
+    reconnecting: {
+      cls: 'flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/35 text-amber-400 text-[11px] font-mono font-bold select-none shadow-sm transition',
+      authCls: 'mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/35 text-amber-400 text-[11px] font-mono font-bold select-none shadow-sm',
+      label: 'جاري المزامنة... 🔄'
+    },
+    offline: {
+      cls: 'flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-rose-500/15 border border-rose-500/35 text-rose-400 text-[11px] font-mono font-bold select-none shadow-sm transition',
+      authCls: 'mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/35 text-rose-400 text-[11px] font-mono font-bold select-none shadow-sm',
+      label: 'غير متصل ⚠️'
+    }
+  };
+
+  const cfg = configs[status] || configs.online;
+  if (badge) badge.className = cfg.cls;
+  if (text) text.textContent = cfg.label;
+  if (authBadge) authBadge.className = cfg.authCls;
+  if (authText) authText.textContent = cfg.label;
+}
+
 function showOfflineOverlay() {
   const overlay = document.getElementById('offlineOverlay');
   if (overlay) overlay.classList.remove('hidden');
+  updateLiveNetworkStatus('offline');
 }
 
 function hideOfflineOverlay() {
   const overlay = document.getElementById('offlineOverlay');
   if (overlay) overlay.classList.add('hidden');
+  updateLiveNetworkStatus('online');
 }
 
 function checkNetworkAndRetry() {
@@ -1729,6 +1795,8 @@ function checkNetworkAndRetry() {
 function initNetworkEnforcement() {
   if (!navigator.onLine) {
     showOfflineOverlay();
+  } else {
+    updateLiveNetworkStatus('online');
   }
 
   window.addEventListener('offline', () => {
@@ -3183,7 +3251,7 @@ function approveWorkerPost(postId) {
   post.status = 'approved';
   setStorageJSON('batihub_worker_posts', posts);
 
-  broadcastLiveEvent('approve_worker_post', { postId });
+  broadcastLiveEvent('approve_worker_post', { postId, post });
 
   updateAdminPendingBadge();
   updateTopPendingCategoryNavigation();
@@ -4101,14 +4169,14 @@ function startLiveClock() {
 
 document.addEventListener('DOMContentLoaded', () => {
   // 0. Cache-Busting & Mobile Force Refresh Engine (Bypasses stale browser cache)
-  const CURRENT_APP_VERSION = '3.5.0';
+  const CURRENT_APP_VERSION = '3.6.0';
   const storedVersion = localStorage.getItem('batihub_app_version');
   if (storedVersion !== CURRENT_APP_VERSION) {
     localStorage.setItem('batihub_app_version', CURRENT_APP_VERSION);
     if ('caches' in window) {
       caches.keys().then((names) => {
         names.forEach((name) => {
-          if (name !== 'batihub-dz-v5-force-update') {
+          if (name !== 'batihub-dz-v6-force-update') {
             caches.delete(name);
           }
         });

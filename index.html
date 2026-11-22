@@ -49,7 +49,7 @@
   </script>
   
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=3.5.0">
+  <link rel="stylesheet" href="style.css?v=3.6.0">
 </head>
 <body class="bg-bh-bg text-slate-100 font-sans antialiased min-h-screen selection:bg-bh-yellow selection:text-slate-950">
 
@@ -103,6 +103,10 @@
         <img src="assets/batihub_logo.png" alt="BatiHub DZ" class="w-28 sm:w-32 h-auto object-contain mb-2 drop-shadow-lg">
         <h2 class="text-xl font-heading font-black text-white" id="authScreenHeaderTitle">BatiHub DZ • تسجيل الدخول</h2>
         <p class="text-xs text-slate-400 mt-1" id="authScreenHeaderSub">منصة المحترفين وأصحاب المشاريع وعروض العمل في الجزائر</p>
+        <div id="authLiveStatusBadge" class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/35 text-emerald-400 text-[11px] font-mono font-bold select-none shadow-sm">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="authLiveStatusText">متصل (نشط ديما 📶)</span>
+        </div>
       </div>
 
       <!-- VIEW 1: LOGIN -->
@@ -188,9 +192,16 @@
             <input type="password" id="regConfirmPassword" required minlength="6" placeholder="أعد إدخال كلمة المرور" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow font-mono text-left" dir="ltr">
           </div>
 
+          <div class="flex items-center justify-between text-xs text-slate-300 py-1">
+            <label class="flex items-center gap-2 cursor-pointer select-none">
+              <input type="checkbox" id="regRememberMeCheck" checked class="w-4 h-4 rounded border-bh-border text-bh-yellow focus:ring-0 bg-bh-bg cursor-pointer">
+              <span class="font-semibold text-slate-300 hover:text-white transition">حفظ الحساب على هذا الجهاز (تسجيل الدخول التلقائي دائماً)</span>
+            </label>
+          </div>
+
           <button type="submit" id="btnRegisterSubmit" class="w-full py-2.5 bg-gradient-to-r from-bh-yellow to-bh-orange hover:opacity-95 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
             <i class="fa-solid fa-user-plus"></i>
-            <span>متابعة وتأكيد الحساب</span>
+            <span>إنشاء الحساب وتأمينه والدخول فوراً</span>
           </button>
         </form>
 
@@ -251,7 +262,13 @@
             <span class="text-bh-yellow font-bold text-[11px]" data-i18n="app_slogan">كل خدمات البناء في مكان واحد</span>
           </div>
 
-          <div class="flex items-center gap-3 text-[11px]">
+          <div class="flex items-center gap-2.5 text-[11px]">
+            <!-- Always Active Network Badge ("نشط ديما 📶") -->
+            <div id="liveNetworkBadge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/35 text-emerald-400 text-[11px] font-mono font-bold select-none shadow-sm transition">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span id="liveNetworkText">متصل (نشط ديما 📶)</span>
+            </div>
+
             <!-- Live Clock -->
             <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-bh-card border border-bh-border text-slate-300 text-[11px] font-mono">
               <i class="fa-regular fa-clock text-bh-yellow"></i>
@@ -1187,8 +1204,8 @@
   <div id="appToastContainer"></div>
 
   <!-- Real-time MQTT Engine -->
-  <script src="assets/mqtt.min.js?v=3.5.0"></script>
+  <script src="assets/mqtt.min.js?v=3.6.0"></script>
   <!-- Main JavaScript File -->
-  <script src="app.js?v=3.5.0"></script>
+  <script src="app.js?v=3.6.0"></script>
 </body>
 </html>
