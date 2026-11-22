@@ -61,7 +61,20 @@ const I18N = {
     m_nav_offices: 'مكاتب دراسات',
     m_nav_messages: 'محادثات',
     m_nav_profile: 'حسابي',
-    worker_board_title: 'عروض العمل والحرفيين',
+    worker_board_title: 'عرض الخدمة والحرفيين',
+    worker_board_sub: 'انشر واستكشف عروض خدمات البناء ومشاريع الحرفيين في الجزائر مع تواصل مباشر',
+    btn_new_worker_post: 'نشر عرض خدمة جديد',
+    nav_worker_board: 'عرض الخدمة',
+    nav_worker_requests: 'طلب عامل / عمال',
+    nav_gallery: 'معرض التصاميم والديكور',
+    m_nav_workers: 'عرض الخدمة',
+    m_nav_worker_requests: 'طلب عامل',
+    m_nav_gallery: 'المعرض',
+    worker_requests_title: 'طلب عامل / عمال',
+    worker_requests_sub: 'أصحاب المشاريع وأرباب العمل يطلبون عمالاً وحرفيين لإنجاز ورشاتهم وأشغالهم',
+    btn_new_worker_request: 'نشر طلب عامل جديد',
+    gallery_title: 'معرض التصاميم والديكور',
+    gallery_sub: 'استكشف أحدث نماذج المطابخ، الحمامات، الصالونات مع تفاصيل مواد البناء والمساحة',
     worker_board_sub: 'انشر واستكشف عروض العمل وطلبات الحرفيين في الجزائر مع تواصل مباشر وتحديث فوري',
     btn_new_worker_post: 'نشر عرض أو طلب عمل',
     filter_all: 'الكل',
@@ -120,17 +133,26 @@ const I18N = {
   fr: {
     app_slogan: 'Tous les services du bâtiment en un seul endroit',
     nav_scientific_calc: 'Calculatrice',
-    nav_worker_board: 'Offres d\'emploi',
+    nav_worker_board: 'Offres de services',
+    nav_worker_requests: 'Demandes d\'ouvriers',
+    nav_gallery: 'Galerie & Décoration',
     nav_study_offices: 'Bureaux d\'études',
     nav_messages: 'Messagerie',
     m_nav_calc: 'Calculatrice',
-    m_nav_workers: 'Offres',
+    m_nav_workers: 'Services',
+    m_nav_worker_requests: 'Demandes',
+    m_nav_gallery: 'Galerie',
     m_nav_offices: 'Bureaux',
     m_nav_messages: 'Messages',
     m_nav_profile: 'Profil',
-    worker_board_title: 'Offres d\'emploi & Artisans',
+    worker_board_title: 'Offres de services & Artisans',
     worker_board_sub: 'Publiez et explorez les offres d\'artisans et chantiers en Algérie',
-    btn_new_worker_post: 'Publier une offre ou demande',
+    btn_new_worker_post: 'Publier une offre de service',
+    worker_requests_title: 'Demande Ouvrier / Artisans',
+    worker_requests_sub: 'Trouvez et recrutez des artisans et ouvriers qualifiés pour vos chantiers',
+    btn_new_worker_request: 'Publier une demande d\'ouvrier',
+    gallery_title: 'Galerie & Décoration d\'intérieur',
+    gallery_sub: 'Découvrez les modèles de cuisines, salles de bain et salons avec matériaux et surface',
     filter_all: 'Tous',
     filter_mason: 'Maçonnerie',
     filter_electric: 'Électricité',
@@ -187,17 +209,26 @@ const I18N = {
   en: {
     app_slogan: 'All Construction Services in One Platform',
     nav_scientific_calc: 'Calculator',
-    nav_worker_board: 'Job Board',
+    nav_worker_board: 'Service Offers',
+    nav_worker_requests: 'Worker Requests',
+    nav_gallery: 'Design & Decor Gallery',
     nav_study_offices: 'Study Offices',
     nav_messages: 'Private Messages',
     m_nav_calc: 'Calculator',
-    m_nav_workers: 'Jobs',
+    m_nav_workers: 'Services',
+    m_nav_worker_requests: 'Requests',
+    m_nav_gallery: 'Gallery',
     m_nav_offices: 'Offices',
     m_nav_messages: 'Chat',
     m_nav_profile: 'Profile',
-    worker_board_title: 'Job Board & Artisans',
-    worker_board_sub: 'Post and explore construction jobs and craftsman listings across Algeria',
-    btn_new_worker_post: 'Post Job Offer or Request',
+    worker_board_title: 'Service Offers & Artisans',
+    worker_board_sub: 'Post and explore construction service offers and craftsman listings across Algeria',
+    btn_new_worker_post: 'Post Service Offer',
+    worker_requests_title: 'Worker & Artisan Requests',
+    worker_requests_sub: 'Project owners request craftsmen and construction workers across Algeria',
+    btn_new_worker_request: 'Post Worker Request',
+    gallery_title: 'Design & Interior Decor Gallery',
+    gallery_sub: 'Explore modern kitchens, bathrooms, living rooms with material specifications and area',
     filter_all: 'All',
     filter_mason: 'Masonry',
     filter_electric: 'Electrical',
@@ -804,11 +835,12 @@ function switchAuthView(viewName) {
     if (viewGoogle) viewGoogle.classList.remove('hidden');
     if (headerTitle) headerTitle.textContent = 'BatiHub DZ • تسجيل الدخول بـ Google';
     if (headerSub) headerSub.textContent = 'أدخل بريد Google (Gmail) لتسجيل الدخول المباشر أو تأكيد جهازك الجديد';
+    initMobileLoginPicker();
     renderTrustedAccountsPills();
   } else if (viewName === 'otp') {
     if (viewOtp) viewOtp.classList.remove('hidden');
-    if (headerTitle) headerTitle.textContent = 'تحقق أمان Google • تأكيد جهاز جديد';
-    if (headerSub) headerSub.textContent = 'أدخل رمز الأمان المكون من 6 أرقام المرسل إلى بريدك لتأكيد هذا الجهاز';
+    if (headerTitle) headerTitle.textContent = 'تأكيد جهاز جديد • رمز التحقق';
+    if (headerSub) headerSub.textContent = 'أدخل رمز التحقق المكون من 6 أرقام المرسل إلى بريدك لتأكيد هذا الجهاز';
   }
 }
 
@@ -953,6 +985,37 @@ function cancelOtpAndGoBack() {
   switchAuthView('google');
 }
 
+function initMobileLoginPicker() {
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+  const mobileContainer = document.getElementById('mobileGooglePickerContainer');
+  if (mobileContainer && isMobile) {
+    mobileContainer.classList.remove('hidden');
+  }
+}
+
+async function handleMobileGoogleLogin() {
+  const input = document.getElementById('authGmailInput');
+  
+  if (window.navigator && window.navigator.credentials && window.navigator.credentials.get) {
+    try {
+      const cred = await window.navigator.credentials.get({
+        mediation: 'optional'
+      });
+      if (cred && cred.id && cred.id.includes('@')) {
+        if (input) input.value = cred.id;
+        handleGoogleAuthSubmit();
+        return;
+      }
+    } catch (e) {}
+  }
+
+  const userGmail = prompt('أدخل بريد Google (Gmail) المسجل في هاتفك:');
+  if (userGmail && userGmail.trim()) {
+    if (input) input.value = userGmail.trim();
+    handleGoogleAuthSubmit();
+  }
+}
+
 // Backwards-compatible aliases
 function handleUserLogin(event) { return handleGoogleAuthSubmit(event); }
 function handleUserRegister(event) { return handleGoogleAuthSubmit(event); }
@@ -970,7 +1033,7 @@ async function handleSendPasswordResetCode() {
 }
 
 async function sendOtpEmail(toEmail, otpCode, purpose = 'registration') {
-  const subject = 'BatiHub DZ • رمز أمان Google وتأكيد الجهاز';
+  const subject = 'BatiHub DZ • رمز التحقق لتأكيد جهازك';
 
   const html = `
     <div dir="rtl" style="font-family: Arial, Tahoma, sans-serif; background-color: #07090e; color: #f1f5f9; padding: 25px; border-radius: 16px; max-width: 520px; margin: auto; border: 1px solid #1c2638;">
@@ -979,7 +1042,7 @@ async function sendOtpEmail(toEmail, otpCode, purpose = 'registration') {
         <p style="color: #94a3b8; font-size: 12px; margin-top: 5px;">منصة المحترفين وعروض العمل في الجزائر</p>
       </div>
       <div style="background-color: #0f1520; padding: 20px; border-radius: 12px; border: 1px solid #1c2638; text-align: center;">
-        <h3 style="color: #ffffff; font-size: 16px; margin-top: 0;">رمز أمان Google وتأكيد الجهاز الجديد</h3>
+        <h3 style="color: #ffffff; font-size: 16px; margin-top: 0;">رمز التحقق لتأكيد جهازك</h3>
         <p style="color: #94a3b8; font-size: 13px;">أدخل هذا الرمز المكون من 6 أرقام لتأكيد حسابك وتوثيق هذا الجهاز:</p>
         <div style="display: inline-block; background: linear-gradient(135deg, #ffa000, #ff6d00); color: #07090e; font-size: 32px; font-weight: bold; letter-spacing: 8px; padding: 12px 28px; border-radius: 12px; margin: 15px 0; font-family: monospace;">
           ${otpCode}
@@ -997,7 +1060,7 @@ async function sendOtpEmail(toEmail, otpCode, purpose = 'registration') {
       const res = await window.electronMailAPI.sendMail({
         to: toEmail,
         subject: subject,
-        text: `رمز أمان BatiHub DZ الخاص بك هو: ${otpCode}`,
+        text: `رمز التحقق الخاص بك في BatiHub DZ هو: ${otpCode}`,
         html: html
       });
       return res;
@@ -1050,6 +1113,8 @@ function transitionToDashboard() {
   applyLanguage(currentLanguage);
   renderWorkerPostsFeed();
   renderStudyOfficesFeed();
+  renderWorkerRequestsFeed();
+  renderGalleryFeed();
   updateUnreadMessagesCount();
   updateTopPendingCategoryNavigation();
   renderDedicatedPendingPostsTab();
@@ -1078,6 +1143,14 @@ function updateUserProfileUI() {
 
   // Show/Hide Admin pending posts filter button & top navigation
   updateTopPendingCategoryNavigation();
+  const btnAdminAddGallery = document.getElementById('btnAdminAddGallery');
+  if (btnAdminAddGallery) {
+    if (currentUser && currentUser.role === 'admin') {
+      btnAdminAddGallery.classList.remove('hidden');
+    } else {
+      btnAdminAddGallery.classList.add('hidden');
+    }
+  }
   const adminFilterBtn = document.getElementById('adminPendingFilterBtn');
   if (adminFilterBtn) {
     if (currentUser.role === 'admin') {
@@ -1186,6 +1259,83 @@ async function handleDirectPasswordChange(event) {
   showToast('تم تغيير كلمة المرور بنجاح!', 'success');
 }
 
+function toggleEditUserName(show) {
+  const container = document.getElementById('editUserNameContainer');
+  const input = document.getElementById('editUserNameInput');
+  if (!container) return;
+
+  const isHidden = container.classList.contains('hidden');
+  const willShow = (typeof show === 'boolean') ? show : isHidden;
+
+  if (willShow) {
+    container.classList.remove('hidden');
+    if (input && currentUser) {
+      input.value = currentUser.fullName || currentUser.firstName || '';
+      input.focus();
+    }
+  } else {
+    container.classList.add('hidden');
+  }
+}
+
+function handleSaveNewUserName() {
+  if (!currentUser) return;
+  const input = document.getElementById('editUserNameInput');
+  if (!input) return;
+
+  const newName = (input.value || '').trim();
+  if (!newName || newName.length < 2) {
+    showToast('يرجى إدخال اسم صحيح مكون من حرفين على الأقل', 'warning');
+    return;
+  }
+
+  const parts = newName.split(/\s+/);
+  currentUser.fullName = newName;
+  currentUser.firstName = parts[0] || newName;
+  currentUser.lastName = parts.slice(1).join(' ') || '';
+
+  // 1. Update in local storage
+  setStorageJSON('batihub_current_user', currentUser);
+  sessionStorage.setItem('batihub_current_user', JSON.stringify(currentUser));
+
+  // 2. Update in accounts database
+  const accounts = initAccountsDatabase();
+  const cleanEmail = currentUser.email.toLowerCase();
+  if (accounts[cleanEmail]) {
+    accounts[cleanEmail].fullName = newName;
+    accounts[cleanEmail].firstName = currentUser.firstName;
+    accounts[cleanEmail].lastName = currentUser.lastName;
+    setStorageJSON('batihub_registered_accounts', accounts);
+  }
+
+  // 3. Update Electron disk DB
+  if (window.electronDB && typeof window.electronDB.saveAccounts === 'function') {
+    window.electronDB.saveAccounts(accounts).catch(() => {});
+  }
+
+  // 4. Update any worker posts authored by this user
+  let posts = getStorageJSON('batihub_worker_posts', []);
+  let postsUpdated = false;
+  posts.forEach(p => {
+    if (p.authorId && p.authorId.toLowerCase() === cleanEmail) {
+      p.authorName = newName;
+      postsUpdated = true;
+    }
+  });
+  if (postsUpdated) setStorageJSON('batihub_worker_posts', posts);
+
+  // 5. Broadcast profile update
+  broadcastLiveEvent('edit_user_profile', {
+    email: cleanEmail,
+    fullName: newName
+  });
+
+  // 6. Update UI
+  updateUserProfileUI();
+  toggleEditUserName(false);
+  showToast('تم حفظ وتحديث اسم المستخدم بنجاح! 🎉', 'success');
+}
+
 /* ========================================================================= */
 /* 9. NAVIGATION & TAB SWITCHING ENGINE                                      */
 /* ========================================================================= */
@@ -1220,6 +1370,8 @@ function switchTab(tabId) {
   const mNavMapping = {
     'tab-scientific-calculator': 'mNavCalc',
     'tab-worker-board': 'mNavWorkers',
+    'tab-worker-requests': 'mNavWorkerRequests',
+    'tab-gallery': 'mNavGallery',
     'tab-pending-posts': 'mNavPending',
     'tab-study-offices': 'mNavOffices'
   };
@@ -1238,9 +1390,15 @@ function switchTab(tabId) {
     }
   }
 
-  // 5. If switching to dedicated pending posts tab, render it fresh
+  // 5. Re-render feeds when tabs become active
   if (tabId === 'tab-pending-posts') {
     renderDedicatedPendingPostsTab();
+  } else if (tabId === 'tab-worker-requests') {
+    renderWorkerRequestsFeed();
+  } else if (tabId === 'tab-gallery') {
+    renderGalleryFeed();
+  } else if (tabId === 'tab-worker-board') {
+    renderWorkerPostsFeed();
   }
 }
 
@@ -1483,6 +1641,111 @@ function handleIncomingLiveSyncPacket(packet) {
     } else {
       showToast('تم اعتماد ونشر عرض عمل جديد في المنصة! 🚀', 'info', 3500);
     }
+  }
+
+  // 3.55. Worker Requests Sync
+  else if (action === 'new_worker_request') {
+    let reqs = getStorageJSON('batihub_worker_requests', []);
+    if (!reqs.some(r => r.id === payload.id)) {
+      reqs.unshift(payload);
+      setStorageJSON('batihub_worker_requests', reqs);
+      renderWorkerRequestsFeed();
+      renderDedicatedPendingPostsTab();
+      updateTopPendingCategoryNavigation();
+      updateAdminPendingBadge();
+
+      if (currentUser && currentUser.role === 'admin') {
+        showToast(`طلب عامل جديد بانتظار المراجعة من ${escapeHTML(payload.authorName || 'مستخدم')} 👷`, 'warning', 5000);
+      }
+    }
+  }
+
+  else if (action === 'approve_worker_request') {
+    let reqs = getStorageJSON('batihub_worker_requests', []);
+    const idx = reqs.findIndex(r => r.id === payload.reqId);
+    let reqToDisplay = null;
+    if (idx > -1) {
+      reqs[idx].status = 'approved';
+      if (payload.request) reqs[idx] = { ...reqs[idx], ...payload.request, status: 'approved' };
+      reqToDisplay = reqs[idx];
+    } else if (payload.request) {
+      reqToDisplay = { ...payload.request, status: 'approved' };
+      reqs.unshift(reqToDisplay);
+    }
+    setStorageJSON('batihub_worker_requests', reqs);
+    renderWorkerRequestsFeed();
+    renderDedicatedPendingPostsTab();
+    updateTopPendingCategoryNavigation();
+    updateAdminPendingBadge();
+
+    if (currentUser && reqToDisplay && reqToDisplay.authorId && currentUser.email.toLowerCase() === reqToDisplay.authorId.toLowerCase()) {
+      showToast('تهانينا! تمت الموافقة على طلب العامل ونشره في المنصة! 🎉', 'success', 6000);
+    }
+  }
+
+  else if (action === 'reject_worker_request' || action === 'delete_worker_request') {
+    let reqs = getStorageJSON('batihub_worker_requests', []);
+    reqs = reqs.filter(r => r.id !== payload.reqId);
+    setStorageJSON('batihub_worker_requests', reqs);
+    renderWorkerRequestsFeed();
+    renderDedicatedPendingPostsTab();
+    updateTopPendingCategoryNavigation();
+    updateAdminPendingBadge();
+  }
+
+  else if (action === 'toggle_request_like') {
+    let reqs = getStorageJSON('batihub_worker_requests', []);
+    const req = reqs.find(r => r.id === payload.reqId);
+    if (req) {
+      req.likes = payload.likes;
+      setStorageJSON('batihub_worker_requests', reqs);
+      renderWorkerRequestsFeed();
+    }
+  }
+
+  else if (action === 'add_request_comment') {
+    let reqs = getStorageJSON('batihub_worker_requests', []);
+    const req = reqs.find(r => r.id === payload.reqId);
+    if (req) {
+      if (!req.comments) req.comments = [];
+      if (!req.comments.some(c => c.id === payload.comment.id)) {
+        req.comments.push(payload.comment);
+        setStorageJSON('batihub_worker_requests', reqs);
+        renderWorkerRequestsFeed();
+      }
+    }
+  }
+
+  // 3.56. Gallery Sync
+  else if (action === 'new_gallery_item') {
+    let items = getStorageJSON('batihub_gallery_items', []);
+    if (!items.some(i => i.id === payload.id)) {
+      items.unshift(payload);
+      setStorageJSON('batihub_gallery_items', items);
+      renderGalleryFeed();
+    }
+  }
+
+  else if (action === 'delete_gallery_item') {
+    let items = getStorageJSON('batihub_gallery_items', []);
+    items = items.filter(i => i.id !== payload.itemId);
+    setStorageJSON('batihub_gallery_items', items);
+    renderGalleryFeed();
+  }
+
+  else if (action === 'edit_user_profile') {
+    const accounts = initAccountsDatabase();
+    if (accounts[payload.email]) {
+      accounts[payload.email].fullName = payload.fullName;
+      setStorageJSON('batihub_registered_accounts', accounts);
+    }
+    if (currentUser && currentUser.email.toLowerCase() === payload.email.toLowerCase()) {
+      currentUser.fullName = payload.fullName;
+      setStorageJSON('batihub_current_user', currentUser);
+      updateUserProfileUI();
+    }
+    renderWorkerPostsFeed();
+    renderWorkerRequestsFeed();
   }
 
   // 3.6. Study Office Sync (Created, Approved, Rejected)
@@ -2185,9 +2448,13 @@ function updateAdminPendingBadge() {
 
   const posts = getStorageJSON('batihub_worker_posts', []);
   const offices = getStorageJSON('batihub_study_offices', []);
+  const requests = getStorageJSON('batihub_worker_requests', []);
+
   const pendingPostsCount = posts.filter(p => p.status === 'pending').length;
   const pendingOfficesCount = offices.filter(o => o.status === 'pending').length;
-  const pendingCount = pendingPostsCount + pendingOfficesCount;
+  const pendingRequestsCount = requests.filter(r => r.status === 'pending').length;
+
+  const pendingCount = pendingPostsCount + pendingOfficesCount + pendingRequestsCount;
   badge.textContent = String(pendingCount);
 }
 
@@ -2326,9 +2593,12 @@ function updateTopPendingCategoryNavigation() {
 
   const posts = getStorageJSON('batihub_worker_posts', []);
   const offices = getStorageJSON('batihub_study_offices', []);
+  const requests = getStorageJSON('batihub_worker_requests', []);
+
   const allPendingPosts = posts.filter(p => p.status === 'pending');
   const allPendingOffices = offices.filter(o => o.status === 'pending');
-  const totalAllPending = allPendingPosts.length + allPendingOffices.length;
+  const allPendingRequests = requests.filter(r => r.status === 'pending');
+  const totalAllPending = allPendingPosts.length + allPendingOffices.length + allPendingRequests.length;
 
   const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.email.toLowerCase() === 'batihubdz@gmail.com');
 
@@ -2338,7 +2608,8 @@ function updateTopPendingCategoryNavigation() {
   } else if (currentUser) {
     const userPosts = posts.filter(p => p.status === 'pending' && p.authorId && p.authorId.toLowerCase() === currentUser.email.toLowerCase()).length;
     const userOffices = offices.filter(o => o.status === 'pending' && o.authorId && o.authorId.toLowerCase() === currentUser.email.toLowerCase()).length;
-    relevantCount = userPosts + userOffices;
+    const userRequests = requests.filter(r => r.status === 'pending' && r.authorId && r.authorId.toLowerCase() === currentUser.email.toLowerCase()).length;
+    relevantCount = userPosts + userOffices + userRequests;
   }
 
   // Header update inside tab
@@ -2413,13 +2684,15 @@ function renderDedicatedPendingPostsTab() {
   const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.email.toLowerCase() === 'batihubdz@gmail.com');
   const allPosts = getStorageJSON('batihub_worker_posts', []);
   const allOffices = getStorageJSON('batihub_study_offices', []);
+  const allRequests = getStorageJSON('batihub_worker_requests', []);
 
   // Update top navigation badges & header
   updateTopPendingCategoryNavigation();
 
-  // Filter pending posts directly without trade restrictions
+  // Filter pending items
   let pendingPosts = allPosts.filter(p => p.status === 'pending');
   let pendingOffices = allOffices.filter(o => o.status === 'pending');
+  let pendingRequests = allRequests.filter(r => r.status === 'pending');
 
   if (!isAdmin) {
     if (!currentUser) {
@@ -2439,19 +2712,21 @@ function renderDedicatedPendingPostsTab() {
       `;
       return;
     }
-    // Regular user only sees their own pending posts & offices
-    pendingPosts = pendingPosts.filter(p => p.authorId && p.authorId.toLowerCase() === currentUser.email.toLowerCase());
-    pendingOffices = pendingOffices.filter(o => o.authorId && o.authorId.toLowerCase() === currentUser.email.toLowerCase());
+    // Regular user only sees their own pending items
+    const userEmail = currentUser.email.toLowerCase();
+    pendingPosts = pendingPosts.filter(p => p.authorId && p.authorId.toLowerCase() === userEmail);
+    pendingOffices = pendingOffices.filter(o => o.authorId && o.authorId.toLowerCase() === userEmail);
+    pendingRequests = pendingRequests.filter(r => r.authorId && r.authorId.toLowerCase() === userEmail);
   }
 
-  const totalPending = pendingPosts.length + pendingOffices.length;
+  const totalPending = pendingPosts.length + pendingOffices.length + pendingRequests.length;
 
   if (totalPending === 0) {
     let emptyIcon = isAdmin ? 'fa-shield-halved' : 'fa-hourglass-half';
     let emptyTitle = isAdmin ? 'رائع! لا توجد طلبات معلقة للمراجعة حالياً' : 'لا توجد لديك منشورات معلقة حالياً';
     let emptyDesc = isAdmin
-      ? 'جميع عروض العمل ومكاتب الدراسات المقدمة من المستخدمين تم اعتمادها أو معالجتها بنجاح.'
-      : 'جميع منشوراتك تم اعتمادها وتظهر مباشرة في الأقسام المخصصة، أو يمكنك نشر عرض عمل جديد الآن.';
+      ? 'جميع عروض الخدمات، طلبات العمال، ومكاتب الدراسات المقدمة تم اعتمادها بنجاح.'
+      : 'جميع منشوراتك تم اعتمادها وتظهر مباشرة في المنصة، أو يمكنك نشر عرض خدمة أو طلب عامل جديد الآن.';
 
     container.innerHTML = `
       <div class="bg-bh-card border border-bh-border rounded-3xl p-10 text-center space-y-4">
@@ -2465,10 +2740,13 @@ function renderDedicatedPendingPostsTab() {
         ${!isAdmin ? `
           <div class="flex items-center justify-center gap-3 flex-wrap">
             <button type="button" onclick="openCreateWorkerPostModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-black text-xs shadow-lg hover:opacity-95 transition cursor-pointer">
-              نشر عرض أو طلب عمل جديد
+              نشر عرض خدمة جديد
+            </button>
+            <button type="button" onclick="openCreateWorkerRequestModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-black text-xs shadow-lg hover:opacity-95 transition cursor-pointer">
+              نشر طلب عامل جديد
             </button>
             <button type="button" onclick="openAddStudyOfficeModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-400 to-blue-500 text-slate-950 font-black text-xs shadow-lg hover:opacity-95 transition cursor-pointer">
-              تسجيل مكتب دراسات جديد
+              تسجيل مكتب دراسات
             </button>
           </div>
         ` : ''}
@@ -2477,10 +2755,9 @@ function renderDedicatedPendingPostsTab() {
     return;
   }
 
-  // Render cards
   container.innerHTML = '';
 
-  // 1. Render Pending Worker Posts
+  // 1. Render Pending Service Offers (Worker Posts)
   pendingPosts.forEach(post => {
     const card = document.createElement('div');
     card.className = 'bg-bh-card border border-amber-500/40 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 relative overflow-hidden transition hover:border-amber-500/60';
@@ -2507,28 +2784,15 @@ function renderDedicatedPendingPostsTab() {
     };
     const unitLabel = unitMap[post.unit] || 'دج / م²';
 
-    let cardBannerHTML = '';
-    if (isAdmin) {
-      cardBannerHTML = `
-        <div class="p-3 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-bold flex items-center justify-between flex-wrap gap-2">
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-shield-halved text-base text-amber-400"></i>
-            <span>طلب منشور معلق بانتظار قرار الإدارة</span>
-          </div>
-          <span class="text-[10px] text-amber-400/80 font-mono">${new Date(post.createdAt).toLocaleDateString()}</span>
+    let cardBannerHTML = `
+      <div class="p-3 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-bold flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid ${isAdmin ? 'fa-shield-halved' : 'fa-hourglass-half'} text-amber-400"></i>
+          <span>${isAdmin ? 'طلب عرض خدمة معلق بانتظار قرار الإدارة' : 'عرض الخدمة قيد الفحص والمراجعة من قبل الإدارة'}</span>
         </div>
-      `;
-    } else {
-      cardBannerHTML = `
-        <div class="p-3 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-bold flex items-center justify-between flex-wrap gap-2">
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-hourglass-half animate-spin text-sm text-amber-400"></i>
-            <span>منشورك قيد الفحص والمراجعة من قبل الإدارة، وسيظهر للجميع فور اعتماده</span>
-          </div>
-          <span class="text-[10px] text-amber-400/80 font-mono">${new Date(post.createdAt).toLocaleDateString()}</span>
-        </div>
-      `;
-    }
+        <span class="text-[10px] text-amber-400/80 font-mono">${new Date(post.createdAt).toLocaleDateString()}</span>
+      </div>
+    `;
 
     let actionsHTML = '';
     if (isAdmin) {
@@ -2536,7 +2800,7 @@ function renderDedicatedPendingPostsTab() {
         <div class="pt-3 border-t border-bh-border/70 flex items-center gap-2.5 flex-wrap">
           <button type="button" onclick="approveWorkerPost('${post.id}')" class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98">
             <i class="fa-solid fa-check text-sm"></i>
-            <span>قبول واعتماد المنشور فوراً</span>
+            <span>قبول واعتماد عرض الخدمة</span>
           </button>
           <button type="button" onclick="openEditWorkerPostModal('${post.id}')" class="py-2.5 px-4 rounded-xl bg-bh-bg hover:bg-slate-800 text-bh-yellow border border-bh-yellow/40 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-95">
             <i class="fa-solid fa-pen-to-square"></i>
@@ -2555,11 +2819,11 @@ function renderDedicatedPendingPostsTab() {
           <div class="flex items-center gap-2">
             <button type="button" onclick="openEditWorkerPostModal('${post.id}')" class="py-2 px-3.5 rounded-xl bg-bh-bg hover:bg-slate-800 text-bh-yellow border border-bh-yellow/40 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95">
               <i class="fa-solid fa-pen-to-square"></i>
-              <span>تعديل المنشور</span>
+              <span>تعديل</span>
             </button>
             <button type="button" onclick="deleteWorkerPost('${post.id}')" class="py-2 px-3.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer active:scale-95">
               <i class="fa-regular fa-trash-can"></i>
-              <span>حذف المنشور</span>
+              <span>حذف</span>
             </button>
           </div>
         </div>
@@ -2575,7 +2839,7 @@ function renderDedicatedPendingPostsTab() {
             <div class="flex items-center gap-2 flex-wrap">
               <h4 class="font-bold text-sm text-white">${escapeHTML(post.authorName || 'مستخدم')}</h4>
               ${isOwner ? '<span class="text-[9px] font-bold text-bh-yellow bg-bh-yellow/10 px-2 py-0.5 rounded-full border border-bh-yellow/30">(أنت)</span>' : ''}
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 font-mono">عرض عمل 🛠️</span>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 font-mono">عرض خدمة 🛠️</span>
             </div>
             <div class="flex items-center gap-2 text-xs text-slate-400 mt-1">
               <span class="text-bh-yellow font-bold">${escapeHTML(post.trade)}</span>
@@ -2602,35 +2866,107 @@ function renderDedicatedPendingPostsTab() {
     container.appendChild(card);
   });
 
-  // 2. Render Pending Study Offices
+  // 2. Render Pending Worker Requests (طلب عامل)
+  pendingRequests.forEach(req => {
+    const card = document.createElement('div');
+    card.className = 'bg-bh-card border border-emerald-500/40 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 relative overflow-hidden transition hover:border-emerald-500/60';
+
+    const isOwner = currentUser && req.authorId && currentUser.email.toLowerCase() === req.authorId.toLowerCase();
+    const avatarHTML = renderAvatarImgTag(req.authorAvatar, req.authorName, req.authorId, 'w-12 h-12 rounded-full object-cover border-2 border-emerald-500/50 shadow-md');
+
+    let reqImageHTML = '';
+    if (req.image) {
+      reqImageHTML = `
+        <div class="rounded-2xl overflow-hidden border border-bh-border max-h-80 bg-bh-bg cursor-pointer" onclick="openImageLightbox('${escapeHTML(req.image)}')">
+          <img src="${req.image}" alt="Job location" class="w-full h-auto object-cover hover:scale-102 transition duration-300">
+        </div>
+      `;
+    }
+
+    let cardBannerHTML = `
+      <div class="p-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid ${isAdmin ? 'fa-shield-halved' : 'fa-hourglass-half'} text-emerald-400"></i>
+          <span>${isAdmin ? 'طلب عامل معلق بانتظار قرار الإدارة' : 'طلب العامل قيد الفحص والمراجعة وسيظهر للجميع فور اعتماده'}</span>
+        </div>
+        <span class="text-[10px] text-emerald-400/80 font-mono">${new Date(req.createdAt).toLocaleDateString()}</span>
+      </div>
+    `;
+
+    let actionsHTML = '';
+    if (isAdmin) {
+      actionsHTML = `
+        <div class="pt-3 border-t border-bh-border/70 flex items-center gap-2.5 flex-wrap">
+          <button type="button" onclick="approveWorkerRequest('${req.id}')" class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98">
+            <i class="fa-solid fa-check text-sm"></i>
+            <span>قبول واعتماد طلب العامل فوراً</span>
+          </button>
+          <button type="button" onclick="rejectWorkerRequest('${req.id}')" class="flex-1 py-2.5 px-4 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98">
+            <i class="fa-solid fa-xmark text-sm"></i>
+            <span>رفض وحذف نهائياً</span>
+          </button>
+        </div>
+      `;
+    } else if (isOwner) {
+      actionsHTML = `
+        <div class="pt-3 border-t border-bh-border/70 flex items-center justify-between flex-wrap gap-2">
+          <span class="text-xs text-emerald-400/90 font-medium">حالة الطلب: قيد التدقيق ⏳</span>
+          <button type="button" onclick="deleteWorkerRequest('${req.id}')" class="py-2 px-3.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer active:scale-95">
+            <i class="fa-regular fa-trash-can"></i>
+            <span>حذف الطلب</span>
+          </button>
+        </div>
+      `;
+    }
+
+    card.innerHTML = `
+      ${cardBannerHTML}
+      <div class="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-bh-border/70">
+        <div class="flex items-center gap-3">
+          ${avatarHTML}
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h4 class="font-bold text-sm text-white">${escapeHTML(req.authorName || 'صاحب المشروع')}</h4>
+              ${isOwner ? '<span class="text-[9px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full border border-emerald-400/30">(أنت)</span>' : ''}
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono">طلب عامل 👷</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-slate-400 mt-1">
+              <span class="text-emerald-400 font-bold">المهنة: ${escapeHTML(req.trade)}</span>
+              <span>•</span>
+              <span class="font-mono text-[11px]">${escapeHTML(req.wilaya || 'الجزائر')}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="space-y-2">
+        <p class="text-xs text-slate-300 leading-relaxed">${escapeHTML(req.description)}</p>
+        ${reqImageHTML}
+        <div class="flex items-center gap-4 text-xs text-slate-400 pt-1 font-mono">
+          <span><i class="fa-solid fa-phone text-emerald-400 ml-1"></i> ${escapeHTML(req.phone)}</span>
+        </div>
+      </div>
+      ${actionsHTML}
+    `;
+
+    container.appendChild(card);
+  });
+
+  // 3. Render Pending Study Offices
   pendingOffices.forEach(office => {
     const card = document.createElement('div');
     card.className = 'bg-bh-card border border-sky-500/40 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 relative overflow-hidden transition hover:border-sky-500/60';
 
     const isOwner = currentUser && office.authorId && currentUser.email.toLowerCase() === office.authorId.toLowerCase();
 
-    let officeBannerHTML = '';
-    if (isAdmin) {
-      officeBannerHTML = `
-        <div class="p-3 rounded-2xl bg-sky-500/15 border border-sky-500/40 text-sky-300 text-xs font-bold flex items-center justify-between flex-wrap gap-2">
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-compass-drafting text-base text-sky-400"></i>
-            <span>طلب تسجيل مكتب دراسات وهندسة معلق بانتظار قرار الإدارة</span>
-          </div>
-          <span class="text-[10px] text-sky-400/80 font-mono">${new Date(office.createdAt).toLocaleDateString()}</span>
+    let officeBannerHTML = `
+      <div class="p-3 rounded-2xl bg-sky-500/15 border border-sky-500/40 text-sky-300 text-xs font-bold flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid ${isAdmin ? 'fa-shield-halved' : 'fa-hourglass-half'} text-sky-400"></i>
+          <span>${isAdmin ? 'طلب تسجيل مكتب دراسات وهندسة معلق بانتظار قرار الإدارة' : 'بطاقة مكتب الدراسات قيد الفحص والمراجعة وسيتم اعتمادها قريباً'}</span>
         </div>
-      `;
-    } else {
-      officeBannerHTML = `
-        <div class="p-3 rounded-2xl bg-sky-500/15 border border-sky-500/40 text-sky-300 text-xs font-bold flex items-center justify-between flex-wrap gap-2">
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-hourglass-half animate-spin text-sm text-sky-400"></i>
-            <span>بطاقة مكتب الدراسات الخاص بك قيد الفحص والمراجعة، وستظهر للجميع فور اعتمادها</span>
-          </div>
-          <span class="text-[10px] text-sky-400/80 font-mono">${new Date(office.createdAt).toLocaleDateString()}</span>
-        </div>
-      `;
-    }
+        <span class="text-[10px] text-sky-400/80 font-mono">${new Date(office.createdAt).toLocaleDateString()}</span>
+      </div>
+    `;
 
     let actionsHTML = '';
     if (isAdmin) {
@@ -4329,6 +4665,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // 1. Initialize databases & seed accounts
   initAccountsDatabase();
   initDefaultFeedsIfEmpty();
+  initDefaultWorkerRequestsIfEmpty();
+  initDefaultGalleryIfEmpty();
 
   // Load persistent database from Electron disk if available
   if (window.electronDB) {
@@ -4436,3 +4774,764 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, 120);
 });
+
+/* ========================================================================= */
+/* 20. GALLERY & INTERIOR DESIGNS (معرض التصاميم والديكور)                  */
+/* ========================================================================= */
+
+let activeGalleryFilter = 'all';
+let cachedGalleryImagesBase64 = [];
+
+const DEFAULT_SAMPLE_GALLERY = [
+  {
+    id: 'gal_sample_01',
+    title: 'مطبخ عصري مجهز بأحدث الديكورات وخشب إسباني هيدروفوج',
+    roomType: 'kitchen',
+    materials: 'خشب MDF هيدروفوج مقاوم للمياه، كوارتز أبيض تركي، إضاءة LED مدمجة، سيراميك إسباني 60x120',
+    area: '16 م²',
+    description: 'تصميم وتنفيذ متكامل لمطبخ عصري يجمع بين الاستغلال المثالي للمساحات وسلاسة الحركة مع أجهزة كهرومنزلية مدمجة بالكامل.',
+    images: ['assets/batihub_banner.jpg'],
+    authorId: 'batihubdz@gmail.com',
+    authorName: 'BatiHub DZ (الإدارة)',
+    createdAt: '2026-11-20T10:00:00.000Z'
+  },
+  {
+    id: 'gal_sample_02',
+    title: 'حمام إيطالي فخم بتجهيزات حديثة ودش مدمج',
+    roomType: 'bathroom',
+    materials: 'بورسلان إيطالي رمادي، دوش إيطالي (Douche Italienne)، زجاج سيكوريت 10 مم، حنفيات دفن سوداء مات',
+    area: '9 م²',
+    description: 'تشطيب عصري بمستوى فندقي، عزل مائي احترافي، ومغسلة معلقة بتصميم مريح وعصري.',
+    images: ['assets/batihub_logo.png'],
+    authorId: 'batihubdz@gmail.com',
+    authorName: 'BatiHub DZ (الإدارة)',
+    createdAt: '2026-11-20T11:00:00.000Z'
+  },
+  {
+    id: 'gal_sample_03',
+    title: 'صالون فاخر بديكور مغربي جبسي معاصر',
+    roomType: 'living_room',
+    materials: 'جبس مغربي معاصر منقوش، رخام بيج كلاسيكي، إضاءة خفية متناسقة، دهان ديكوري فلفت مخملي',
+    area: '32 م²',
+    description: 'صالون استقبال فاخر يدمج أصالة النقش الجبسي مع حداثة التوزيع الضوئي والرخام اللامع.',
+    images: ['assets/batihub_banner.jpg'],
+    authorId: 'batihubdz@gmail.com',
+    authorName: 'BatiHub DZ (الإدارة)',
+    createdAt: '2026-11-20T12:00:00.000Z'
+  },
+  {
+    id: 'gal_sample_04',
+    title: 'مرحاض عصري معلق مع حائط حجري ديكوري',
+    roomType: 'toilet',
+    materials: 'مرحاض معلق (Cuvette suspendue)، خزان جداري مدفون (Geberit)، بلاط حجري بارز، شفاط هواء صامت',
+    area: '4 م²',
+    description: 'استغلال احترافي للمساحات الصغيرة مع سهولة فائقة في التنظيف وعصرية في المظهر.',
+    images: ['assets/batihub_logo.png'],
+    authorId: 'batihubdz@gmail.com',
+    authorName: 'BatiHub DZ (الإدارة)',
+    createdAt: '2026-11-20T13:00:00.000Z'
+  },
+  {
+    id: 'gal_sample_05',
+    title: 'واجهة فيلا عصرية بمزيج الحجر الطبيعي والمونوكوش',
+    roomType: 'facade',
+    materials: 'حجر ترافيرتينو طبيعي، طلاء مونوكوش مقاوم للطقس، ألومنيوم رمادي داكن، إضاءة معمارية ليلية',
+    area: '220 م²',
+    description: 'واجهة معمارية عصرية تتميز بالمتانة والجمال مع خطوط نظيفة وعزل حراري خارجي عالي الكفاءة.',
+    images: ['assets/batihub_banner.jpg'],
+    authorId: 'batihubdz@gmail.com',
+    authorName: 'BatiHub DZ (الإدارة)',
+    createdAt: '2026-11-20T14:00:00.000Z'
+  }
+];
+
+function initDefaultGalleryIfEmpty() {
+  let items = getStorageJSON('batihub_gallery_items', null);
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    setStorageJSON('batihub_gallery_items', DEFAULT_SAMPLE_GALLERY);
+  }
+}
+
+function setGalleryFilter(filter, btn) {
+  activeGalleryFilter = filter || 'all';
+
+  document.querySelectorAll('.gallery-filter-pill').forEach(b => {
+    b.classList.remove('active-gallery-pill', 'bg-bh-yellow', 'text-slate-950', 'border-bh-yellow');
+    b.classList.add('bg-bh-card', 'text-slate-300', 'border-bh-border');
+  });
+
+  if (btn) {
+    btn.classList.add('active-gallery-pill', 'bg-bh-yellow', 'text-slate-950', 'border-bh-yellow');
+    btn.classList.remove('bg-bh-card', 'text-slate-300', 'border-bh-border');
+  }
+
+  renderGalleryFeed();
+}
+
+function openAddGalleryModal() {
+  if (!currentUser || currentUser.role !== 'admin') {
+    showToast('هذه الميزة مخصصة لحساب الإدارة فقط!', 'warning');
+    return;
+  }
+
+  cachedGalleryImagesBase64 = [];
+  const title = document.getElementById('galleryTitle');
+  const materials = document.getElementById('galleryMaterials');
+  const area = document.getElementById('galleryArea');
+  const desc = document.getElementById('galleryDescription');
+  const countEl = document.getElementById('galleryImagesCount');
+  const previewCont = document.getElementById('galleryMultiImagesPreview');
+
+  if (title) title.value = '';
+  if (materials) materials.value = '';
+  if (area) area.value = '';
+  if (desc) desc.value = '';
+  if (countEl) countEl.textContent = '0 صور محددة';
+  if (previewCont) previewCont.innerHTML = '';
+
+  const modal = document.getElementById('modalAddGalleryDesign');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeAddGalleryModal() {
+  const modal = document.getElementById('modalAddGalleryDesign');
+  if (modal) modal.classList.add('hidden');
+}
+
+function handleGalleryImagesSelect(event) {
+  const files = Array.from(event.target.files || []);
+  if (files.length === 0) return;
+
+  const previewCont = document.getElementById('galleryMultiImagesPreview');
+  const countEl = document.getElementById('galleryImagesCount');
+
+  files.forEach(file => {
+    if (file.size > 5 * 1024 * 1024) {
+      showToast(`تم تخطي ${file.name} لأن حجمها أكبر من 5 ميغابايت`, 'warning');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64 = e.target.result;
+      cachedGalleryImagesBase64.push(base64);
+
+      if (countEl) countEl.textContent = `${cachedGalleryImagesBase64.length} صور محددة`;
+
+      if (previewCont) {
+        const thumb = document.createElement('div');
+        thumb.className = 'relative rounded-xl overflow-hidden border border-bh-border h-20 bg-bh-bg';
+        const idx = cachedGalleryImagesBase64.length - 1;
+        thumb.innerHTML = `
+          <img src="${base64}" alt="Thumb" class="w-full h-full object-cover">
+          <button type="button" onclick="removeGallerySelectedImage(${idx}, this)" class="absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] flex items-center justify-center cursor-pointer">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        `;
+        previewCont.appendChild(thumb);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeGallerySelectedImage(index, btn) {
+  if (btn && btn.parentElement) btn.parentElement.remove();
+  if (index >= 0 && index < cachedGalleryImagesBase64.length) {
+    cachedGalleryImagesBase64.splice(index, 1);
+  }
+  const countEl = document.getElementById('galleryImagesCount');
+  if (countEl) countEl.textContent = `${cachedGalleryImagesBase64.length} صور محددة`;
+}
+
+function handleCreateGallerySubmit(event) {
+  if (event) event.preventDefault();
+  if (!currentUser || currentUser.role !== 'admin') return;
+
+  const title = (document.getElementById('galleryTitle').value || '').trim();
+  const roomType = document.getElementById('galleryRoomType').value;
+  const area = (document.getElementById('galleryArea').value || '').trim();
+  const materials = (document.getElementById('galleryMaterials').value || '').trim();
+  const description = (document.getElementById('galleryDescription').value || '').trim();
+
+  if (!title || !materials) {
+    showToast('يرجى ملء عنوان التصميم ومواد البناء المستخدمة', 'warning');
+    return;
+  }
+
+  const items = getStorageJSON('batihub_gallery_items', []);
+  const newItem = {
+    id: 'gal_' + Date.now(),
+    title,
+    roomType,
+    materials,
+    area,
+    description,
+    images: cachedGalleryImagesBase64.length > 0 ? cachedGalleryImagesBase64 : ['assets/batihub_banner.jpg'],
+    authorId: currentUser.email,
+    authorName: currentUser.fullName || 'الإدارة',
+    createdAt: new Date().toISOString()
+  };
+
+  items.unshift(newItem);
+  setStorageJSON('batihub_gallery_items', items);
+
+  broadcastLiveEvent('new_gallery_item', newItem);
+
+  closeAddGalleryModal();
+  renderGalleryFeed();
+  showToast('تم نشر التصميم الجديد في المعرض بنجاح! 📸', 'success', 5000);
+}
+
+function deleteGalleryItem(itemId) {
+  if (!currentUser || currentUser.role !== 'admin') return;
+
+  showAppModalAlert('تأكيد حذف التصميم', 'هل أنت متأكد من حذف هذا التصميم من المعرض نهائياً؟', true, () => {
+    let items = getStorageJSON('batihub_gallery_items', []);
+    items = items.filter(i => i.id !== itemId);
+    setStorageJSON('batihub_gallery_items', items);
+    broadcastLiveEvent('delete_gallery_item', { itemId });
+    renderGalleryFeed();
+    showToast('تم حذف التصميم من المعرض', 'info');
+  });
+}
+
+function renderGalleryFeed() {
+  const container = document.getElementById('galleryFeedContainer');
+  if (!container) return;
+
+  initDefaultGalleryIfEmpty();
+  let items = getStorageJSON('batihub_gallery_items', []);
+
+  if (activeGalleryFilter !== 'all') {
+    items = items.filter(i => i.roomType === activeGalleryFilter);
+  }
+
+  const isAdmin = currentUser && currentUser.role === 'admin';
+
+  if (items.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full bg-bh-card border border-bh-border rounded-3xl p-10 text-center space-y-4">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center text-3xl">
+          <i class="fa-solid fa-camera-retro"></i>
+        </div>
+        <div class="space-y-1">
+          <h3 class="font-bold text-white text-base">لا توجد تصاميم في هذا القسم حالياً</h3>
+          <p class="text-xs text-slate-400 max-w-sm mx-auto">سيتم إضافة نماذج وتصاميم جديدة قريباً من قبل إدارة BatiHub DZ.</p>
+        </div>
+        ${isAdmin ? `
+          <button type="button" onclick="openAddGalleryModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black text-xs shadow-lg hover:opacity-95 transition cursor-pointer">
+            إضافة تصميم الآن ➕
+          </button>
+        ` : ''}
+      </div>
+    `;
+    return;
+  }
+
+  const roomLabels = {
+    kitchen: 'مطبخ (كوزينة) 🍳',
+    bathroom: 'حمام 🚿',
+    toilet: 'مرحاض 🚽',
+    living_room: 'صالون ومعيشة 🛋️',
+    bedroom: 'غرفة نوم 🛏️',
+    facade: 'واجهة ومدخل 🏛️'
+  };
+
+  container.innerHTML = '';
+  items.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'bg-bh-card border border-bh-border hover:border-amber-500/40 rounded-3xl overflow-hidden shadow-2xl transition flex flex-col justify-between group';
+
+    const mainImage = (item.images && item.images.length > 0) ? item.images[0] : 'assets/batihub_banner.jpg';
+    const totalImages = item.images ? item.images.length : 1;
+
+    let thumbsHTML = '';
+    if (item.images && item.images.length > 1) {
+      thumbsHTML = `
+        <div class="flex items-center gap-1.5 p-2 bg-bh-bg/90 border-t border-bh-border overflow-x-auto no-scrollbar">
+          ${item.images.map((img, idx) => `
+            <img src="${img}" onclick="openImageLightbox('${escapeHTML(img)}')" alt="Photo ${idx+1}" class="w-12 h-10 object-cover rounded-lg border border-bh-border hover:border-amber-400 cursor-pointer transition shrink-0">
+          `).join('')}
+        </div>
+      `;
+    }
+
+    const roomLabel = roomLabels[item.roomType] || 'تصميم معماري';
+
+    card.innerHTML = `
+      <div>
+        <div class="relative overflow-hidden max-h-56 bg-slate-950 cursor-pointer" onclick="openImageLightbox('${escapeHTML(mainImage)}')">
+          <img src="${mainImage}" alt="${escapeHTML(item.title)}" class="w-full h-52 object-cover group-hover:scale-103 transition duration-500">
+          <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-950/80 backdrop-blur-md text-amber-300 border border-amber-500/40">
+            ${roomLabel}
+          </span>
+          ${totalImages > 1 ? `
+            <span class="absolute bottom-3 left-3 px-2 py-0.5 rounded-full text-[10px] font-mono bg-black/75 text-white flex items-center gap-1">
+              <i class="fa-solid fa-images"></i> ${totalImages} صور
+            </span>
+          ` : ''}
+        </div>
+        ${thumbsHTML}
+
+        <div class="p-5 space-y-3 text-right">
+          <h4 class="font-heading font-black text-sm text-white leading-snug">${escapeHTML(item.title)}</h4>
+
+          <!-- Materials Info Strip -->
+          <div class="p-3 rounded-2xl bg-bh-bg border border-bh-border/70 space-y-1.5">
+            <div class="text-[11px] font-bold text-amber-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-cubes-stacked text-xs"></i>
+              <span>مواد البناء والتجهيز :</span>
+            </div>
+            <p class="text-[11px] text-slate-300 leading-relaxed font-sans">${escapeHTML(item.materials)}</p>
+          </div>
+
+          ${item.area ? `
+            <div class="flex items-center gap-2 text-xs text-slate-400 font-mono">
+              <i class="fa-solid fa-ruler-combined text-amber-400"></i>
+              <span class="text-white font-bold">المساحة:</span>
+              <span class="text-amber-300 font-bold">${escapeHTML(item.area)}</span>
+            </div>
+          ` : ''}
+
+          ${item.description ? `
+            <p class="text-xs text-slate-400 leading-relaxed">${escapeHTML(item.description)}</p>
+          ` : ''}
+        </div>
+      </div>
+
+      ${isAdmin ? `
+        <div class="p-4 pt-0 text-left">
+          <button type="button" onclick="deleteGalleryItem('${item.id}')" class="px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+            <i class="fa-regular fa-trash-can"></i>
+            <span>حذف التصميم</span>
+          </button>
+        </div>
+      ` : ''}
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+/* ========================================================================= */
+/* 21. WORKER REQUESTS ENGINE (طلب عامل / عمال)                               */
+/* ========================================================================= */
+
+let activeWorkerReqFilter = 'all';
+let cachedWorkerReqImageBase64 = null;
+
+const DEFAULT_SAMPLE_WORKER_REQUESTS = [
+  {
+    id: 'req_sample_01',
+    trade: 'بناء',
+    wilaya: 'قسنطينة',
+    phone: '0555123456',
+    description: 'نحتاج بناء محترف لبناء سياج حديقة وجدران فيلا طابق أرضي بطول 40 متراً، السلعة متوفرة كاملة في الورشة والمطلوب العمل بالمتر المربع أو الفيجور.',
+    image: null,
+    status: 'approved',
+    authorId: 'mouhanedguellif16@gmail.com',
+    authorName: 'Mouhaned Guellif',
+    likes: [],
+    comments: [],
+    createdAt: '2026-11-21T09:00:00.000Z'
+  },
+  {
+    id: 'req_sample_02',
+    trade: 'ترصيص وصحي',
+    wilaya: 'الجزائر العاصمة',
+    phone: '0660987654',
+    description: 'مطلوب ترصاص محترف لتركيب شبكة التدفئة المركزية وتمديدات المياه لحمامين ومطبخ في شقة جديدة، العمل ابتداء من الأسبوع القادم.',
+    image: null,
+    status: 'approved',
+    authorId: 'karim.artisan@gmail.com',
+    authorName: 'Karim Artisan',
+    likes: [],
+    comments: [],
+    createdAt: '2026-11-21T11:30:00.000Z'
+  }
+];
+
+function initDefaultWorkerRequestsIfEmpty() {
+  let reqs = getStorageJSON('batihub_worker_requests', null);
+  if (!reqs || !Array.isArray(reqs) || reqs.length === 0) {
+    setStorageJSON('batihub_worker_requests', DEFAULT_SAMPLE_WORKER_REQUESTS);
+  }
+}
+
+function filterWorkerRequests(trade, btn) {
+  activeWorkerReqFilter = trade || 'all';
+
+  document.querySelectorAll('.worker-req-filter-pill').forEach(b => {
+    b.classList.remove('active-filter');
+    const icon = b.querySelector('i');
+    if (icon) icon.classList.remove('text-slate-950');
+  });
+
+  if (btn) {
+    btn.classList.add('active-filter');
+    const icon = btn.querySelector('i');
+    if (icon) icon.classList.add('text-slate-950');
+  }
+
+  renderWorkerRequestsFeed();
+}
+
+function openCreateWorkerRequestModal() {
+  if (!currentUser) {
+    showToast('يرجى تسجيل الدخول أولاً لنشر طلب عامل', 'warning');
+    switchAuthView('google');
+    transitionToAuth();
+    return;
+  }
+
+  cachedWorkerReqImageBase64 = null;
+  const wilaya = document.getElementById('workerReqWilaya');
+  const phone = document.getElementById('workerReqPhone');
+  const desc = document.getElementById('workerReqDesc');
+  const imgInput = document.getElementById('workerReqImageInput');
+  const preview = document.getElementById('workerReqImagePreviewContainer');
+
+  if (wilaya) wilaya.value = '';
+  if (phone) phone.value = '';
+  if (desc) desc.value = '';
+  if (imgInput) imgInput.value = '';
+  if (preview) preview.classList.add('hidden');
+
+  const modal = document.getElementById('modalCreateWorkerRequest');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeCreateWorkerRequestModal() {
+  const modal = document.getElementById('modalCreateWorkerRequest');
+  if (modal) modal.classList.add('hidden');
+}
+
+function handleWorkerReqImageSelect(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  if (file.size > 4 * 1024 * 1024) {
+    showToast('حجم الصورة كبير جداً! اختر صورة أقل من 4 ميغابايت', 'warning');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    cachedWorkerReqImageBase64 = e.target.result;
+    const preview = document.getElementById('workerReqImagePreview');
+    const container = document.getElementById('workerReqImagePreviewContainer');
+    if (preview) preview.src = cachedWorkerReqImageBase64;
+    if (container) container.classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeWorkerReqSelectedImage() {
+  cachedWorkerReqImageBase64 = null;
+  const input = document.getElementById('workerReqImageInput');
+  const container = document.getElementById('workerReqImagePreviewContainer');
+  if (input) input.value = '';
+  if (container) container.classList.add('hidden');
+}
+
+function handleCreateWorkerRequestSubmit(event) {
+  if (event) event.preventDefault();
+  if (!currentUser) return;
+
+  const trade = document.getElementById('workerReqTrade').value;
+  const wilaya = (document.getElementById('workerReqWilaya').value || '').trim();
+  const phone = (document.getElementById('workerReqPhone').value || '').trim();
+  const description = (document.getElementById('workerReqDesc').value || '').trim();
+
+  if (!trade || !wilaya || !phone || !description) {
+    showToast('يرجى ملء جميع الحقول المطلوبة', 'warning');
+    return;
+  }
+
+  const isAdmin = currentUser.role === 'admin' || currentUser.email.toLowerCase() === 'batihubdz@gmail.com';
+  const status = isAdmin ? 'approved' : 'pending';
+
+  const requests = getStorageJSON('batihub_worker_requests', []);
+  const newReq = {
+    id: 'req_' + Date.now(),
+    trade,
+    wilaya,
+    phone,
+    description,
+    image: cachedWorkerReqImageBase64,
+    status: status,
+    authorId: currentUser.email,
+    authorName: currentUser.fullName || currentUser.firstName,
+    authorAvatar: currentUser.avatar,
+    likes: [],
+    comments: [],
+    createdAt: new Date().toISOString()
+  };
+
+  requests.unshift(newReq);
+  setStorageJSON('batihub_worker_requests', requests);
+
+  broadcastLiveEvent('new_worker_request', newReq);
+
+  closeCreateWorkerRequestModal();
+  renderWorkerRequestsFeed();
+  renderDedicatedPendingPostsTab();
+  updateTopPendingCategoryNavigation();
+  updateAdminPendingBadge();
+
+  if (status === 'pending') {
+    showToast('تم إرسال طلب العامل بنجاح! المنشور قيد الفحص والمراجعة من قبل الإدارة وسيظهر للجميع فور اعتماده.', 'info', 6000);
+  } else {
+    showToast('تم اعتماد ونشر طلب العامل بنجاح!', 'success');
+  }
+}
+
+function approveWorkerRequest(reqId) {
+  const reqs = getStorageJSON('batihub_worker_requests', []);
+  const target = reqs.find(r => r.id === reqId);
+  if (target) {
+    target.status = 'approved';
+    setStorageJSON('batihub_worker_requests', reqs);
+    broadcastLiveEvent('approve_worker_request', { reqId, request: target });
+    renderWorkerRequestsFeed();
+    renderDedicatedPendingPostsTab();
+    updateTopPendingCategoryNavigation();
+    updateAdminPendingBadge();
+    showToast('تم اعتماد ونشر طلب العامل للجميع بنجاح!', 'success');
+  }
+}
+
+function rejectWorkerRequest(reqId) {
+  const reqs = getStorageJSON('batihub_worker_requests', []);
+  const updated = reqs.filter(r => r.id !== reqId);
+  setStorageJSON('batihub_worker_requests', updated);
+  broadcastLiveEvent('reject_worker_request', { reqId });
+  renderWorkerRequestsFeed();
+  renderDedicatedPendingPostsTab();
+  updateTopPendingCategoryNavigation();
+  updateAdminPendingBadge();
+  showToast('تم رفض وحذف طلب العامل نهائياً.', 'info');
+}
+
+function deleteWorkerRequest(reqId) {
+  showAppModalAlert('تأكيد الحذف', 'هل أنت متأكد من حذف هذا الطلب نهائياً؟', true, () => {
+    const reqs = getStorageJSON('batihub_worker_requests', []);
+    const updated = reqs.filter(r => r.id !== reqId);
+    setStorageJSON('batihub_worker_requests', updated);
+    broadcastLiveEvent('delete_worker_request', { reqId });
+    renderWorkerRequestsFeed();
+    renderDedicatedPendingPostsTab();
+    updateTopPendingCategoryNavigation();
+    updateAdminPendingBadge();
+    showToast('تم حذف طلب العامل بنجاح', 'info');
+  });
+}
+
+function toggleRequestLike(reqId) {
+  if (!currentUser) {
+    showToast('يرجى تسجيل الدخول أولاً للإعجاب بالمنشور', 'warning');
+    return;
+  }
+
+  const reqs = getStorageJSON('batihub_worker_requests', []);
+  const req = reqs.find(r => r.id === reqId);
+  if (!req) return;
+
+  if (!req.likes) req.likes = [];
+  const uEmail = currentUser.email.toLowerCase();
+  const idx = req.likes.indexOf(uEmail);
+
+  if (idx > -1) {
+    req.likes.splice(idx, 1);
+  } else {
+    req.likes.push(uEmail);
+  }
+
+  setStorageJSON('batihub_worker_requests', reqs);
+  broadcastLiveEvent('toggle_request_like', { reqId, likes: req.likes });
+  renderWorkerRequestsFeed();
+}
+
+function toggleRequestComments(reqId) {
+  const cont = document.getElementById(`reqCommentsBox_${reqId}`);
+  if (cont) cont.classList.toggle('hidden');
+}
+
+function handleAddRequestComment(event, reqId) {
+  if (event) event.preventDefault();
+  if (!currentUser) {
+    showToast('يرجى تسجيل الدخول للتعليق', 'warning');
+    return;
+  }
+
+  const input = document.getElementById(`reqCommentInput_${reqId}`);
+  if (!input) return;
+
+  const text = (input.value || '').trim();
+  if (!text) return;
+
+  const reqs = getStorageJSON('batihub_worker_requests', []);
+  const req = reqs.find(r => r.id === reqId);
+  if (!req) return;
+
+  if (!req.comments) req.comments = [];
+  const comment = {
+    id: 'c_' + Date.now(),
+    text,
+    authorId: currentUser.email,
+    authorName: currentUser.fullName || currentUser.firstName,
+    authorAvatar: currentUser.avatar,
+    createdAt: new Date().toISOString()
+  };
+
+  req.comments.push(comment);
+  setStorageJSON('batihub_worker_requests', reqs);
+  broadcastLiveEvent('add_request_comment', { reqId, comment });
+
+  input.value = '';
+  renderWorkerRequestsFeed();
+  showToast('تمت إضافة تعليقك بنجاح', 'success');
+}
+
+function renderWorkerRequestsFeed() {
+  const container = document.getElementById('workerRequestsFeedContainer');
+  if (!container) return;
+
+  initDefaultWorkerRequestsIfEmpty();
+  let requests = getStorageJSON('batihub_worker_requests', []);
+
+  // Filter only approved
+  requests = requests.filter(r => r.status === 'approved' || !r.status);
+
+  if (activeWorkerReqFilter !== 'all') {
+    requests = requests.filter(r => r.trade === activeWorkerReqFilter);
+  }
+
+  if (requests.length === 0) {
+    container.innerHTML = `
+      <div class="bg-bh-card border border-bh-border rounded-3xl p-10 text-center space-y-4">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-3xl">
+          <i class="fa-solid fa-users-gear"></i>
+        </div>
+        <div class="space-y-1">
+          <h3 class="font-bold text-white text-base">لا توجد طلبات عمال في هذا التخصص حالياً</h3>
+          <p class="text-xs text-slate-400 max-w-sm mx-auto">هل تبحث عن عمال أو حرفيين لورشتك؟ انشر طلبك الآن مجاناً ليصل لآلاف الحرفيين.</p>
+        </div>
+        <button type="button" onclick="openCreateWorkerRequestModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-black text-xs shadow-lg hover:opacity-95 transition cursor-pointer">
+          نشر طلب عامل جديد ➕
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = '';
+  requests.forEach(req => {
+    const card = document.createElement('div');
+    card.className = 'bg-bh-card border border-bh-border hover:border-emerald-500/40 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 transition';
+
+    const isOwner = currentUser && req.authorId && currentUser.email.toLowerCase() === req.authorId.toLowerCase();
+    const isAdmin = currentUser && currentUser.role === 'admin';
+    const avatarHTML = renderAvatarImgTag(req.authorAvatar, req.authorName, req.authorId, 'w-12 h-12 rounded-full object-cover border-2 border-emerald-500/50 shadow-md');
+
+    let imageHTML = '';
+    if (req.image) {
+      imageHTML = `
+        <div class="rounded-2xl overflow-hidden border border-bh-border max-h-80 bg-bh-bg cursor-pointer" onclick="openImageLightbox('${escapeHTML(req.image)}')">
+          <img src="${req.image}" alt="Job Location" class="w-full h-auto object-cover hover:scale-102 transition duration-300">
+        </div>
+      `;
+    }
+
+    const likesCount = (req.likes || []).length;
+    const isLiked = currentUser && (req.likes || []).includes(currentUser.email.toLowerCase());
+    const commentsCount = (req.comments || []).length;
+
+    let commentsListHTML = '';
+    if (req.comments && req.comments.length > 0) {
+      commentsListHTML = req.comments.map(c => `
+        <div class="p-2.5 rounded-xl bg-bh-bg border border-bh-border/60 space-y-1">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-emerald-400">${escapeHTML(c.authorName || 'مستخدم')}</span>
+            <span class="text-[10px] text-slate-500 font-mono">${new Date(c.createdAt).toLocaleDateString()}</span>
+          </div>
+          <p class="text-xs text-slate-300">${escapeHTML(c.text)}</p>
+        </div>
+      `).join('');
+    }
+
+    card.innerHTML = `
+      <div class="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-bh-border/70">
+        <div class="flex items-center gap-3">
+          ${avatarHTML}
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h4 class="font-bold text-sm text-white">${escapeHTML(req.authorName || 'صاحب المشروع')}</h4>
+              ${isOwner ? '<span class="text-[9px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full border border-emerald-400/30">(أنت)</span>' : ''}
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono">طلب عامل 👷</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-slate-400 mt-1">
+              <span class="text-emerald-400 font-bold">المهنة: ${escapeHTML(req.trade)}</span>
+              <span>•</span>
+              <span class="font-mono text-[11px]">${escapeHTML(req.wilaya || 'الجزائر')}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          ${isOwner || isAdmin ? `
+            <button type="button" onclick="deleteWorkerRequest('${req.id}')" class="w-8 h-8 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 flex items-center justify-center transition cursor-pointer" title="حذف الطلب">
+              <i class="fa-regular fa-trash-can text-xs"></i>
+            </button>
+          ` : ''}
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <p class="text-xs text-slate-200 leading-relaxed">${escapeHTML(req.description)}</p>
+        ${imageHTML}
+      </div>
+
+      <!-- Action Buttons: Phone, Chat, Like, Comment -->
+      <div class="pt-3 border-t border-bh-border/70 flex items-center justify-between flex-wrap gap-2 text-xs">
+        <div class="flex items-center gap-2">
+          <a href="tel:${escapeHTML(req.phone)}" class="py-2 px-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold transition flex items-center gap-1.5 shadow-md active:scale-95">
+            <i class="fa-solid fa-phone text-xs"></i>
+            <span>اتصال: ${escapeHTML(req.phone)}</span>
+          </a>
+          <button type="button" onclick="startChatFromPost('${escapeHTML(req.authorId)}', '${escapeHTML(req.authorName || 'صاحب المشروع')}', '${escapeHTML(req.authorAvatar || '')}')" class="py-2 px-3.5 rounded-xl bg-bh-bg hover:bg-slate-800 text-emerald-400 border border-emerald-500/30 font-bold transition flex items-center gap-1.5 cursor-pointer active:scale-95">
+            <i class="fa-solid fa-comments"></i>
+            <span>محادثة خاصة</span>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button type="button" onclick="toggleRequestLike('${req.id}')" class="flex items-center gap-1.5 py-1.5 px-3 rounded-xl ${isLiked ? 'text-rose-400 bg-rose-500/10' : 'text-slate-400 hover:text-white'} transition cursor-pointer">
+            <i class="fa-solid fa-heart ${isLiked ? 'text-rose-500' : ''}"></i>
+            <span class="font-mono text-xs font-bold">${likesCount}</span>
+          </button>
+          <button type="button" onclick="toggleRequestComments('${req.id}')" class="flex items-center gap-1.5 py-1.5 px-3 rounded-xl text-slate-400 hover:text-white transition cursor-pointer">
+            <i class="fa-regular fa-comment"></i>
+            <span class="font-mono text-xs font-bold">${commentsCount}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Comments Box (Slide Down) -->
+      <div id="reqCommentsBox_${req.id}" class="hidden pt-3 border-t border-bh-border/50 space-y-3">
+        <div class="space-y-2 max-h-48 overflow-y-auto no-scrollbar">
+          ${commentsListHTML || '<p class="text-[11px] text-slate-500 text-center py-2">لا توجد تعليقات بعد، كن أول من يعلق!</p>'}
+        </div>
+        <form onsubmit="handleAddRequestComment(event, '${req.id}')" class="flex items-center gap-2 pt-1">
+          <input type="text" id="reqCommentInput_${req.id}" placeholder="اكتب تعليقاً..." class="flex-1 bg-bh-bg border border-bh-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400">
+          <button type="submit" class="py-2 px-3.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-xl text-xs transition cursor-pointer shadow-sm">
+            إرسال
+          </button>
+        </form>
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+}

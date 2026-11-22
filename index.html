@@ -103,10 +103,6 @@
         <img src="assets/batihub_logo.png" alt="BatiHub DZ" class="w-28 sm:w-32 h-auto object-contain mb-2 drop-shadow-lg">
         <h2 class="text-xl font-heading font-black text-white" id="authScreenHeaderTitle">BatiHub DZ • تسجيل الدخول</h2>
         <p class="text-xs text-slate-400 mt-1" id="authScreenHeaderSub">منصة المحترفين وأصحاب المشاريع وعروض العمل في الجزائر</p>
-        <div id="authLiveStatusBadge" class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/35 text-emerald-400 text-[11px] font-mono font-bold select-none shadow-sm">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="authLiveStatusText">متصل (نشط ديما 📶)</span>
-        </div>
       </div>
 
       <!-- VIEW 1: GOOGLE / GMAIL AUTH -->
@@ -134,18 +130,15 @@
             <i class="fa-brands fa-google text-sm"></i>
             <span>المتابعة باستخدام حساب Google (Gmail)</span>
           </button>
-        </form>
 
-        <!-- Quick Trusted Accounts on this device -->
-        <div id="trustedAccountsSection" class="hidden pt-3 border-t border-bh-border/70 text-right space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
-              <i class="fa-solid fa-mobile-screen-button text-emerald-400"></i>
-              <span>الحسابات الموثقة على هذا الجهاز (انقر للدخول المباشر) :</span>
-            </span>
+          <!-- Mobile Direct Google Account Picker button -->
+          <div id="mobileGooglePickerContainer" class="hidden pt-1">
+            <button type="button" onclick="handleMobileGoogleLogin()" class="w-full py-2.5 bg-bh-bg hover:bg-slate-800 border border-bh-yellow/40 text-slate-200 hover:text-white font-bold rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer active:scale-98">
+              <i class="fa-solid fa-mobile-screen-button text-bh-yellow"></i>
+              <span>تسجيل الدخول التلقائي بحساب الهاتف</span>
+            </button>
           </div>
-          <div id="trustedAccountsPillsList" class="flex flex-wrap gap-2"></div>
-        </div>
+        </form>
       </div>
 
       <!-- VIEW 2: OTP SECURITY CODE VERIFICATION -->
@@ -154,8 +147,8 @@
           <i class="fa-solid fa-shield-halved animate-pulse"></i>
         </div>
         <div class="space-y-1">
-          <h3 class="font-heading font-black text-white text-base">تحقق أمان Google • تأكيد جهاز جديد</h3>
-          <p class="text-xs text-slate-300">أدخل رمز الأمان المكون من 6 أرقام المرسل إلى بريدك :</p>
+          <h3 class="font-heading font-black text-white text-base">تأكيد جهاز جديد • رمز التحقق</h3>
+          <p class="text-xs text-slate-300">أدخل رمز التحقق المكون من 6 أرقام المرسل إلى بريدك :</p>
           <p id="otpTargetEmailDisplay" class="font-mono font-bold text-xs text-bh-yellow" dir="ltr">user@gmail.com</p>
         </div>
 
@@ -201,12 +194,6 @@
           </div>
 
           <div class="flex items-center gap-2.5 text-[11px]">
-            <!-- Always Active Network Badge ("نشط ديما 📶") -->
-            <div id="liveNetworkBadge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/35 text-emerald-400 text-[11px] font-mono font-bold select-none shadow-sm transition">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span id="liveNetworkText">متصل (نشط ديما 📶)</span>
-            </div>
-
             <!-- Live Clock -->
             <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-bh-card border border-bh-border text-slate-300 text-[11px] font-mono">
               <i class="fa-regular fa-clock text-bh-yellow"></i>
@@ -250,7 +237,15 @@
             </button>
             <button class="nav-tab" data-tab="tab-worker-board" onclick="switchTab('tab-worker-board')">
               <i class="fa-solid fa-briefcase text-bh-orange"></i>
-              <span data-i18n="nav_worker_board">عروض العمل</span>
+              <span data-i18n="nav_worker_board">عرض الخدمة</span>
+            </button>
+            <button class="nav-tab" data-tab="tab-worker-requests" onclick="switchTab('tab-worker-requests')">
+              <i class="fa-solid fa-users-gear text-emerald-400"></i>
+              <span data-i18n="nav_worker_requests">طلب عامل / عمال</span>
+            </button>
+            <button class="nav-tab" data-tab="tab-gallery" onclick="switchTab('tab-gallery')">
+              <i class="fa-solid fa-palette text-amber-400"></i>
+              <span data-i18n="nav_gallery">معرض التصاميم والديكور</span>
             </button>
             <button class="nav-tab" id="navTabPendingPosts" data-tab="tab-pending-posts" onclick="switchTab('tab-pending-posts')">
               <i id="navTabPendingIcon" class="fa-solid fa-hourglass-half text-amber-400"></i>
@@ -487,6 +482,114 @@
       </div>
 
       <!-- ========================================================================= -->
+      <!-- TAB 2.5: WORKER REQUESTS (طلب عامل / عمال)                                -->
+      <!-- ========================================================================= -->
+      <div id="tab-worker-requests" class="tab-content hidden space-y-6 text-right">
+
+        <!-- Header Card -->
+        <div class="bg-gradient-to-r from-bh-card via-bh-cardhover to-bh-card border border-bh-border rounded-2xl p-4 sm:p-6 flex flex-wrap items-center justify-between gap-4 shadow-xl">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-slate-950 text-xl font-black shadow-lg shadow-emerald-500/30">
+              <i class="fa-solid fa-users-gear"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="font-heading font-black text-lg sm:text-xl text-white tracking-tight" data-i18n="worker_requests_title">طلب عامل / عمال</h2>
+                <span class="text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> أصحاب المشاريع 👷
+                </span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5" data-i18n="worker_requests_sub">أصحاب المشاريع وأرباب العمل يطلبون عمالاً وحرفيين لإنجاز ورشاتهم وأشغالهم</p>
+            </div>
+          </div>
+
+          <button type="button" onclick="openCreateWorkerRequestModal()" class="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-95 text-slate-950 font-black rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition flex items-center gap-2 cursor-pointer active:scale-95">
+            <i class="fa-solid fa-circle-plus"></i>
+            <span data-i18n="btn_new_worker_request">نشر طلب عامل جديد</span>
+          </button>
+        </div>
+
+        <!-- Filter Pills for Trade Needed -->
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 pt-1 text-xs" id="workerRequestsFilterPills">
+          <button type="button" onclick="filterWorkerRequests('all', this)" class="worker-req-filter-pill active-filter">
+            <i class="fa-solid fa-layer-group text-slate-950"></i>
+            <span>الكل</span>
+          </button>
+          <button type="button" onclick="filterWorkerRequests('بناء', this)" class="worker-req-filter-pill">
+            <i class="fa-solid fa-trowel-bricks text-amber-400"></i>
+            <span>بناء</span>
+          </button>
+          <button type="button" onclick="filterWorkerRequests('كهرباء', this)" class="worker-req-filter-pill">
+            <i class="fa-solid fa-bolt text-yellow-400"></i>
+            <span>كهرباء</span>
+          </button>
+          <button type="button" onclick="filterWorkerRequests('ترصيص وصحي', this)" class="worker-req-filter-pill">
+            <i class="fa-solid fa-faucet-drip text-sky-400"></i>
+            <span>ترصيص وصحي</span>
+          </button>
+          <button type="button" onclick="filterWorkerRequests('دهان وديكور', this)" class="worker-req-filter-pill">
+            <i class="fa-solid fa-paint-roller text-emerald-400"></i>
+            <span>دهان وديكور</span>
+          </button>
+          <button type="button" onclick="filterWorkerRequests('بلاط وسيراميك', this)" class="worker-req-filter-pill">
+            <i class="fa-solid fa-shapes text-orange-400"></i>
+            <span>بلاط وسيراميك</span>
+          </button>
+          <button type="button" onclick="filterWorkerRequests('نجارة وألمنيوم', this)" class="worker-req-filter-pill">
+            <i class="fa-solid fa-hammer text-stone-400"></i>
+            <span>نجارة وألمنيوم</span>
+          </button>
+        </div>
+
+        <!-- Worker Requests Feed Container -->
+        <div id="workerRequestsFeedContainer" class="space-y-4"></div>
+
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- TAB 2.6: GALLERY & INTERIOR DESIGNS (معرض التصاميم والديكور)             -->
+      <!-- ========================================================================= -->
+      <div id="tab-gallery" class="tab-content hidden space-y-6 text-right">
+
+        <!-- Header Card -->
+        <div class="bg-gradient-to-r from-bh-card via-bh-cardhover to-bh-card border border-bh-border rounded-2xl p-4 sm:p-6 flex flex-wrap items-center justify-between gap-4 shadow-xl">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 text-xl font-black shadow-lg shadow-amber-500/30">
+              <i class="fa-solid fa-palette"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="font-heading font-black text-lg sm:text-xl text-white tracking-tight" data-i18n="gallery_title">معرض التصاميم والديكور</h2>
+                <span class="text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-mono">أفكار ونماذج 📸</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5" data-i18n="gallery_sub">استكشف أحدث نماذج المطابخ، الحمامات، الصالونات مع تفاصيل مواد البناء والمساحة</p>
+            </div>
+          </div>
+
+          <!-- Admin Add Design Button -->
+          <button type="button" id="btnAdminAddGallery" onclick="openAddGalleryModal()" class="hidden px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black text-xs shadow-lg hover:opacity-95 transition flex items-center gap-2 cursor-pointer active:scale-95">
+            <i class="fa-solid fa-plus text-sm"></i>
+            <span>إضافة تصميم ونموذج جديد للمعرض</span>
+          </button>
+        </div>
+
+        <!-- Room Filter Pills -->
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 pt-1 text-xs">
+          <button type="button" onclick="setGalleryFilter('all', this)" class="gallery-filter-pill active-gallery-pill px-3.5 py-1.5 rounded-xl border border-bh-yellow bg-bh-yellow text-slate-950 font-bold transition whitespace-nowrap cursor-pointer">الكل</button>
+          <button type="button" onclick="setGalleryFilter('kitchen', this)" class="gallery-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">مطابخ (كوزينة) 🍳</button>
+          <button type="button" onclick="setGalleryFilter('bathroom', this)" class="gallery-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">حمامات 🚿</button>
+          <button type="button" onclick="setGalleryFilter('toilet', this)" class="gallery-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">مراحيض 🚽</button>
+          <button type="button" onclick="setGalleryFilter('living_room', this)" class="gallery-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">صالونات ومعيشة 🛋️</button>
+          <button type="button" onclick="setGalleryFilter('bedroom', this)" class="gallery-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">غرف نوم 🛏️</button>
+          <button type="button" onclick="setGalleryFilter('facade', this)" class="gallery-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">واجهات ومداخل 🏛️</button>
+        </div>
+
+        <!-- Gallery Grid Container -->
+        <div id="galleryFeedContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+      </div>
+
+      <!-- ========================================================================= -->
       <!-- TAB: DEDICATED PENDING POSTS CATEGORY (المنشورات المعلقة - أعلى الواجهة)      -->
       <!-- ========================================================================= -->
       <div id="tab-pending-posts" class="tab-content hidden space-y-6 text-right">
@@ -592,37 +695,47 @@
     </main>
 
     <!-- MOBILE BOTTOM NAVIGATION -->
-    <nav id="mobileBottomNav" class="fixed bottom-0 left-0 right-0 z-40 bg-[#0c1017]/95 backdrop-blur-xl border-t border-bh-border px-2 py-1.5 flex items-center justify-around md:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.7)] safe-area-bottom">
-      <button type="button" onclick="switchTab('tab-scientific-calculator')" id="mNavCalc" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2 rounded-xl text-bh-yellow transition active:scale-90">
-        <i class="fa-solid fa-calculator text-base"></i>
-        <span class="text-[9px] font-bold mt-0.5 tracking-tight" data-i18n="m_nav_calc">الحاسبة</span>
+    <nav id="mobileBottomNav" class="fixed bottom-0 left-0 right-0 z-40 bg-[#0c1017]/95 backdrop-blur-xl border-t border-bh-border px-1 py-1.5 flex items-center justify-around md:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.7)] safe-area-bottom">
+      <button type="button" onclick="switchTab('tab-scientific-calculator')" id="mNavCalc" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-bh-yellow transition active:scale-90">
+        <i class="fa-solid fa-calculator text-sm"></i>
+        <span class="text-[8px] font-bold mt-0.5 tracking-tight" data-i18n="m_nav_calc">الحاسبة</span>
       </button>
 
-      <button type="button" onclick="switchTab('tab-worker-board')" id="mNavWorkers" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
-        <i class="fa-solid fa-briefcase text-base"></i>
-        <span class="text-[9px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_workers">عروض العمل</span>
+      <button type="button" onclick="switchTab('tab-worker-board')" id="mNavWorkers" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
+        <i class="fa-solid fa-briefcase text-sm"></i>
+        <span class="text-[8px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_workers">عرض الخدمة</span>
       </button>
 
-      <button type="button" onclick="switchTab('tab-pending-posts')" id="mNavPending" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2 rounded-xl text-slate-400 hover:text-white transition active:scale-90 relative">
-        <i id="mNavPendingIcon" class="fa-solid fa-hourglass-half text-base text-amber-400"></i>
-        <span id="mNavPendingBadge" class="hidden absolute top-0.5 right-2 px-1 rounded-full text-[8px] bg-amber-500 text-slate-950 font-black">0</span>
-        <span id="mNavPendingText" class="text-[9px] font-semibold mt-0.5 tracking-tight">معلقة</span>
+      <button type="button" onclick="switchTab('tab-worker-requests')" id="mNavWorkerRequests" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
+        <i class="fa-solid fa-users-gear text-sm text-emerald-400"></i>
+        <span class="text-[8px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_worker_requests">طلب عامل</span>
       </button>
 
-      <button type="button" onclick="switchTab('tab-study-offices')" id="mNavOffices" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
-        <i class="fa-solid fa-compass-drafting text-base text-sky-400"></i>
-        <span class="text-[9px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_offices">مكاتب دراسات</span>
+      <button type="button" onclick="switchTab('tab-gallery')" id="mNavGallery" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
+        <i class="fa-solid fa-palette text-sm text-amber-400"></i>
+        <span class="text-[8px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_gallery">المعرض</span>
       </button>
 
-      <button type="button" onclick="openMessagesHubModal()" id="mNavMessages" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2 rounded-xl text-slate-400 hover:text-white transition active:scale-90 relative">
-        <i class="fa-solid fa-comments text-base text-amber-400"></i>
-        <span id="mUnreadBadge" class="hidden absolute top-0.5 right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-        <span class="text-[9px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_messages">محادثات</span>
+      <button type="button" onclick="switchTab('tab-pending-posts')" id="mNavPending" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-400 hover:text-white transition active:scale-90 relative">
+        <i id="mNavPendingIcon" class="fa-solid fa-hourglass-half text-sm text-amber-400"></i>
+        <span id="mNavPendingBadge" class="hidden absolute top-0.5 right-1 px-1 rounded-full text-[7px] bg-amber-500 text-slate-950 font-black">0</span>
+        <span id="mNavPendingText" class="text-[8px] font-semibold mt-0.5 tracking-tight">معلقة</span>
       </button>
 
-      <button type="button" onclick="openUserProfileModal()" id="mNavProfile" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-2 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
-        <i class="fa-solid fa-user-circle text-base"></i>
-        <span class="text-[9px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_profile">حسابي</span>
+      <button type="button" onclick="switchTab('tab-study-offices')" id="mNavOffices" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
+        <i class="fa-solid fa-compass-drafting text-sm text-sky-400"></i>
+        <span class="text-[8px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_offices">مكاتب</span>
+      </button>
+
+      <button type="button" onclick="openMessagesHubModal()" id="mNavMessages" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-400 hover:text-white transition active:scale-90 relative">
+        <i class="fa-solid fa-comments text-sm text-amber-400"></i>
+        <span id="mUnreadBadge" class="hidden absolute top-0.5 right-1 w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+        <span class="text-[8px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_messages">محادثات</span>
+      </button>
+
+      <button type="button" onclick="openUserProfileModal()" id="mNavProfile" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
+        <i class="fa-solid fa-user-circle text-sm text-bh-yellow"></i>
+        <span class="text-[8px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_profile">حسابي</span>
       </button>
     </nav>
 
@@ -802,6 +915,149 @@
   </div>
 
   <!-- ========================================================================= -->
+  <!-- MODAL: CREATE WORKER REQUEST (نشر طلب عامل / عمال)                         -->
+  <!-- ========================================================================= -->
+  <div id="modalCreateWorkerRequest" class="modal-backdrop hidden">
+    <div class="modal-box max-w-lg w-full overflow-hidden relative text-right" dir="rtl">
+      <div class="px-5 py-4 border-b border-bh-border flex items-center justify-between bg-bh-cardhover">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+            <i class="fa-solid fa-users-gear text-sm"></i>
+          </div>
+          <h3 class="font-bold text-white text-sm" data-i18n="modal_create_request_title">نشر طلب عامل أو حرفي جديد</h3>
+        </div>
+        <button type="button" onclick="closeCreateWorkerRequestModal()" class="w-7 h-7 rounded-full bg-bh-bg hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleCreateWorkerRequestSubmit(event)" class="p-5 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1" data-i18n="lbl_req_trade">نوع العامل أو الحرفة المطلوبة :</label>
+          <select id="workerReqTrade" required class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-400">
+            <option value="بناء">بناء</option>
+            <option value="كهرباء">كهرباء</option>
+            <option value="ترصيص وصحي">ترصيص وصحي</option>
+            <option value="دهان وديكور">دهان وديكور</option>
+            <option value="بلاط وسيراميك">بلاط وسيراميك</option>
+            <option value="نجارة وألمنيوم">نجارة وألمنيوم</option>
+            <option value="حدادة وتسليح">حدادة وتسليح</option>
+            <option value="تكييف وتبريد">تكييف وتبريد</option>
+            <option value="أشغال حفر وتطهير">أشغال حفر وتطهير</option>
+            <option value="تخصص آخر">تخصص آخر</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1" data-i18n="lbl_req_wilaya">مكان العمل (الولاية) :</label>
+            <input type="text" id="workerReqWilaya" required placeholder="مثلاً: قسنطينة" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1" data-i18n="lbl_req_phone">رقم الهاتف للتواصل :</label>
+            <input type="tel" id="workerReqPhone" required placeholder="0550123456" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 font-mono text-left" dir="ltr">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1" data-i18n="lbl_req_desc">وصف العمل المطلوب وتفاصيل الورشة :</label>
+          <textarea id="workerReqDesc" required rows="3" placeholder="اكتب بالتفصيل العمل المطلوب، حجم المشروع، عدد العمال المطلوب، وموعد البدء..." class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 resize-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1" data-i18n="lbl_req_img">إرفاق صورة للورشة أو مكان العمل (اختياري) :</label>
+          <input type="file" id="workerReqImageInput" accept="image/*" onchange="handleWorkerReqImageSelect(event)" class="w-full text-xs text-slate-400 file:ml-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-500/20 file:text-emerald-400 hover:file:bg-emerald-500/30 cursor-pointer">
+          <div id="workerReqImagePreviewContainer" class="hidden mt-2 relative w-24 h-24 rounded-xl overflow-hidden border border-bh-border">
+            <img id="workerReqImagePreview" src="" alt="Preview" class="w-full h-full object-cover">
+            <button type="button" onclick="removeWorkerReqSelectedImage()" class="absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] flex items-center justify-center cursor-pointer">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-bh-border">
+          <button type="button" onclick="closeCreateWorkerRequestModal()" class="px-4 py-2 rounded-xl bg-bh-bg hover:bg-slate-800 text-slate-300 text-xs font-semibold transition cursor-pointer" data-i18n="btn_cancel">إلغاء</button>
+          <button type="submit" id="btnPublishWorkerRequest" class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 text-xs font-black shadow-md hover:opacity-95 transition cursor-pointer flex items-center gap-1.5">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span data-i18n="btn_publish_request">إرسال طلب العامل</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: ADD GALLERY DESIGN (خاص بالإدارة - إضافة نموذج ومعرض صور)          -->
+  <!-- ========================================================================= -->
+  <div id="modalAddGalleryDesign" class="modal-backdrop hidden">
+    <div class="modal-box max-w-lg w-full overflow-hidden relative text-right" dir="rtl">
+      <div class="px-5 py-4 border-b border-bh-border flex items-center justify-between bg-bh-cardhover">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
+            <i class="fa-solid fa-palette text-sm"></i>
+          </div>
+          <h3 class="font-bold text-white text-sm">إضافة نموذج وتصميم جديد للمعرض</h3>
+        </div>
+        <button type="button" onclick="closeAddGalleryModal()" class="w-7 h-7 rounded-full bg-bh-bg hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleCreateGallerySubmit(event)" class="p-5 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">عنوان التصميم أو النموذج :</label>
+          <input type="text" id="galleryTitle" required placeholder="مثلاً: مطبخ إيطالي عصري مجهز بأحدث الديكورات" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">الجهة / الغرفة المخصصة :</label>
+            <select id="galleryRoomType" required class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
+              <option value="kitchen">مطبخ (كوزينة)</option>
+              <option value="bathroom">حمام</option>
+              <option value="toilet">مرحاض</option>
+              <option value="living_room">صالون ومعيشة</option>
+              <option value="bedroom">غرفة نوم</option>
+              <option value="facade">واجهة ومدخل</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">المساحة الإجمالية (اختياري) :</label>
+            <input type="text" id="galleryArea" placeholder="مثلاً: 16 م²" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">مواد البناء والتجهيز المستخدمة :</label>
+          <input type="text" id="galleryMaterials" required placeholder="مثلاً: رخام طبيعي، إيبوكسي، خشب زان، جبس بورد مضيء، سيراميك إسباني..." class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">الوصف والتفاصيل الهندسية :</label>
+          <textarea id="galleryDescription" rows="2" placeholder="اكتب تفاصيل إضافية حول طريقة التنفيذ ومميزات هذا النموذج..." class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 resize-none"></textarea>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-semibold text-slate-300">صور التصميم (يمكنك اختيار أكثر من صورة) :</label>
+            <span class="text-[10px] text-amber-400 font-mono" id="galleryImagesCount">0 صور محددة</span>
+          </div>
+          <input type="file" id="galleryImagesInput" accept="image/*" multiple onchange="handleGalleryImagesSelect(event)" class="w-full text-xs text-slate-400 file:ml-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-500/20 file:text-amber-400 hover:file:bg-amber-500/30 cursor-pointer">
+          <div id="galleryMultiImagesPreview" class="grid grid-cols-4 gap-2 mt-2 max-h-40 overflow-y-auto no-scrollbar"></div>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-bh-border">
+          <button type="button" onclick="closeAddGalleryModal()" class="px-4 py-2 rounded-xl bg-bh-bg hover:bg-slate-800 text-slate-300 text-xs font-semibold transition cursor-pointer">إلغاء</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 text-xs font-black shadow-md hover:opacity-95 transition cursor-pointer flex items-center gap-1.5">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span>نشر التصميم في المعرض</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
   <!-- MODAL: ADD STUDY OFFICE                                                   -->
   <!-- ========================================================================= -->
   <div id="modalAddStudyOffice" class="modal-backdrop hidden">
@@ -904,9 +1160,35 @@
           <input type="file" id="profilePhotoInput" accept="image/*" onchange="handleProfilePhotoUpload(event)" class="hidden">
         </div>
         <div>
-          <h4 id="profileModalName" class="font-bold text-base text-white">مستخدم</h4>
+          <div class="flex items-center justify-center gap-2">
+            <h4 id="profileModalName" class="font-bold text-base text-white">مستخدم</h4>
+            <button type="button" onclick="toggleEditUserName()" class="text-xs text-bh-yellow hover:text-white p-1 transition cursor-pointer" title="تعديل اسم المستخدم">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+          </div>
           <p id="profileModalEmail" class="text-xs text-slate-400 font-mono" dir="ltr">user@gmail.com</p>
         </div>
+
+        <!-- Inline Name Editor Form -->
+        <div id="editUserNameContainer" class="hidden w-full bg-bh-bg/80 border border-bh-border rounded-xl p-3 space-y-2 mt-2">
+          <label class="block text-[11px] font-semibold text-slate-300 text-right">الاسم واللقب الجديد :</label>
+          <div class="flex items-center gap-2">
+            <input type="text" id="editUserNameInput" placeholder="أدخل اسمك الجديد..." class="flex-1 bg-bh-card border border-bh-border rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-bh-yellow">
+            <button type="button" onclick="handleSaveNewUserName()" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold text-xs hover:opacity-95 transition shadow-sm cursor-pointer">حفظ</button>
+            <button type="button" onclick="toggleEditUserName(false)" class="px-2 py-1.5 rounded-lg bg-slate-800 text-slate-400 text-xs cursor-pointer">إلغاء</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Change Username Option -->
+      <div>
+        <button type="button" onclick="toggleEditUserName()" class="w-full py-2.5 px-4 rounded-xl bg-bh-bg hover:bg-slate-800 text-slate-200 border border-bh-border hover:border-bh-yellow/40 text-xs font-semibold transition flex items-center justify-between cursor-pointer">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-user-pen text-bh-yellow"></i>
+            <span>تعديل اسم المستخدم (الاسم واللقب)</span>
+          </div>
+          <i class="fa-solid fa-chevron-left text-[10px] text-slate-400"></i>
+        </button>
       </div>
 
       <!-- Language Switcher -->
