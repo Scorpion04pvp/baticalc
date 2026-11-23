@@ -61,6 +61,12 @@ const I18N = {
     m_nav_offices: 'مكاتب دراسات',
     m_nav_messages: 'محادثات',
     m_nav_profile: 'حسابي',
+    nav_building_materials: 'دليل مواد البناء',
+    nav_ai_engineer: 'مساعد المهندس الذكي (AI)',
+    m_nav_materials: 'مواد البناء',
+    m_nav_ai: 'ذكاء AI',
+    materials_title: 'دليل وموسوعة مواد البناء في الجزائر',
+    materials_sub: 'استكشف جميع مواد البناء المعتمدة في الجزائر: مجالات الاستعمال، مواد الصنع، ومتوسط الأسعار بالدينار الجزائري',
     worker_board_title: 'عرض الخدمة والحرفيين',
     worker_board_sub: 'انشر واستكشف عروض خدمات البناء ومشاريع الحرفيين في الجزائر مع تواصل مباشر',
     btn_new_worker_post: 'نشر عرض خدمة جديد',
@@ -142,6 +148,12 @@ const I18N = {
     m_nav_workers: 'Services',
     m_nav_worker_requests: 'Demandes',
     m_nav_gallery: 'Galerie',
+    nav_building_materials: 'Matériaux de construction',
+    nav_ai_engineer: 'Assistant Ingénieur AI',
+    m_nav_materials: 'Matériaux',
+    m_nav_ai: 'IA Génie',
+    materials_title: 'Catalogue des matériaux de construction en Algérie',
+    materials_sub: 'Spécifications techniques, domaines d\'application et prix moyens en Dinars Algériens',
     m_nav_offices: 'Bureaux',
     m_nav_messages: 'Messages',
     m_nav_profile: 'Profil',
@@ -218,6 +230,12 @@ const I18N = {
     m_nav_workers: 'Services',
     m_nav_worker_requests: 'Requests',
     m_nav_gallery: 'Gallery',
+    nav_building_materials: 'Building Materials',
+    nav_ai_engineer: 'AI Architectural Assistant',
+    m_nav_materials: 'Materials',
+    m_nav_ai: 'Bati AI',
+    materials_title: 'Building Materials Directory in Algeria',
+    materials_sub: 'Technical specifications, applications, and average prices in Algerian Dinars',
     m_nav_offices: 'Offices',
     m_nav_messages: 'Chat',
     m_nav_profile: 'Profile',
@@ -854,8 +872,9 @@ async function handleGoogleAuthSubmit(event) {
   if (!input) return;
 
   const email = (input.value || '').trim().toLowerCase();
-  if (!email || !email.includes('@')) {
-    showToast('يرجى إدخال عنوان بريد إلكتروني صحيح (Gmail)', 'warning');
+  const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  if (!email || !email.includes('@') || !gmailRegex.test(email)) {
+    showToast('البريد الإلكتروني غير صحيح أو غير متواجد، يرجى كتابة عنوان بريد Google (Gmail) صحيح وموثق', 'warning');
     return;
   }
 
@@ -1049,8 +1068,8 @@ async function sendOtpEmail(toEmail, otpCode, purpose = 'registration') {
         </div>
         <p style="color: #64748b; font-size: 11px; margin-bottom: 0;">هذا الرمز صالح لمدة 15 دقيقة. لا تشاركه مع أي شخص لحماية حسابك.</p>
       </div>
-      <p style="text-align: center; font-size: 11px; color: #64748b; margin-top: 20px;">
-        BatiHub DZ Official Support • batihubdz@gmail.com
+      <p style="text-align: center; font-size: 12px; color: #ffa000; font-weight: bold; margin-top: 20px; letter-spacing: 1px;">
+        Support Bati Hub DZ
       </p>
     </div>
   `;
@@ -1373,7 +1392,9 @@ function switchTab(tabId) {
     'tab-worker-requests': 'mNavWorkerRequests',
     'tab-gallery': 'mNavGallery',
     'tab-pending-posts': 'mNavPending',
-    'tab-study-offices': 'mNavOffices'
+    'tab-study-offices': 'mNavOffices',
+    'tab-building-materials': 'mNavMaterials',
+    'tab-ai-engineer': 'mNavAi'
   };
 
   document.querySelectorAll('.mobile-nav-item').forEach(item => {
@@ -1397,6 +1418,10 @@ function switchTab(tabId) {
     renderWorkerRequestsFeed();
   } else if (tabId === 'tab-gallery') {
     renderGalleryFeed();
+  } else if (tabId === 'tab-building-materials') {
+    renderBuildingMaterialsFeed();
+  } else if (tabId === 'tab-ai-engineer') {
+    // initialize AI if needed
   } else if (tabId === 'tab-worker-board') {
     renderWorkerPostsFeed();
   }
@@ -5535,3 +5560,917 @@ function renderWorkerRequestsFeed() {
     container.appendChild(card);
   });
 }
+
+
+/* ========================================================================= */
+/* 22. TWEMOJI & 3D VECTOR EMOJI ENHANCER                                    */
+/* ========================================================================= */
+
+function parseTwemoji(element) {
+  if (typeof window !== 'undefined' && window.twemoji && typeof window.twemoji.parse === 'function') {
+    try {
+      window.twemoji.parse(element || document.body, {
+        folder: 'svg',
+        ext: '.svg'
+      });
+    } catch (e) {
+      // silent fallback
+    }
+  }
+}
+
+// Automatically parse Twemoji on DOM load and after render passes
+window.addEventListener('load', () => {
+  setTimeout(() => parseTwemoji(), 600);
+});
+
+/* ========================================================================= */
+/* 23. BUILDING MATERIALS CATALOG ENGINE (دليل مواد البناء في الجزائر)       */
+/* ========================================================================= */
+
+let activeMaterialFilter = 'all';
+let cachedMaterialImageBase64 = null;
+
+const DEFAULT_BUILDING_MATERIALS = [
+  {
+    id: 'mat_sample_01',
+    name: 'إسمنت بورتلاندي CPJ 42.5 (لافارج / متين / الشلف)',
+    category: 'cement',
+    price: '520 دج للكيس (50 كغ)',
+    usage: 'صب الهياكل الخرسانية المسلحة، الأعمدة، القواعد والأساسات (Semelles)، والأسقف الخرسانية المصبوبة ذات المقاومة العالية للضغط.',
+    composition: 'كلينكر نقي 95%، جبس طبيعي 5% مع مركبات سيليكات ثلاثية الكالسيوم المطابقة للمواصفة القياسية الجزائرية NA 442.',
+    image: 'assets/batihub_banner.jpg',
+    author: 'batihubdz@gmail.com',
+    createdAt: '2026-11-20T10:00:00.000Z'
+  },
+  {
+    id: 'mat_sample_02',
+    name: 'حديد التسليح عالي المقاومة FeE500 (توسيالي و بلارة AQS)',
+    category: 'steel',
+    price: '10,800 دج للقنطار (100 كغ)',
+    usage: 'تسليح الأعمدة والميدات (Longrines)، أقفاص الأساسات، وتدعيم الكمرات والأسقف ضد قوى الشد والزلازل وفق نظام RPA99.',
+    composition: 'فولاذ كربوني معالج بالدرفلة الحرارية العالية، أقطار من Ø6 إلى Ø25 ملم مع تعرجات لولبية مقاومة للانزلاق داخل الخرسانة.',
+    image: 'assets/batihub_banner.jpg',
+    author: 'batihubdz@gmail.com',
+    createdAt: '2026-11-20T10:05:00.000Z'
+  },
+  {
+    id: 'mat_sample_03',
+    name: 'آجر أحمر طيني مجوف 12 ثقب (Brique rouge 12 trous)',
+    category: 'brick',
+    price: '38 دج للقطعة',
+    usage: 'بناء وتشييد الجدران الخارجية المزدوجة العازلة مع ترك فراغ هوائي (Double cloison) وحشو العوازل الحرارية والصوتية.',
+    composition: 'طين أحمر نقي محروق في أفران حرارية عند 950° مئوية، عازل حراري وصوتي طبيعي خفيف الوزن.',
+    image: 'assets/batihub_banner.jpg',
+    author: 'batihubdz@gmail.com',
+    createdAt: '2026-11-20T10:10:00.000Z'
+  },
+  {
+    id: 'mat_sample_04',
+    name: 'طوب إسمنتي مجوف 15سم و 20سم (Parpaing)',
+    category: 'brick',
+    price: '48 دج للقطعة',
+    usage: 'بناء جدران الأسوار الخارجية، جدران الأقبية (Sous-sol)، وحواجز ورشات البناء والمستودعات ومجاري الصرف.',
+    composition: 'خليط الإسمنت مع الرمل الخشن والحصى الصغير مع كبس هيدروليكي آلي عالي الكثافة ومقاوم للرطوبة.',
+    image: 'assets/batihub_banner.jpg',
+    author: 'batihubdz@gmail.com',
+    createdAt: '2026-11-20T10:15:00.000Z'
+  },
+  {
+    id: 'mat_sample_05',
+    name: 'رمل الوادي الطبيعي المغسول (Sable d\'oued)',
+    category: 'aggregates',
+    price: '18,500 دج للشاحنة (15 م³)',
+    usage: 'صناعة الملاط (Mortier) للياسة وتلبيس الجدران، تركيب السيراميك والرخام، وخلط الخرسانة المسلحة الناعمة.',
+    composition: 'حبيبات كوارتز ورمل سليسي طبيعي مفروز خالي من الطين والشوائب العضوية بنعومة مثالية (0-3 ملم).',
+    image: 'assets/batihub_banner.jpg',
+    author: 'batihubdz@gmail.com',
+    createdAt: '2026-11-20T10:20:00.000Z'
+  },
+  {
+    id: 'mat_sample_06',
+    name: 'حصى خرساني متدرج 8/15 و 15/25 (Gravier concassé)',
+    category: 'aggregates',
+    price: '22,000 دج للشاحنة (16 م³)',
+    usage: 'المكون الرئيسي للخرسانة المسلحة للهياكل والقواعد والأسقف لضمان تماسك الهيكل ومقاومة إجهاد الكسر.',
+    composition: 'حجارة كلسية صلبة مطحونة ومفروزة بكسارات المقالع (Carrière) حسب المقاييس الهندسية الجزائرية.',
+    image: 'assets/batihub_banner.jpg',
+    author: 'batihubdz@gmail.com',
+    createdAt: '2026-11-20T10:25:00.000Z'
+  },
+  {
+    id: 'mat_sample_07',
+    name: 'عازل الرطوبة والمياه باكس رول 4 ملم (Paxroll Étanchéité SBS)',
+    category: 'insulation',
+    price: '3,800 دج للفة (10 م²)',
+    usage: 'عزل أسطح المنازل والشرفات، حمامات السباحة، وقواعد البنايات ضد تسرب مياه الأمطار والرطوبة الأرضية.',
+    composition: 'غشاء بيتوميني بوليمري مقوى بألياف البوليستر والألومنيوم مع طبقة حماية معدنية مقاومة للشمس.',
+    image: 'assets/batihub_banner.jpg',
+    author: 'batihubdz@gmail.com',
+    createdAt: '2026-11-20T10:30:00.000Z'
+  },
+  {
+    id: 'mat_sample_08',
+    name: 'صفائح الجبس بورد كناوف BA13 (Plâtre Knauf)',
+    category: 'paint',
+    price: '1,150 دج للصفيحة (3 م²)',
+    usage: 'الأسقف المعلقة الديكورية (Faux plafond)، القواطع الجدارية العازلة للصوت، والديكورات المضيئة للصالونات.',
+    composition: 'جبس طبيعي مكلس ومغلف بطبقتين من الكرتون المعالج المقاوم للرطوبة والحرائق.',
+    image: 'assets/batihub_banner.jpg',
+    author: 'batihubdz@gmail.com',
+    createdAt: '2026-11-20T10:35:00.000Z'
+  }
+];
+
+function initDefaultBuildingMaterialsIfEmpty() {
+  let mats = getStorageJSON('batihub_building_materials', null);
+  if (!mats || !Array.isArray(mats) || mats.length === 0) {
+    setStorageJSON('batihub_building_materials', DEFAULT_BUILDING_MATERIALS);
+  }
+}
+
+function filterBuildingMaterials(category, btn) {
+  activeMaterialFilter = category || 'all';
+
+  document.querySelectorAll('.material-filter-pill').forEach(b => {
+    b.classList.remove('active-filter');
+    b.classList.remove('border-bh-yellow');
+    b.classList.remove('bg-bh-yellow');
+    b.classList.remove('text-slate-950');
+    b.classList.add('bg-bh-card');
+    b.classList.add('text-slate-300');
+  });
+
+  if (btn) {
+    btn.classList.add('active-filter');
+    btn.classList.remove('bg-bh-card');
+    btn.classList.remove('text-slate-300');
+    btn.classList.add('border-bh-yellow');
+    btn.classList.add('bg-bh-yellow');
+    btn.classList.add('text-slate-950');
+  }
+
+  renderBuildingMaterialsFeed();
+}
+
+function handleSearchMaterials(query) {
+  renderBuildingMaterialsFeed(query);
+}
+
+function openAddBuildingMaterialModal() {
+  if (!currentUser || currentUser.role !== 'admin') {
+    showToast('هذه الميزة مخصصة لإدارة المنصة فقط', 'warning');
+    return;
+  }
+
+  cachedMaterialImageBase64 = null;
+  const name = document.getElementById('matNameInput');
+  const price = document.getElementById('matPriceInput');
+  const usage = document.getElementById('matUsageInput');
+  const comp = document.getElementById('matCompositionInput');
+  const imgInput = document.getElementById('matImageInput');
+  const preview = document.getElementById('matImagePreviewContainer');
+
+  if (name) name.value = '';
+  if (price) price.value = '';
+  if (usage) usage.value = '';
+  if (comp) comp.value = '';
+  if (imgInput) imgInput.value = '';
+  if (preview) preview.classList.add('hidden');
+
+  const modal = document.getElementById('modalAddBuildingMaterial');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeAddBuildingMaterialModal() {
+  const modal = document.getElementById('modalAddBuildingMaterial');
+  if (modal) modal.classList.add('hidden');
+}
+
+function handleMaterialImageSelect(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('حجم الصورة كبير! اختر صورة أقل من 5 ميغابايت', 'warning');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    cachedMaterialImageBase64 = e.target.result;
+    const preview = document.getElementById('matImagePreview');
+    const container = document.getElementById('matImagePreviewContainer');
+    if (preview) preview.src = cachedMaterialImageBase64;
+    if (container) container.classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleCreateMaterialSubmit(event) {
+  if (event) event.preventDefault();
+  if (!currentUser || currentUser.role !== 'admin') return;
+
+  const name = (document.getElementById('matNameInput').value || '').trim();
+  const category = document.getElementById('matCategoryInput').value;
+  const price = (document.getElementById('matPriceInput').value || '').trim();
+  const usage = (document.getElementById('matUsageInput').value || '').trim();
+  const composition = (document.getElementById('matCompositionInput').value || '').trim();
+
+  if (!name || !price || !usage || !composition) {
+    showToast('يرجى ملء جميع الحقول المطلوبة لمادة البناء', 'warning');
+    return;
+  }
+
+  const newMat = {
+    id: 'mat_' + Date.now(),
+    name,
+    category,
+    price,
+    usage,
+    composition,
+    image: cachedMaterialImageBase64 || 'assets/batihub_banner.jpg',
+    author: currentUser.email,
+    createdAt: new Date().toISOString()
+  };
+
+  const materials = getStorageJSON('batihub_building_materials', []);
+  materials.unshift(newMat);
+  setStorageJSON('batihub_building_materials', materials);
+
+  broadcastLiveEvent('new_building_material', newMat);
+
+  closeAddBuildingMaterialModal();
+  renderBuildingMaterialsFeed();
+  showToast('تمت إضافة مادة البناء الجديدة ونشرها بالدليل بنجاح! 🧱', 'success');
+}
+
+function deleteBuildingMaterial(matId) {
+  if (!currentUser || currentUser.role !== 'admin') return;
+
+  showAppModalAlert('تأكيد حذف المادة', 'هل أنت متأكد من حذف هذه المادة من دليل مواد البناء؟', true, () => {
+    let materials = getStorageJSON('batihub_building_materials', []);
+    materials = materials.filter(m => m.id !== matId);
+    setStorageJSON('batihub_building_materials', materials);
+    broadcastLiveEvent('delete_building_material', { matId });
+    renderBuildingMaterialsFeed();
+    showToast('تم حذف المادة بنجاح', 'info');
+  });
+}
+
+function renderBuildingMaterialsFeed(searchQuery = '') {
+  const container = document.getElementById('buildingMaterialsGrid');
+  if (!container) return;
+
+  initDefaultBuildingMaterialsIfEmpty();
+  let materials = getStorageJSON('batihub_building_materials', []);
+
+  if (activeMaterialFilter !== 'all') {
+    materials = materials.filter(m => m.category === activeMaterialFilter);
+  }
+
+  if (searchQuery && searchQuery.trim() !== '') {
+    const q = searchQuery.toLowerCase().trim();
+    materials = materials.filter(m => 
+      (m.name && m.name.toLowerCase().includes(q)) ||
+      (m.usage && m.usage.toLowerCase().includes(q)) ||
+      (m.composition && m.composition.toLowerCase().includes(q))
+    );
+  }
+
+  const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.email.toLowerCase() === 'batihubdz@gmail.com');
+
+  if (materials.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full bg-bh-card border border-bh-border rounded-3xl p-10 text-center space-y-4">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center text-3xl">
+          <i class="fa-solid fa-cubes-stacked"></i>
+        </div>
+        <div class="space-y-1">
+          <h3 class="font-bold text-white text-base">لا توجد مواد بناء مطابقة للبحث</h3>
+          <p class="text-xs text-slate-400 max-w-sm mx-auto">جرب البحث بكلمات أخرى أو اختر تصنيفاً مختلفاً من شريط التصفية أعلاه.</p>
+        </div>
+        ${isAdmin ? `
+          <button type="button" onclick="openAddBuildingMaterialModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black text-xs shadow-lg hover:opacity-95 transition cursor-pointer">
+            إضافة مادة بناء جديدة ➕
+          </button>
+        ` : ''}
+      </div>
+    `;
+    return;
+  }
+
+  const categoryLabels = {
+    cement: 'إسمنت وخرسانة 🏗️',
+    steel: 'حديد وتسليح ⚙️',
+    brick: 'طوب وآجر 🧱',
+    aggregates: 'رمل وحصى ⏳',
+    insulation: 'عوازل وكتامة 🛡️',
+    paint: 'دهان وتشطيب 🎨',
+    plumbing: 'أنابيب وكهرباء ⚡'
+  };
+
+  container.innerHTML = '';
+  materials.forEach(mat => {
+    const card = document.createElement('div');
+    card.className = 'bg-bh-card border border-bh-border hover:border-amber-500/50 rounded-3xl overflow-hidden shadow-2xl transition flex flex-col justify-between group';
+
+    const catLabel = categoryLabels[mat.category] || 'مواد بناء';
+    const imageSrc = mat.image || 'assets/batihub_banner.jpg';
+
+    card.innerHTML = `
+      <div>
+        <div class="relative overflow-hidden max-h-48 bg-slate-950 cursor-pointer" onclick="openImageLightbox('${escapeHTML(imageSrc)}')">
+          <img src="${imageSrc}" alt="${escapeHTML(mat.name)}" class="w-full h-44 object-cover group-hover:scale-103 transition duration-500">
+          <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-950/80 backdrop-blur-md text-amber-300 border border-amber-500/40">
+            ${catLabel}
+          </span>
+          <span class="absolute bottom-3 left-3 px-2.5 py-1 rounded-xl text-xs font-mono font-bold bg-amber-500 text-slate-950 shadow-md">
+            ${escapeHTML(mat.price)}
+          </span>
+        </div>
+
+        <div class="p-5 space-y-3.5 text-right">
+          <h4 class="font-heading font-black text-sm text-white leading-snug">${escapeHTML(mat.name)}</h4>
+
+          <!-- Applications / Usage Box -->
+          <div class="p-3 rounded-2xl bg-bh-bg border border-bh-border/70 space-y-1">
+            <div class="text-[11px] font-bold text-amber-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-screwdriver-wrench text-xs"></i>
+              <span>مجالات والاستعمالات (لواه يستعملوه) :</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">${escapeHTML(mat.usage)}</p>
+          </div>
+
+          <!-- Composition Box -->
+          <div class="p-3 rounded-2xl bg-bh-bg/50 border border-bh-border/50 space-y-1">
+            <div class="text-[11px] font-bold text-sky-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-atom text-xs"></i>
+              <span>مكونات ومواد الصنع :</span>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed font-sans">${escapeHTML(mat.composition)}</p>
+          </div>
+        </div>
+      </div>
+
+      ${isAdmin ? `
+        <div class="p-4 pt-0 text-left border-t border-bh-border/60 flex items-center justify-end">
+          <button type="button" onclick="deleteBuildingMaterial('${mat.id}')" class="px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+            <i class="fa-regular fa-trash-can"></i>
+            <span>حذف المادة</span>
+          </button>
+        </div>
+      ` : ''}
+    `;
+
+    container.appendChild(card);
+  });
+
+  parseTwemoji(container);
+}
+
+/* ========================================================================= */
+/* 24. BATI-HUB AI ASSISTANT & COST ESTIMATOR (مساعد المهندس وحاسبة التكاليف) */
+/* ========================================================================= */
+
+let aiAttachedImageBase64 = null;
+let aiImageGenMode = false;
+let estBlueprintBase64 = null;
+
+function switchAiSubMode(mode) {
+  const btnChat = document.getElementById('btnAiModeChat');
+  const btnEst = document.getElementById('btnAiModeEstimator');
+  const contChat = document.getElementById('aiChatSubModeContainer');
+  const contEst = document.getElementById('aiEstimatorSubModeContainer');
+
+  if (mode === 'chat') {
+    if (btnChat) {
+      btnChat.className = 'px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer bg-cyan-500 text-slate-950 shadow-md';
+    }
+    if (btnEst) {
+      btnEst.className = 'px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition cursor-pointer';
+    }
+    if (contChat) contChat.classList.remove('hidden');
+    if (contEst) contEst.classList.add('hidden');
+  } else {
+    if (btnEst) {
+      btnEst.className = 'px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer bg-cyan-500 text-slate-950 shadow-md';
+    }
+    if (btnChat) {
+      btnChat.className = 'px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition cursor-pointer';
+    }
+    if (contEst) contEst.classList.remove('hidden');
+    if (contChat) contChat.classList.add('hidden');
+  }
+}
+
+function handleAiImageSelect(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    aiAttachedImageBase64 = e.target.result;
+    const strip = document.getElementById('aiAttachmentPreviewStrip');
+    const thumb = document.getElementById('aiAttachmentImgThumb');
+    const nameLabel = document.getElementById('aiAttachmentName');
+    if (thumb) thumb.src = aiAttachedImageBase64;
+    if (nameLabel) nameLabel.innerText = file.name || 'مخطط مرفق';
+    if (strip) strip.classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeAiAttachment() {
+  aiAttachedImageBase64 = null;
+  const strip = document.getElementById('aiAttachmentPreviewStrip');
+  const input = document.getElementById('aiImageFileInput');
+  if (strip) strip.classList.add('hidden');
+  if (input) input.value = '';
+}
+
+function toggleAiImageGenMode() {
+  aiImageGenMode = !aiImageGenMode;
+  const btn = document.getElementById('btnAiGenToggle');
+  if (btn) {
+    if (aiImageGenMode) {
+      btn.classList.add('bg-amber-500', 'text-slate-950');
+      btn.classList.remove('bg-bh-bg', 'text-amber-400');
+      showToast('تم تفعيل وضع توليد الصور المعمارية 🎨 اكتب وصف التصميم المطلوب', 'info');
+    } else {
+      btn.classList.remove('bg-amber-500', 'text-slate-950');
+      btn.classList.add('bg-bh-bg', 'text-amber-400');
+    }
+  }
+}
+
+function sendAiQuickPrompt(promptText) {
+  const input = document.getElementById('aiChatInput');
+  if (input) {
+    input.value = promptText;
+    handleAiChatSubmit();
+  }
+}
+
+// Strict AI Engineering Knowledge Base & Guardrails
+function getAiEngineeringResponse(userPrompt, hasImage, isGenMode) {
+  const lower = userPrompt.toLowerCase().trim();
+
+  // 1. Creator / Developer inquiry
+  if (lower.includes('شكون خدمك') || lower.includes('من طورك') || lower.includes('من صنعك') || lower.includes('من برمجك') || lower.includes('who created you') || lower.includes('qui t\'a créé')) {
+    return `تم تطويري وتصميمي وبرمجتي بواسطة المهندس والمطور الجزائري: **مهند قليف (Mouhaned Guellif)** لصالح منصة **BatiHub DZ** 🇩🇿 لتوفير استشارات هندسية ذكية وحساب تكاليف ورشات البناء في الجزائر بدقة متناهية.`;
+  }
+
+  // 2. Off-topic guardrail: Politics, Religion, Sports, Celebrities
+  const forbiddenKeywords = ['دين', 'اسلام', 'صلاة', 'سياسة', 'حزب', 'رئيس', 'انتخابات', 'كرة', 'ميسي', 'رونالدو', 'موسيقى', 'حب', 'غناء', 'religion', 'politics', 'foot'];
+  for (let kw of forbiddenKeywords) {
+    if (lower.includes(kw)) {
+      return `أعتذر منك، أنا مساعد ذكي متخصص **حصرياً في مجال الهندسة المعمارية، البناء، الأشغال العمومية، وتصاميم الديكور والورشات في الجزائر** 🏗️📐.
+
+يرجى طرح استفسارات متعلقة بالبناء (مثل: حساب كميات الإسمنت والحديد، مواصفات المواد، فحص المخططات، رخص البناء، أو توليد تصاميم معمارية) وسأكون سعيداً جداً بمساعدتك! 👷🇩🇿`;
+    }
+  }
+
+  // 3. Image Generation Mode
+  if (isGenMode || lower.includes('ولدلي') || lower.includes('صورة واجهة') || lower.includes('تصميم مطبخ') || lower.includes('صورة صالون')) {
+    return {
+      type: 'image_generation',
+      text: `إليك التصميم المعماري المقترح وفقاً للمواصفات المعمارية الجزائرية الحديثة 🎨🏛️:`,
+      image: 'assets/batihub_banner.jpg',
+      prompt: userPrompt
+    };
+  }
+
+  // 4. Multimodal image analysis
+  if (hasImage) {
+    return `قمت بفحص المخطط / الصورة الهندسية المرفقة بعناية 🔍📐:
+
+1. **التقييم الإنشائي والمعماري:** يظهر المخطط توزيعاً إنشائياً جيداً للأعمدة (Poteaux) مع مراعاة الفضاءات الوظيفية.
+2. **التوصيات الهندسية المعتمدة (DTR):**
+   • ينصح بالتأكد من سمك السقف الخرساني (Dalle de compression) بما لا يقل عن 16سم إلى 20سم حسب المسافة بين الركائز.
+   • استخدام شبكة حديد تسليح FeE500 عالي التماسك مع مراعاة تغطية خرسانية (Enrobage) لا تقل عن 2.5سم لحماية التسليح من الصدأ.
+   • تطبيق طبقة عزل مائي وحراري (Paxroll + Polystyrène) فوق السطح لمنع التشققات.
+
+هل تود حساب كمية المواد المطلوبة لهذا المخطط أو استخراج كشف تقديري كامل؟ 👷`;
+  }
+
+  // 5. Algerian Darja response for quantity estimation
+  if (lower.includes('دالة') || lower.includes('سيمة') || lower.includes('شحال يسقاملي') || lower.includes('حديد') || lower.includes('100م') || lower.includes('سقف')) {
+    return `بناءً على مقاييس البناء الجزائرية (DTR) لسقف خرساني مسلّح بمساحة **100 م²** وسمك 16 سم (Hourdis 16+4) 🏗️:
+
+1. **الإسمنت (Ciment CPJ 42.5):** يلزمك حوالي **35 إلى 40 كيس إسمنت** (عيار 350 كغ/م³).
+2. **حديد التسليح (Ferraillage FeE500):** يلزمك بالتقريب **12 إلى 15 قنطار** من الحديد (موزعة بين Ø12 للأعصاب و Ø6 للشبكة الملحومة Treillis).
+3. **الرمل والحصى:** حوالي **1 شاحنة رمل وادي (15م³)** و **1 شاحنة حصى 8/15 (16م³)**.
+4. **الياجور تاع الدالة (Hourdis):** حوالي **700 إلى 800 حبة هوردي**.
+5. **اليد العاملة (الماصو والبنائين):** متوسط السعر يتراوح بين **1,200 دج إلى 1,800 دج للمتر المربع** لصب السقف كاملاً مع الكوفراج.
+
+💡 يمكنك الانتقال لتبويب **"حاسبة التكاليف و Devis"** لتوليد ملف PDF رسمي ومفصل لهذا المشروع!`;
+  }
+
+  // 6. Waterproofing & Insulation inquiry
+  if (lower.includes('عازل') || lower.includes('رطوبة') || lower.includes('ماء') || lower.includes('تسرب') || lower.includes('étanchéité')) {
+    return `أفضل نظام عزل مائي وحراري معتمد في الجزائر للأسطح والأساسات يتكون من الطبقات التالية 🛡️:
+
+1. **طبقة الأساس (Imprégnation à froid):** دهان بيتوميني سائل لغلق المسام الخرسانية.
+2. **العازل الحراري:** ألواح البوليسترين المبثوق (Polystyrène extrudé) سمك 4 إلى 5 سم لحماية المنزل من حرارة الصيف وبرودة الشتاء.
+3. **طبقة العزل المائي (Paxroll 4mm SBS):** غشاء بيتوميني مسلح بالألومنيوم أو الحصى المعدني ملحوم باللهب لضمان منع تسرب مياه الأمطار نهائياً.
+4. **خرسانة الميول (Forme de pente):** بنسبة لا تقل عن 1.5% لتصريف مياه الأمطار نحو المزاريب.`;
+  }
+
+  // 7. General architectural response
+  return `أهلاً بك! بصفتي مهندساً ومستشاراً معمارياً في BatiHub DZ 📐:
+
+• **المجال:** جاهز لتقديم أي استشارة في دراسة المشاريع، رخص البناء، واختيار مواد البناء الأنسب للطقس الجزائري.
+• **حساب التكاليف:** يمكنك تزويدي بمساحة ورشتك وعدد الطوابق لحساب التكلفة التقديرية لمواد البناء وأجور الحرفيين فوراً.
+• **فحص المخططات:** يمكنك إرفاق أي صورة أو مخطط (Plan) وسأقوم بتحليله هندسياً.
+
+بماذا يمكنني مساعدتك في ورشتك اليوم؟ 🏗️`;
+}
+
+function handleAiChatSubmit(event) {
+  if (event) event.preventDefault();
+
+  const input = document.getElementById('aiChatInput');
+  if (!input) return;
+
+  const promptText = (input.value || '').trim();
+  if (!promptText && !aiAttachedImageBase64) return;
+
+  const container = document.getElementById('aiChatMessagesContainer');
+  if (!container) return;
+
+  const userTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  // 1. Append User Message Bubble
+  const userBubble = document.createElement('div');
+  userBubble.className = 'flex items-start justify-end gap-3';
+  userBubble.innerHTML = `
+    <div class="ai-bubble-user p-4 rounded-2xl max-w-2xl space-y-2 text-right">
+      <div class="flex items-center justify-end gap-2">
+        <span class="text-[10px] text-amber-200/80 font-mono">${userTime}</span>
+        <span class="font-bold text-amber-300 text-xs">${currentUser ? escapeHTML(currentUser.fullName || currentUser.firstName) : 'أنت'}</span>
+      </div>
+      ${promptText ? `<p class="text-white">${escapeHTML(promptText)}</p>` : ''}
+      ${aiAttachedImageBase64 ? `
+        <div class="rounded-xl overflow-hidden border border-amber-500/30 max-h-48 cursor-pointer mt-2" onclick="openImageLightbox('${escapeHTML(aiAttachedImageBase64)}')">
+          <img src="${aiAttachedImageBase64}" class="w-full h-auto object-cover max-h-48">
+        </div>
+      ` : ''}
+    </div>
+    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center font-bold text-sm shrink-0 shadow-md">
+      <i class="fa-solid fa-user"></i>
+    </div>
+  `;
+  container.appendChild(userBubble);
+
+  const hadAttachment = !!aiAttachedImageBase64;
+  const isGen = aiImageGenMode;
+
+  input.value = '';
+  removeAiAttachment();
+  if (aiImageGenMode) toggleAiImageGenMode();
+
+  // Scroll to bottom
+  container.scrollTop = container.scrollHeight;
+
+  // 2. Typing indicator
+  const typingBubble = document.createElement('div');
+  typingBubble.id = 'aiTypingIndicator';
+  typingBubble.className = 'flex items-start gap-3';
+  typingBubble.innerHTML = `
+    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-slate-950 flex items-center justify-center font-bold text-sm shrink-0 shadow-md">
+      <i class="fa-solid fa-robot"></i>
+    </div>
+    <div class="ai-bubble-bot px-4 py-3 rounded-2xl flex items-center gap-1.5">
+      <span class="ai-typing-dot"></span>
+      <span class="ai-typing-dot"></span>
+      <span class="ai-typing-dot"></span>
+    </div>
+  `;
+  container.appendChild(typingBubble);
+  container.scrollTop = container.scrollHeight;
+
+  // 3. Generate response with realistic architectural latency
+  setTimeout(() => {
+    const typing = document.getElementById('aiTypingIndicator');
+    if (typing) typing.remove();
+
+    const response = getAiEngineeringResponse(promptText, hadAttachment, isGen);
+    const botTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    const botBubble = document.createElement('div');
+    botBubble.className = 'flex items-start gap-3';
+
+    let contentHTML = '';
+    if (typeof response === 'object' && response.type === 'image_generation') {
+      contentHTML = `
+        <p class="text-slate-200">${escapeHTML(response.text)}</p>
+        <div class="rounded-2xl overflow-hidden border border-cyan-500/40 bg-slate-950 mt-2 cursor-pointer shadow-xl group" onclick="openImageLightbox('${escapeHTML(response.image)}')">
+          <img src="${response.image}" alt="Generated Design" class="w-full h-auto max-h-60 object-cover group-hover:scale-102 transition duration-300">
+          <div class="p-2.5 bg-bh-bg border-t border-bh-border flex items-center justify-between text-[11px] text-slate-400">
+            <span class="text-cyan-300 font-bold">🎨 نموذج ثلاثي الأبعاد مقترح</span>
+            <span>بواسطة BatiHub AI</span>
+          </div>
+        </div>
+      `;
+    } else {
+      contentHTML = `<div class="text-slate-200 whitespace-pre-line">${escapeHTML(String(response))}</div>`;
+    }
+
+    botBubble.innerHTML = `
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-slate-950 flex items-center justify-center font-bold text-sm shrink-0 shadow-md">
+        <i class="fa-solid fa-robot"></i>
+      </div>
+      <div class="ai-bubble-bot p-4 rounded-2xl max-w-2xl space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-cyan-400 text-xs">مساعد المهندس الذكي (BatiHub AI)</span>
+          <span class="text-[10px] text-slate-400 font-mono">${botTime}</span>
+        </div>
+        ${contentHTML}
+      </div>
+    `;
+
+    container.appendChild(botBubble);
+    container.scrollTop = container.scrollHeight;
+    parseTwemoji(botBubble);
+  }, 750);
+}
+
+/* ========================================================================= */
+/* 25. AI COST ESTIMATOR & DEVIS PDF EXPORT ENGINE                           */
+/* ========================================================================= */
+
+let lastCalculatedDevisData = null;
+
+function handleEstScopeChange() {
+  const scope = document.getElementById('estScope').value;
+  const decorWalls = document.getElementById('estDecorWallsGroup');
+  if (decorWalls) {
+    if (scope === 'kitchen_bath_remodel' || scope === 'facade_only') {
+      decorWalls.classList.remove('hidden');
+    } else {
+      decorWalls.classList.add('hidden');
+    }
+  }
+}
+
+function handleEstBlueprintSelect(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const nameLabel = document.getElementById('estBlueprintName');
+  if (nameLabel) nameLabel.innerText = file.name;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    estBlueprintBase64 = e.target.result;
+    showToast('تم رفع المخطط المعماري لفحصه في الكشف التقديري 📐', 'info');
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleRunCostEstimation(event) {
+  if (event) event.preventDefault();
+
+  const scope = document.getElementById('estScope').value;
+  const area = parseFloat(document.getElementById('estArea').value) || 100;
+  const floors = parseInt(document.getElementById('estFloors').value) || 1;
+
+  // Selected Materials
+  const hasCement = document.getElementById('matCheckCement').checked;
+  const hasSteel = document.getElementById('matCheckSteel').checked;
+  const hasSand = document.getElementById('matCheckSand').checked;
+  const hasBricks = document.getElementById('matCheckBricks').checked;
+  const hasInsulation = document.getElementById('matCheckInsulation').checked;
+  const hasFinishing = document.getElementById('matCheckFinishing').checked;
+
+  // Selected Labor
+  const hasMason = document.getElementById('laborCheckMason').checked;
+  const hasSteelLabor = document.getElementById('laborCheckSteel').checked;
+  const hasElectric = document.getElementById('laborCheckElectric').checked;
+  const hasPlumber = document.getElementById('laborCheckPlumber').checked;
+  const hasPainter = document.getElementById('laborCheckPainter').checked;
+  const hasTiler = document.getElementById('laborCheckTile').checked;
+
+  // Selected Machinery
+  const hasTruck = document.getElementById('machCheckTruck').checked;
+  const hasPump = document.getElementById('machCheckPump').checked;
+  const hasScaffold = document.getElementById('machCheckScaffold').checked;
+
+  // Calculation models based on Algerian standards
+  const totalAreaM2 = area * floors;
+  let matCost = 0;
+  let laborCost = 0;
+  let machCost = 0;
+  let durationWeeks = 4;
+  let itemsBreakdown = [];
+
+  if (scope === 'foundations_only') {
+    const concVol = totalAreaM2 * 0.35;
+    const cementBags = Math.round(concVol * 7);
+    const steelQuintals = Math.round(concVol * 1.1);
+
+    if (hasCement) {
+      const cCost = cementBags * 520;
+      matCost += cCost;
+      itemsBreakdown.push({ item: 'إسمنت بورتلاندي CPJ 42.5 للأساسات والميدات', qty: `${cementBags} كيس`, unitPrice: '520 دج', total: cCost });
+    }
+    if (hasSteel) {
+      const sCost = steelQuintals * 10800;
+      matCost += sCost;
+      itemsBreakdown.push({ item: 'حديد تسليح عالي المقاومة FeE500 للأساسات والأوتاد', qty: `${steelQuintals} قنطار`, unitPrice: '10,800 دج', total: sCost });
+    }
+    if (hasSand) {
+      const sandCost = 3 * 18500;
+      matCost += sandCost;
+      itemsBreakdown.push({ item: 'رمل وادي وحصى خرساني متدرج مفروز', qty: '3 شاحنات', unitPrice: '18,500 دج', total: sandCost });
+    }
+
+    laborCost = Math.round(totalAreaM2 * 2200);
+    itemsBreakdown.push({ item: 'أجور عمال البناء وحرفيي نجارة وتسليح الأساسات', qty: `${totalAreaM2} م²`, unitPrice: '2,200 دج', total: laborCost });
+
+    if (hasTruck) machCost += 35000;
+    if (hasPump) machCost += 45000;
+    durationWeeks = Math.max(2, Math.round(totalAreaM2 / 60));
+
+  } else if (scope === 'carcasse_only') {
+    const concVol = totalAreaM2 * 0.30;
+    const cementBags = Math.round(concVol * 7.5);
+    const steelQuintals = Math.round(concVol * 1.25);
+
+    if (hasCement) {
+      const cCost = cementBags * 520;
+      matCost += cCost;
+      itemsBreakdown.push({ item: 'إسمنت CPJ 42.5 لصب الأعمدة والأسقف (Dalles)', qty: `${cementBags} كيس`, unitPrice: '520 دج', total: cCost });
+    }
+    if (hasSteel) {
+      const sCost = steelQuintals * 10800;
+      matCost += sCost;
+      itemsBreakdown.push({ item: 'حديد تسليح الهيكل العظم خرساني FeE500', qty: `${steelQuintals} قنطار`, unitPrice: '10,800 دج', total: sCost });
+    }
+    if (hasSand) {
+      const sandCost = Math.round((concVol / 8) * 19000);
+      matCost += sandCost;
+      itemsBreakdown.push({ item: 'رمل وادي طبيعي وحصى كلسي 15/25', qty: `${Math.round(concVol / 8)} شاحنات`, unitPrice: '19,000 دج', total: sandCost });
+    }
+
+    laborCost = Math.round(totalAreaM2 * 3500);
+    itemsBreakdown.push({ item: 'أجور فريق البناء والكوفراج والصب لجميع الطوابق', qty: `${totalAreaM2} م²`, unitPrice: '3,500 دج', total: laborCost });
+
+    if (hasPump) machCost += 60000;
+    if (hasScaffold) machCost += 40000;
+    durationWeeks = Math.max(3, Math.round(totalAreaM2 / 40));
+
+  } else if (scope === 'kitchen_bath_remodel') {
+    const wallType = document.querySelector('input[name="estDecorWallType"]:checked')?.value || 'full';
+    const mult = wallType === 'full' ? 1.0 : (wallType === 'single' ? 0.35 : 0.6);
+
+    matCost = Math.round(area * 14500 * mult);
+    itemsBreakdown.push({ item: 'سيراميك، رخام طبيعي، وتجهيزات المطبخ والحمام الديكورية', qty: `${Math.round(area * mult)} م²`, unitPrice: '14,500 دج', total: matCost });
+
+    laborCost = Math.round(area * 6500 * mult);
+    itemsBreakdown.push({ item: 'أجور الترصاص، المبلط، والكهربائي المتخصص', qty: 'مقطوعية', unitPrice: '-', total: laborCost });
+
+    machCost = 15000;
+    durationWeeks = Math.max(1, Math.round(area / 15));
+
+  } else {
+    // Full Villa Turnkey or Complete Finish
+    const baseMatRate = scope === 'full_villa' ? 24000 : 16000;
+    const baseLaborRate = scope === 'full_villa' ? 12000 : 9000;
+
+    matCost = Math.round(totalAreaM2 * baseMatRate);
+    laborCost = Math.round(totalAreaM2 * baseLaborRate);
+    machCost = Math.round(totalAreaM2 * 1200);
+
+    itemsBreakdown.push({ item: 'إسمنت CPJ 42.5 وحديد تسليح ورمل وحصى', qty: `${totalAreaM2} م²`, unitPrice: '14,000 دج', total: Math.round(totalAreaM2 * 14000) });
+    itemsBreakdown.push({ item: 'طوب مجوف، عوازل حرارية ومائية، ومواد تلبيس', qty: `${totalAreaM2} م²`, unitPrice: '6,000 دج', total: Math.round(totalAreaM2 * 6000) });
+    itemsBreakdown.push({ item: 'تشطيبات السيراميك، الدهانات، الكهرباء والترصيص الصحي', qty: `${totalAreaM2} م²`, unitPrice: `${baseMatRate - 20000} دج`, total: Math.round(totalAreaM2 * (baseMatRate - 20000)) });
+    itemsBreakdown.push({ item: 'اليد العاملة الإجمالية (بناؤون، حدادون، كهربائيون، دهانون)', qty: `${totalAreaM2} م²`, unitPrice: `${baseLaborRate} دج`, total: laborCost });
+    itemsBreakdown.push({ item: 'وسائل النقل، شاحنات تفريغ الردوم، ومضخات الخرسانة', qty: 'مقطوعية الورشة', unitPrice: '-', total: machCost });
+
+    durationWeeks = Math.max(8, Math.round(totalAreaM2 / 20));
+  }
+
+  const grandTotalDZD = matCost + laborCost + machCost;
+
+  // Format numbers with comma separation
+  const fmt = (n) => n.toLocaleString('fr-DZ') + ' دج';
+
+  document.getElementById('resMatCost').innerText = fmt(matCost);
+  document.getElementById('resLaborCost').innerText = fmt(laborCost);
+  document.getElementById('resMachCost').innerText = fmt(machCost);
+  document.getElementById('resDuration').innerText = `${durationWeeks} أسابيع (${Math.round(durationWeeks * 7)} يوم)`;
+  document.getElementById('resGrandTotalDZD').innerText = grandTotalDZD.toLocaleString('fr-DZ') + ' DZD';
+
+  // Devis metadata
+  const devisNo = 'BH-' + Math.floor(100000 + Math.random() * 900000);
+  const devisDate = new Date().toISOString().split('T')[0];
+  document.getElementById('devisNumberDisplay').innerText = devisNo;
+  document.getElementById('devisDateDisplay').innerText = devisDate;
+
+  // Fill Table Body
+  const tbody = document.getElementById('devisTableBody');
+  if (tbody) {
+    tbody.innerHTML = itemsBreakdown.map((item, idx) => `
+      <tr class="hover:bg-bh-card transition">
+        <td class="p-2.5 font-sans font-semibold text-white">${idx + 1}. ${escapeHTML(item.item)}</td>
+        <td class="p-2.5 text-slate-300">${escapeHTML(item.qty)}</td>
+        <td class="p-2.5 text-slate-400 font-mono">${escapeHTML(item.unitPrice)}</td>
+        <td class="p-2.5 text-amber-400 font-bold text-left" dir="ltr">${item.total.toLocaleString('fr-DZ')} DZD</td>
+      </tr>
+    `).join('') + `
+      <tr class="bg-bh-card/90 font-bold text-sm border-t-2 border-bh-yellow">
+        <td colspan="3" class="p-3 text-white text-right">المبلغ الإجمالي التقديري (TTC) :</td>
+        <td class="p-3 text-bh-yellow font-mono text-left" dir="ltr">${grandTotalDZD.toLocaleString('fr-DZ')} DZD</td>
+      </tr>
+    `;
+  }
+
+  const resultContainer = document.getElementById('aiCostResultContainer');
+  if (resultContainer) {
+    resultContainer.classList.remove('hidden');
+    resultContainer.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  lastCalculatedDevisData = {
+    devisNo,
+    devisDate,
+    grandTotalDZD,
+    itemsBreakdown,
+    totalAreaM2,
+    scope
+  };
+
+  showToast('تم حساب التكلفة التقديرية بنجاح! يمكنك الآن تحميل ملف PDF 📄', 'success');
+}
+
+async function exportDevisToPDF() {
+  const card = document.getElementById('printableDevisCard');
+  if (!card) return;
+
+  const btn = document.getElementById('btnExportPDF');
+  const originalText = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري توليد ملف PDF...</span>`;
+  }
+
+  try {
+    if (window.html2canvas && window.jspdf) {
+      const canvas = await window.html2canvas(card, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#07090e'
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`Devis_BatiHub_DZ_${Date.now()}.pdf`);
+      showToast('تم تحميل الكشف التقديري الرسمي بصيغة PDF بنجاح! 📥', 'success');
+    } else {
+      window.print();
+    }
+  } catch (err) {
+    console.error('PDF Export error:', err);
+    window.print();
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  }
+}
+
+/* ========================================================================= */
+/* 26. GALLERY EXTENSIONS (CUSTOM CATEGORIES & BLUEPRINTS)                   */
+/* ========================================================================= */
+
+function handleGalleryCategorySelectChange(val) {
+  const customInputContainer = document.getElementById('galleryCustomCategoryContainer');
+  if (customInputContainer) {
+    if (val === 'custom') {
+      customInputContainer.classList.remove('hidden');
+    } else {
+      customInputContainer.classList.add('hidden');
+    }
+  }
+}
+

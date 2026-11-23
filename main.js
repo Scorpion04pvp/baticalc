@@ -128,6 +128,8 @@ ipcMain.handle('send-mail', async (event, { to, subject, html, text }) => {
 
     const info = await transporter.sendMail({
       from: `"Support Bati Hub DZ" <${email}>`,
+      sender: "Support Bati Hub DZ",
+      replyTo: `"Support Bati Hub DZ" <${email}>`,
       replyTo: `"Support Bati Hub DZ" <${email}>`,
       to,
       subject,

@@ -21,6 +21,13 @@
   <!-- FontAwesome 6 Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
+  <!-- Twemoji for Crisp Real Emojis -->
+  <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+  
+  <!-- jsPDF & html2canvas for Professional PDF Devis Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -246,6 +253,14 @@
             <button class="nav-tab" data-tab="tab-gallery" onclick="switchTab('tab-gallery')">
               <i class="fa-solid fa-palette text-amber-400"></i>
               <span data-i18n="nav_gallery">معرض التصاميم والديكور</span>
+            </button>
+            <button class="nav-tab" data-tab="tab-building-materials" onclick="switchTab('tab-building-materials')">
+              <i class="fa-solid fa-cubes-stacked text-amber-500"></i>
+              <span data-i18n="nav_building_materials">دليل مواد البناء</span>
+            </button>
+            <button class="nav-tab" data-tab="tab-ai-engineer" onclick="switchTab('tab-ai-engineer')">
+              <i class="fa-solid fa-wand-magic-sparkles text-cyan-400"></i>
+              <span data-i18n="nav_ai_engineer">مساعد المهندس الذكي (AI)</span>
             </button>
             <button class="nav-tab" id="navTabPendingPosts" data-tab="tab-pending-posts" onclick="switchTab('tab-pending-posts')">
               <i id="navTabPendingIcon" class="fa-solid fa-hourglass-half text-amber-400"></i>
@@ -573,19 +588,470 @@
           </button>
         </div>
 
-        <!-- Room Filter Pills -->
-        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 pt-1 text-xs">
-          <button type="button" onclick="setGalleryFilter('all', this)" class="gallery-filter-pill active-gallery-pill px-3.5 py-1.5 rounded-xl border border-bh-yellow bg-bh-yellow text-slate-950 font-bold transition whitespace-nowrap cursor-pointer">الكل</button>
+        <!-- Room & Design Filter Pills -->
+        <div id="galleryFilterPillsContainer" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 pt-1 text-xs">
+          <button type="button" onclick="setGalleryFilter('all', this)" class="gallery-filter-pill active-gallery-pill px-3.5 py-1.5 rounded-xl border border-bh-yellow bg-bh-yellow text-slate-950 font-bold transition whitespace-nowrap cursor-pointer">الكل 🌟</button>
+          <button type="button" onclick="setGalleryFilter('blueprint', this)" class="gallery-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">مخططات معمارية 📐</button>
+          <button type="button" onclick="setGalleryFilter('facade', this)" class="gallery-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">واجهات ومداخل 🏛️</button>
           <button type="button" onclick="setGalleryFilter('kitchen', this)" class="gallery-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">مطابخ (كوزينة) 🍳</button>
           <button type="button" onclick="setGalleryFilter('bathroom', this)" class="gallery-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">حمامات 🚿</button>
           <button type="button" onclick="setGalleryFilter('toilet', this)" class="gallery-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">مراحيض 🚽</button>
           <button type="button" onclick="setGalleryFilter('living_room', this)" class="gallery-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">صالونات ومعيشة 🛋️</button>
           <button type="button" onclick="setGalleryFilter('bedroom', this)" class="gallery-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">غرف نوم 🛏️</button>
-          <button type="button" onclick="setGalleryFilter('facade', this)" class="gallery-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">واجهات ومداخل 🏛️</button>
+          <button type="button" onclick="setGalleryFilter('garden', this)" class="gallery-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">حدائق ومساحات خارجية 🌿</button>
         </div>
 
         <!-- Gallery Grid Container -->
         <div id="galleryFeedContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- TAB: BUILDING MATERIALS CATALOG (دليل وموسوعة مواد البناء في الجزائر)      -->
+      <!-- ========================================================================= -->
+      <div id="tab-building-materials" class="tab-content hidden space-y-6 text-right">
+
+        <!-- Header Card -->
+        <div class="bg-gradient-to-r from-bh-card via-bh-cardhover to-bh-card border border-bh-border rounded-2xl p-4 sm:p-6 flex flex-wrap items-center justify-between gap-4 shadow-xl">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-slate-950 text-xl font-black shadow-lg shadow-amber-500/30">
+              <i class="fa-solid fa-cubes-stacked"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="font-heading font-black text-lg sm:text-xl text-white tracking-tight" data-i18n="materials_title">دليل وموسوعة مواد البناء في الجزائر</h2>
+                <span class="text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-mono">كتالوج ومواصفات 🧱</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5" data-i18n="materials_sub">استكشف جميع مواد البناء المعتمدة في الجزائر: مجالات الاستعمال، مواد الصنع، ومتوسط الأسعار بالدينار الجزائري</p>
+            </div>
+          </div>
+
+          <!-- Admin Add Material Button -->
+          <button type="button" id="btnAdminAddMaterial" onclick="openAddBuildingMaterialModal()" class="hidden px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-bh-orange text-slate-950 font-black text-xs shadow-lg hover:opacity-95 transition flex items-center gap-2 cursor-pointer active:scale-95">
+            <i class="fa-solid fa-plus text-sm"></i>
+            <span>إضافة مادة بناء جديدة (خاص بالإدارة)</span>
+          </button>
+        </div>
+
+        <!-- Materials Filter & Search Bar -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <!-- Filter Pills -->
+          <div class="flex items-center gap-2 overflow-x-auto no-scrollbar w-full sm:w-auto pb-1 text-xs">
+            <button type="button" onclick="filterBuildingMaterials('all', this)" class="material-filter-pill active-filter px-3.5 py-1.5 rounded-xl border border-bh-yellow bg-bh-yellow text-slate-950 font-bold transition whitespace-nowrap cursor-pointer">الكل 🌟</button>
+            <button type="button" onclick="filterBuildingMaterials('cement', this)" class="material-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">إسمنت وخرسانة 🏗️</button>
+            <button type="button" onclick="filterBuildingMaterials('steel', this)" class="material-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">حديد وتسليح ⚙️</button>
+            <button type="button" onclick="filterBuildingMaterials('brick', this)" class="material-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">طوب وآجر 🧱</button>
+            <button type="button" onclick="filterBuildingMaterials('aggregates', this)" class="material-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">رمل وحصى ⏳</button>
+            <button type="button" onclick="filterBuildingMaterials('insulation', this)" class="material-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">عوازل وكتامة 🛡️</button>
+            <button type="button" onclick="filterBuildingMaterials('paint', this)" class="material-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">دهان وتشطيب 🎨</button>
+            <button type="button" onclick="filterBuildingMaterials('plumbing', this)" class="material-filter-pill px-3.5 py-1.5 rounded-xl border border-bh-border bg-bh-card text-slate-300 hover:text-white font-bold transition whitespace-nowrap cursor-pointer">أنابيب وكهرباء ⚡</button>
+          </div>
+
+          <!-- Quick Search Input -->
+          <div class="relative w-full sm:w-64">
+            <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+              <i class="fa-solid fa-magnifying-glass text-xs"></i>
+            </span>
+            <input type="text" id="materialsSearchInput" oninput="handleSearchMaterials(this.value)" placeholder="ابحث باسم المادة أو الاستعمال..." class="w-full bg-bh-card border border-bh-border rounded-xl pr-9 pl-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400">
+          </div>
+        </div>
+
+        <!-- Materials Cards Grid Container -->
+        <div id="buildingMaterialsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- TAB: AI ARCHITECTURAL ASSISTANT & COST ESTIMATOR (مساعد المهندس الذكي)     -->
+      <!-- ========================================================================= -->
+      <div id="tab-ai-engineer" class="tab-content hidden space-y-6 text-right">
+
+        <!-- Top Header Card -->
+        <div class="bg-gradient-to-r from-bh-card via-slate-900 to-bh-card border border-cyan-500/40 rounded-3xl p-5 sm:p-6 shadow-2xl relative overflow-hidden">
+          <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 flex items-center justify-center text-2xl shadow-lg shrink-0">
+                <i class="fa-solid fa-wand-magic-sparkles animate-pulse"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h2 class="font-heading font-black text-lg sm:text-xl text-white">مساعد المهندس الذكي • BatiHub AI 🤖</h2>
+                  <span class="text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded-full font-mono">هندسة وبناء جزائري 📐</span>
+                </div>
+                <p class="text-xs text-slate-300 mt-1">استشارات فورية في الهندسة المعمارية والبناء، فحص المخططات، توليد صور التصاميم، وحاسبة التكاليف التقديرية بالدينار الجزائري.</p>
+              </div>
+            </div>
+
+            <!-- Submode Switcher Tabs -->
+            <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-bh-bg border border-bh-border">
+              <button type="button" id="btnAiModeChat" onclick="switchAiSubMode('chat')" class="px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer bg-cyan-500 text-slate-950 shadow-md">
+                <i class="fa-solid fa-comments ml-1"></i>
+                <span>المحادثة والاستشارة 💬</span>
+              </button>
+              <button type="button" id="btnAiModeEstimator" onclick="switchAiSubMode('estimator')" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition cursor-pointer">
+                <i class="fa-solid fa-calculator ml-1 text-bh-yellow"></i>
+                <span>حاسبة التكاليف و Devis 📄</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================================================================== -->
+        <!-- SUBMODE 1: AI CONVERSATION & VISION CHATBOT                           -->
+        <!-- ===================================================================== -->
+        <div id="aiChatSubModeContainer" class="space-y-4">
+          
+          <!-- Suggested Quick Prompts -->
+          <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
+            <span class="text-[11px] text-slate-400 font-semibold shrink-0">أسئلة مقترحة:</span>
+            <button type="button" onclick="sendAiQuickPrompt('احسبلي بالتقريب كمية الإسمنت والحديد اللازمة لصب سقف 100م² سمك 16سم؟')" class="px-3 py-1.5 rounded-xl bg-bh-card hover:bg-slate-800 text-slate-300 hover:text-cyan-300 border border-bh-border text-xs whitespace-nowrap transition cursor-pointer">
+              🏗️ كمية إسمنت وحديد سقف 100م²؟
+            </button>
+            <button type="button" onclick="sendAiQuickPrompt('ما هي أفضل مادة عزل مائي وحراري للأسطح والأساسات في الجزائر؟')" class="px-3 py-1.5 rounded-xl bg-bh-card hover:bg-slate-800 text-slate-300 hover:text-cyan-300 border border-bh-border text-xs whitespace-nowrap transition cursor-pointer">
+              🛡️ أفضل عوازل الأسطح في الجزائر؟
+            </button>
+            <button type="button" onclick="sendAiQuickPrompt('ولدلي صورة لتصميم واجهة فيلا عصرية في الجزائر بحجر القرميد والزجاج والإنارة المخفية')" class="px-3 py-1.5 rounded-xl bg-bh-card hover:bg-slate-800 text-slate-300 hover:text-cyan-300 border border-bh-border text-xs whitespace-nowrap transition cursor-pointer">
+              🎨 توليد صورة واجهة فيلا مودرن
+            </button>
+            <button type="button" onclick="sendAiQuickPrompt('شكون خدمك وبرمجك؟')" class="px-3 py-1.5 rounded-xl bg-bh-card hover:bg-slate-800 text-slate-300 hover:text-cyan-300 border border-bh-border text-xs whitespace-nowrap transition cursor-pointer">
+              👤 شكون خدمك؟
+            </button>
+          </div>
+
+          <!-- Chat Window Box -->
+          <div class="bg-bh-card border border-bh-border rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col h-[520px] max-h-[75vh]">
+            
+            <!-- Messages Container -->
+            <div id="aiChatMessagesContainer" class="flex-1 overflow-y-auto space-y-4 pr-1 text-xs leading-relaxed">
+              <!-- Welcome Message from BatiHub AI -->
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-slate-950 flex items-center justify-center font-bold text-sm shrink-0 shadow-md">
+                  <i class="fa-solid fa-robot"></i>
+                </div>
+                <div class="ai-bubble-bot p-4 rounded-2xl max-w-2xl space-y-2">
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-cyan-400 text-xs">مساعد المهندس الذكي (BatiHub AI)</span>
+                    <span class="text-[10px] text-slate-400 font-mono">الآن</span>
+                  </div>
+                  <p class="text-slate-200">
+                    مرحباً بك! أنا مساعدك الذكي المتخصص حصرياً في <strong>الهندسة المعمارية، البناء، الأشغال العمومية، وتصاميم الديكور في الجزائر 🇩🇿</strong>.
+                  </p>
+                  <p class="text-slate-300">
+                    يمكنك سؤالي بالدارجة الجزائرية أو العربية أو الفرنسية، إرسال صور مخططاتك أو ورشاتك لفحصها، أو طلب توليد صور ونماذج ديكور وواجهات عصرية فوراً!
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upload Preview Strip -->
+            <div id="aiAttachmentPreviewStrip" class="hidden pt-2 border-t border-bh-border/60">
+              <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-bh-bg border border-cyan-500/40 text-xs text-white">
+                <img id="aiAttachmentImgThumb" src="" alt="Attached" class="w-8 h-8 rounded-lg object-cover">
+                <span id="aiAttachmentName" class="text-[11px] truncate max-w-xs text-slate-300">مخطط مرفق</span>
+                <button type="button" onclick="removeAiAttachment()" class="text-rose-400 hover:text-white p-1 cursor-pointer">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Input Box -->
+            <form onsubmit="handleAiChatSubmit(event)" class="pt-3 border-t border-bh-border flex items-center gap-2">
+              <input type="file" id="aiImageFileInput" accept="image/*" onchange="handleAiImageSelect(event)" class="hidden">
+              <button type="button" onclick="document.getElementById('aiImageFileInput').click()" class="w-10 h-10 rounded-xl bg-bh-bg hover:bg-slate-800 text-cyan-400 border border-cyan-500/30 flex items-center justify-center transition cursor-pointer" title="إرفاق صورة مخطط أو ورشة">
+                <i class="fa-solid fa-paperclip text-sm"></i>
+              </button>
+              <button type="button" onclick="toggleAiImageGenMode()" id="btnAiGenToggle" class="px-2.5 py-2 rounded-xl bg-bh-bg hover:bg-slate-800 text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-1 transition cursor-pointer" title="توليد صورة معمارية">
+                <i class="fa-solid fa-image text-xs"></i>
+                <span class="hidden sm:inline">توليد صورة</span>
+              </button>
+              <input type="text" id="aiChatInput" placeholder="اسألني عن تكاليف البناء، مواد التشطيب، أو صف لي تصميماً لتوليده..." class="flex-1 bg-bh-bg border border-bh-border rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400">
+              <button type="submit" id="btnAiSend" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-bold text-xs shadow-md hover:opacity-95 transition flex items-center gap-1.5 cursor-pointer active:scale-95">
+                <span>إرسال</span>
+                <i class="fa-solid fa-paper-plane text-xs"></i>
+              </button>
+            </form>
+
+          </div>
+        </div>
+
+        <!-- ===================================================================== -->
+        <!-- SUBMODE 2: AI BUILDING COST ESTIMATOR & DEVIS PDF GENERATOR          -->
+        <!-- ===================================================================== -->
+        <div id="aiEstimatorSubModeContainer" class="hidden space-y-6">
+          
+          <div class="bg-bh-card border border-bh-border rounded-3xl p-5 sm:p-7 shadow-2xl space-y-6">
+            
+            <div class="border-b border-bh-border pb-4 flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <h3 class="font-heading font-black text-white text-base flex items-center gap-2">
+                  <i class="fa-solid fa-calculator text-bh-yellow"></i>
+                  <span>كاشف وحاسبة تكاليف البناء التقديرية (Devis Estimatif)</span>
+                </h3>
+                <p class="text-xs text-slate-400 mt-1">حدد مواصفات ورشتك وسيقوم الذكاء الاصطناعي بحساب تفاصيل المواد، اليد العاملة، والشاحنات مع إمكانية استخراج كشف رسمي بصيغة PDF.</p>
+              </div>
+              <span class="px-3 py-1 rounded-xl bg-bh-yellow/15 border border-bh-yellow/40 text-bh-yellow font-bold text-xs font-mono">بالدينار الجزائري (DZD)</span>
+            </div>
+
+            <!-- Estimator Form -->
+            <form onsubmit="handleRunCostEstimation(event)" class="space-y-5">
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- 1. Scope of work -->
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1.5">1. نطاق ومرحلة الأشغال :</label>
+                  <select id="estScope" onchange="handleEstScopeChange()" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-bh-yellow">
+                    <option value="full_villa">بناء فيلا / منزل كامل (من الصفر إلى المفتاح)</option>
+                    <option value="foundations_only">مرحلة الأساسات فقط (Semelles, Longrines, Voiles)</option>
+                    <option value="carcasse_only">مرحلة الهيكل العظم الخرساني (Poteaux, Poutres, Dalles)</option>
+                    <option value="brickwork_only">بناء الجدران والتقسيمات الداخلية (Maçonnerie)</option>
+                    <option value="facade_only">تشطيب وديكور الواجهة الخارجية (Façade Moderne)</option>
+                    <option value="finishing_only">تشطيبات داخلية كاملة (Plâtre, Carrelage, Peinture)</option>
+                    <option value="kitchen_bath_remodel">تجديد وديكور مطبخ / حمام (Cuisine & Salle de bain)</option>
+                  </select>
+                </div>
+
+                <!-- 2. Area -->
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1.5">2. المساحة الإجمالية للمشروع (م²) :</label>
+                  <input type="number" id="estArea" required min="10" max="5000" value="120" placeholder="مثلاً: 120" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white font-mono focus:outline-none focus:border-bh-yellow">
+                </div>
+
+                <!-- 3. Floors / Height -->
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1.5">3. عدد الطوابق أو الارتفاع :</label>
+                  <select id="estFloors" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-bh-yellow">
+                    <option value="1">طابق أرضي فقط (R+0)</option>
+                    <option value="2" selected>طابق أرضي + طابق أول (R+1)</option>
+                    <option value="3">طابق أرضي + طابقين (R+2)</option>
+                    <option value="4">طابق أرضي + 3 طوابق (R+3)</option>
+                    <option value="5">طابق أرضي + 4 طوابق (R+4)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Decor Specific Wall Coverage (Visible when Decor/Kitchen chosen) -->
+              <div id="estDecorWallsGroup" class="hidden p-4 rounded-2xl bg-bh-bg/80 border border-amber-500/30 space-y-2">
+                <label class="block text-xs font-semibold text-amber-300">مواصفات تغطية الجدران للديكور والمطابخ :</label>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-card border border-bh-border cursor-pointer">
+                    <input type="radio" name="estDecorWallType" value="full" checked class="text-bh-yellow focus:ring-0">
+                    <span>جدران كاملة (4 جدران)</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-card border border-bh-border cursor-pointer">
+                    <input type="radio" name="estDecorWallType" value="single" class="text-bh-yellow focus:ring-0">
+                    <span>جدار رئيسي واحد ديكوري</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-card border border-bh-border cursor-pointer">
+                    <input type="radio" name="estDecorWallType" value="half" class="text-bh-yellow focus:ring-0">
+                    <span>نصف جدار (حزام وسيراميك)</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Blueprint Plan Upload (Optional) -->
+              <div class="p-4 rounded-2xl bg-bh-bg/60 border border-bh-border space-y-2">
+                <div class="flex items-center justify-between">
+                  <label class="block text-xs font-semibold text-slate-300">رفع صورة المخطط المعماري (Plan d'architecture) لفحصه وتضمينه بالكشف :</label>
+                  <span class="text-[10px] text-cyan-400 font-mono" id="estBlueprintName">اختياري</span>
+                </div>
+                <input type="file" id="estBlueprintInput" accept="image/*" onchange="handleEstBlueprintSelect(event)" class="w-full text-xs text-slate-400 file:ml-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
+              </div>
+
+              <!-- 4. Materials Selection Checklist -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-2">4. اختر مواد البناء المستعملة في حساب التكلفة :</label>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-bg border border-bh-border cursor-pointer hover:border-bh-yellow">
+                    <input type="checkbox" id="matCheckCement" checked class="rounded border-bh-border text-bh-yellow focus:ring-0">
+                    <span>إسمنت CPJ 42.5 🏗️</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-bg border border-bh-border cursor-pointer hover:border-bh-yellow">
+                    <input type="checkbox" id="matCheckSteel" checked class="rounded border-bh-border text-bh-yellow focus:ring-0">
+                    <span>حديد التسليح FeE500 ⚙️</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-bg border border-bh-border cursor-pointer hover:border-bh-yellow">
+                    <input type="checkbox" id="matCheckSand" checked class="rounded border-bh-border text-bh-yellow focus:ring-0">
+                    <span>رمل الوادي وحصى ⏳</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-bg border border-bh-border cursor-pointer hover:border-bh-yellow">
+                    <input type="checkbox" id="matCheckBricks" checked class="rounded border-bh-border text-bh-yellow focus:ring-0">
+                    <span>آجر وطوب مجوف 🧱</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-bg border border-bh-border cursor-pointer hover:border-bh-yellow">
+                    <input type="checkbox" id="matCheckInsulation" checked class="rounded border-bh-border text-bh-yellow focus:ring-0">
+                    <span>عوازل الرطوبة والحرارة 🛡️</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-bg border border-bh-border cursor-pointer hover:border-bh-yellow">
+                    <input type="checkbox" id="matCheckFinishing" checked class="rounded border-bh-border text-bh-yellow focus:ring-0">
+                    <span>سيراميك وبلاط ودهان 🎨</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-bg border border-bh-border cursor-pointer hover:border-bh-yellow">
+                    <input type="checkbox" id="matCheckPlumbing" checked class="rounded border-bh-border text-bh-yellow focus:ring-0">
+                    <span>أنابيب صحية وتدفئة 🚿</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-bg border border-bh-border cursor-pointer hover:border-bh-yellow">
+                    <input type="checkbox" id="matCheckElectric" checked class="rounded border-bh-border text-bh-yellow focus:ring-0">
+                    <span>تجهيزات كهربائية ⚡</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- 5. Trades / Labor Selection -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-2">5. تحديد الحرفيين والعمال المطلوبين (اليد العاملة) :</label>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-bg border border-bh-border cursor-pointer hover:border-emerald-400">
+                    <input type="checkbox" id="laborCheckMason" checked class="rounded border-bh-border text-emerald-500 focus:ring-0">
+                    <span>بناؤون (Maçons) 👷</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-bg border border-bh-border cursor-pointer hover:border-emerald-400">
+                    <input type="checkbox" id="laborCheckSteel" checked class="rounded border-bh-border text-emerald-500 focus:ring-0">
+                    <span>حدادو تسليح وقوالب 🔨</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-bg border border-bh-border cursor-pointer hover:border-emerald-400">
+                    <input type="checkbox" id="laborCheckElectric" checked class="rounded border-bh-border text-emerald-500 focus:ring-0">
+                    <span>كهربائي معتمد ⚡</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-bg border border-bh-border cursor-pointer hover:border-emerald-400">
+                    <input type="checkbox" id="laborCheckPlumber" checked class="rounded border-bh-border text-emerald-500 focus:ring-0">
+                    <span>ترصاص صحي وتدفئة 🚿</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-bg border border-bh-border cursor-pointer hover:border-emerald-400">
+                    <input type="checkbox" id="laborCheckPainter" checked class="rounded border-bh-border text-emerald-500 focus:ring-0">
+                    <span>دهان وجبس بورد 🎨</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-bg border border-bh-border cursor-pointer hover:border-emerald-400">
+                    <input type="checkbox" id="laborCheckTile" checked class="rounded border-bh-border text-emerald-500 focus:ring-0">
+                    <span>مبلط وسيراميك 📐</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- 6. Machinery and Trucks -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-2">6. الشاحنات، وسائل النقل والعتاد :</label>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-bg border border-bh-border cursor-pointer">
+                    <input type="checkbox" id="machCheckTruck" checked class="rounded border-bh-border text-bh-yellow focus:ring-0">
+                    <span>شاحنات نقل وتفريغ الردوم 🚛</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-bg border border-bh-border cursor-pointer">
+                    <input type="checkbox" id="machCheckPump" checked class="rounded border-bh-border text-bh-yellow focus:ring-0">
+                    <span>مضخة خرسانة وخلاط 🚜</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2 rounded-xl bg-bh-bg border border-bh-border cursor-pointer">
+                    <input type="checkbox" id="machCheckScaffold" checked class="rounded border-bh-border text-bh-yellow focus:ring-0">
+                    <span>سقالات ورافعة ورشة 🏗️</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="pt-2">
+                <button type="submit" id="btnRunEstimation" class="w-full py-3.5 bg-gradient-to-r from-bh-yellow via-amber-500 to-bh-orange text-slate-950 font-black rounded-2xl text-sm shadow-xl hover:opacity-95 transition flex items-center justify-center gap-2 cursor-pointer active:scale-98">
+                  <i class="fa-solid fa-calculator"></i>
+                  <span>حساب التكلفة التقديرية بالذكاء الاصطناعي ⚡</span>
+                </button>
+              </div>
+
+            </form>
+
+            <!-- Results Card & Devis Display -->
+            <div id="aiCostResultContainer" class="hidden space-y-6 pt-6 border-t border-bh-border">
+              
+              <!-- Key Numbers Grid -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+                <div class="p-4 rounded-2xl bg-bh-bg border border-amber-500/30 space-y-1">
+                  <span class="text-xs text-slate-400 font-semibold">تكلفة مواد البناء 🧱</span>
+                  <div id="resMatCost" class="text-lg font-black text-amber-400 font-mono">0 دج</div>
+                </div>
+                <div class="p-4 rounded-2xl bg-bh-bg border border-emerald-500/30 space-y-1">
+                  <span class="text-xs text-slate-400 font-semibold">تكلفة اليد العاملة والعمال 👷</span>
+                  <div id="resLaborCost" class="text-lg font-black text-emerald-400 font-mono">0 دج</div>
+                </div>
+                <div class="p-4 rounded-2xl bg-bh-bg border border-sky-500/30 space-y-1">
+                  <span class="text-xs text-slate-400 font-semibold">الشاحنات والعتاد والآليات 🚛</span>
+                  <div id="resMachCost" class="text-lg font-black text-sky-400 font-mono">0 دج</div>
+                </div>
+                <div class="p-4 rounded-2xl bg-bh-bg border border-purple-500/30 space-y-1">
+                  <span class="text-xs text-slate-400 font-semibold">المدة الزمنية التقديرية ⏳</span>
+                  <div id="resDuration" class="text-lg font-black text-purple-400 font-mono">0 أسابيع</div>
+                </div>
+              </div>
+
+              <!-- Grand Total Banner -->
+              <div class="p-5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-bh-yellow/20 to-orange-500/20 border-2 border-bh-yellow flex items-center justify-between flex-wrap gap-4">
+                <div class="space-y-0.5">
+                  <span class="text-xs font-bold text-amber-300">التكلفة التقديرية الإجمالية للمشروع :</span>
+                  <h4 class="text-xs text-slate-300">شاملة المواد المحددة والعمال ووسائل النقل بالدينار الجزائري</h4>
+                </div>
+                <div class="text-left font-mono" dir="ltr">
+                  <span id="resGrandTotalDZD" class="text-2xl sm:text-3xl font-black text-white tracking-tight">0 DZD</span>
+                </div>
+              </div>
+
+              <!-- Printable Devis Preview Card (Captured to PDF) -->
+              <div id="printableDevisCard" class="p-6 sm:p-8 rounded-3xl bg-bh-bg border border-bh-border space-y-6 text-right">
+                
+                <!-- Devis Header -->
+                <div class="flex items-center justify-between pb-4 border-b border-bh-border flex-wrap gap-4">
+                  <div class="flex items-center gap-3">
+                    <img src="assets/batihub_logo.png" alt="BatiHub DZ" class="w-16 h-16 object-contain">
+                    <div>
+                      <h3 class="font-heading font-black text-base text-white">BatiHub DZ • كشف تقديري للأشغال (Devis Estimatif)</h3>
+                      <p class="text-[11px] text-slate-400">المنصة الوطنية لخدمات البناء، المقاولات، والحرفيين في الجزائر</p>
+                    </div>
+                  </div>
+                  <div class="text-left font-mono text-xs text-slate-400" dir="ltr">
+                    <div>Devis N°: <span id="devisNumberDisplay" class="font-bold text-bh-yellow">BH-2026-001</span></div>
+                    <div>Date: <span id="devisDateDisplay" class="text-white">2026-11-23</span></div>
+                  </div>
+                </div>
+
+                <!-- Devis Details Table -->
+                <div class="overflow-x-auto">
+                  <table class="w-full text-xs text-right border-collapse">
+                    <thead>
+                      <tr class="bg-bh-card text-slate-300 border-b border-bh-border">
+                        <th class="p-2.5 font-bold">البند وتفاصيل الأشغال</th>
+                        <th class="p-2.5 font-bold">الكمية والمقدار</th>
+                        <th class="p-2.5 font-bold">متوسط السعر</th>
+                        <th class="p-2.5 font-bold text-left" dir="ltr">المبلغ الإجمالي (دج)</th>
+                      </tr>
+                    </thead>
+                    <tbody id="devisTableBody" class="divide-y divide-bh-border/60 font-mono">
+                      <!-- Populated dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Devis Footer & Official Stamp -->
+                <div class="flex items-center justify-between pt-4 border-t border-bh-border text-xs flex-wrap gap-4">
+                  <div class="space-y-1 text-slate-400 text-[11px]">
+                    <p>• هذا الكشف تقديري محسوب وفق متوسط أسعار السوق الوطنية الجزائرية ومقاييس البناء DTR.</p>
+                    <p>• تم إنشاؤه عبر منصة BatiHub DZ وتطوير المهندس: Mouhaned Guellif.</p>
+                  </div>
+                  <div class="text-center p-3 rounded-2xl bg-bh-card border border-amber-500/30 text-amber-400 font-bold text-xs space-y-1">
+                    <i class="fa-solid fa-stamp text-xl"></i>
+                    <div>BatiHub DZ Official Stamp</div>
+                    <div class="text-[9px] font-mono text-slate-400">CERTIFIED ESTIMATE</div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Export Button -->
+              <div class="flex items-center justify-end gap-3 flex-wrap">
+                <button type="button" onclick="exportDevisToPDF()" id="btnExportPDF" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-rose-500 to-red-600 text-white font-black text-xs shadow-xl hover:opacity-95 transition flex items-center gap-2 cursor-pointer active:scale-95">
+                  <i class="fa-solid fa-file-pdf text-sm"></i>
+                  <span>تحميل كشف تقديري رسمي بصيغة PDF 📥</span>
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
 
       </div>
 
@@ -695,7 +1161,7 @@
     </main>
 
     <!-- MOBILE BOTTOM NAVIGATION -->
-    <nav id="mobileBottomNav" class="fixed bottom-0 left-0 right-0 z-40 bg-[#0c1017]/95 backdrop-blur-xl border-t border-bh-border px-1 py-1.5 flex items-center justify-around md:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.7)] safe-area-bottom">
+    <nav id="mobileBottomNav" class="fixed bottom-0 left-0 right-0 z-40 bg-[#0c1017]/95 backdrop-blur-xl border-t border-bh-border px-2 py-1.5 flex items-center justify-between md:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.7)] safe-area-bottom overflow-x-auto no-scrollbar gap-1">
       <button type="button" onclick="switchTab('tab-scientific-calculator')" id="mNavCalc" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-bh-yellow transition active:scale-90">
         <i class="fa-solid fa-calculator text-sm"></i>
         <span class="text-[8px] font-bold mt-0.5 tracking-tight" data-i18n="m_nav_calc">الحاسبة</span>
@@ -711,9 +1177,19 @@
         <span class="text-[8px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_worker_requests">طلب عامل</span>
       </button>
 
-      <button type="button" onclick="switchTab('tab-gallery')" id="mNavGallery" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-400 hover:text-white transition active:scale-90">
+      <button type="button" onclick="switchTab('tab-gallery')" id="mNavGallery" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1.5 rounded-xl text-slate-400 hover:text-white transition active:scale-90 shrink-0">
         <i class="fa-solid fa-palette text-sm text-amber-400"></i>
         <span class="text-[8px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_gallery">المعرض</span>
+      </button>
+
+      <button type="button" onclick="switchTab('tab-building-materials')" id="mNavMaterials" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1.5 rounded-xl text-slate-400 hover:text-white transition active:scale-90 shrink-0">
+        <i class="fa-solid fa-cubes-stacked text-sm text-amber-500"></i>
+        <span class="text-[8px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_materials">مواد البناء</span>
+      </button>
+
+      <button type="button" onclick="switchTab('tab-ai-engineer')" id="mNavAi" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1.5 rounded-xl text-slate-400 hover:text-white transition active:scale-90 shrink-0">
+        <i class="fa-solid fa-wand-magic-sparkles text-sm text-cyan-400"></i>
+        <span class="text-[8px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_ai">ذكاء AI</span>
       </button>
 
       <button type="button" onclick="switchTab('tab-pending-posts')" id="mNavPending" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-400 hover:text-white transition active:scale-90 relative">
@@ -989,6 +1465,75 @@
   <!-- ========================================================================= -->
   <!-- MODAL: ADD GALLERY DESIGN (خاص بالإدارة - إضافة نموذج ومعرض صور)          -->
   <!-- ========================================================================= -->
+  <!-- MODAL: ADD BUILDING MATERIAL (ADMIN) -->
+  <div id="modalAddBuildingMaterial" class="modal-backdrop hidden">
+    <div class="modal-box max-w-lg w-full overflow-hidden relative text-right" dir="rtl">
+      <div class="px-5 py-4 border-b border-bh-border flex items-center justify-between bg-bh-cardhover">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
+            <i class="fa-solid fa-cubes text-sm"></i>
+          </div>
+          <h3 class="font-bold text-white text-sm">إضافة مادة بناء جديدة لدليل BatiHub DZ</h3>
+        </div>
+        <button type="button" onclick="closeAddBuildingMaterialModal()" class="w-7 h-7 rounded-full bg-bh-bg hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleCreateMaterialSubmit(event)" class="p-5 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">اسم مادة البناء أو المنتوج :</label>
+          <input type="text" id="matNameInput" required placeholder="مثلاً: إسمنت بورتلاندي CPJ 42.5 لافارج" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">التصنيف والنوع :</label>
+            <select id="matCategoryInput" required class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
+              <option value="cement">إسمنت وخرسانة</option>
+              <option value="steel">حديد وتسليح</option>
+              <option value="brick">طوب وآجر</option>
+              <option value="aggregates">رمل وحصى</option>
+              <option value="insulation">عوازل وكتامة</option>
+              <option value="paint">دهان وتشطيب</option>
+              <option value="plumbing">أنابيب وكهرباء</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">متوسط السعر بالدينار (دج) :</label>
+            <input type="text" id="matPriceInput" required placeholder="مثلاً: 520 دج للكيس" class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">مجالات والاستعمالات (لواه يستعملوه) :</label>
+          <textarea id="matUsageInput" rows="2" required placeholder="مثلاً: صب الأعمدة والأسقف، تشييد الهياكل الخرسانية المسلحة، والأرضيات الصناعية..." class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 resize-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">مكونات ومواد الصنع :</label>
+          <input type="text" id="matCompositionInput" required placeholder="مثلاً: كلينكر 95%، جبس طبيعي 5%، حجر جيري نقي..." class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">صورة المادة التوضيحية :</label>
+          <input type="file" id="matImageInput" accept="image/*" onchange="handleMaterialImageSelect(event)" class="w-full text-xs text-slate-400 file:ml-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-500/20 file:text-amber-400 hover:file:bg-amber-500/30 cursor-pointer">
+          <div id="matImagePreviewContainer" class="hidden mt-2">
+            <img id="matImagePreview" src="" alt="Preview" class="h-28 w-full object-cover rounded-xl border border-bh-border">
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-bh-border">
+          <button type="button" onclick="closeAddBuildingMaterialModal()" class="px-4 py-2 rounded-xl bg-bh-bg hover:bg-slate-800 text-slate-300 text-xs font-semibold transition cursor-pointer">إلغاء</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 text-xs font-black shadow-md hover:opacity-95 transition cursor-pointer flex items-center gap-1.5">
+            <i class="fa-solid fa-plus"></i>
+            <span>حفظ ونشر المادة بالدليل</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
   <div id="modalAddGalleryDesign" class="modal-backdrop hidden">
     <div class="modal-box max-w-lg w-full overflow-hidden relative text-right" dir="rtl">
       <div class="px-5 py-4 border-b border-bh-border flex items-center justify-between bg-bh-cardhover">
@@ -1012,14 +1557,20 @@
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">الجهة / الغرفة المخصصة :</label>
-            <select id="galleryRoomType" required class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
-              <option value="kitchen">مطبخ (كوزينة)</option>
-              <option value="bathroom">حمام</option>
-              <option value="toilet">مرحاض</option>
-              <option value="living_room">صالون ومعيشة</option>
-              <option value="bedroom">غرفة نوم</option>
-              <option value="facade">واجهة ومدخل</option>
+            <select id="galleryRoomType" onchange="handleGalleryCategorySelectChange(this.value)" required class="w-full bg-bh-bg border border-bh-border rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
+              <option value="kitchen">مطبخ (كوزينة) 🍳</option>
+              <option value="bathroom">حمام 🚿</option>
+              <option value="toilet">مرحاض 🚽</option>
+              <option value="living_room">صالون ومعيشة 🛋️</option>
+              <option value="bedroom">غرفة نوم 🛏️</option>
+              <option value="facade">واجهة ومدخل 🏛️</option>
+              <option value="blueprint">مخططات معمارية وهندسية 📐</option>
+              <option value="garden">حدائق ومساحات خارجية 🌿</option>
+              <option value="custom">+ إضافة قسم مخصص جديد...</option>
             </select>
+            <div id="galleryCustomCategoryContainer" class="hidden mt-2">
+              <input type="text" id="galleryCustomCategoryInput" placeholder="اكتب اسم القسم الجديد..." class="w-full bg-bh-card border border-amber-500/50 rounded-xl p-2 text-xs text-white placeholder-slate-500 focus:outline-none">
+            </div>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">المساحة الإجمالية (اختياري) :</label>
