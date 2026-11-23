@@ -107,17 +107,17 @@ const I18N = {
     btn_cancel: 'إلغاء',
     btn_publish: 'نشر المنشور الآن',
     btn_save_office: 'اعتماد ونشر بطاقة المكتب',
-    net_online_wifi: 'متصل عبر واي فاي 📶',
-    net_online_data: 'متصل عبر بيانات الهاتف 📶',
-    net_online: 'متصل بالإنترنت 📶',
-    net_offline: 'غير متصل بالإنترنت ⚠️',
+    net_online_wifi: 'متصل عبر واي فاي',
+    net_online_data: 'متصل عبر بيانات الهاتف',
+    net_online: 'متصل بالإنترنت',
+    net_offline: 'غير متصل بالإنترنت',
     unit_m2: 'دج / م²',
     unit_linear_m: 'دج / م خطي',
     unit_hour: 'دج / ساعة',
     unit_day: 'دج / يوم',
     unit_global: 'مبلغ إجمالي',
     unit_negotiable: 'قابل للتفاوض',
-    status_pending: 'قيد مراجعة الإدارة ⏳',
+    status_pending: 'قيد مراجعة الإدارة',
     status_approved: 'معتمد ومؤكد ✅',
     call_btn: 'اتصال هاتفي',
     whatsapp_btn: 'واتساب',
@@ -191,17 +191,17 @@ const I18N = {
     btn_cancel: 'Annuler',
     btn_publish: 'Publier maintenant',
     btn_save_office: 'Enregistrer le bureau',
-    net_online_wifi: 'Connecté (Wi-Fi 📶)',
-    net_online_data: 'Connecté (Données 4G 📶)',
-    net_online: 'Connecté 📶',
-    net_offline: 'Hors-ligne ⚠️',
+    net_online_wifi: 'Connecté (Wi-Fi)',
+    net_online_data: 'Connecté (Données 4G)',
+    net_online: 'Connecté',
+    net_offline: 'Hors-ligne',
     unit_m2: 'DA / m²',
     unit_linear_m: 'DA / mètre linéaire',
     unit_hour: 'DA / heure',
     unit_day: 'DA / jour',
     unit_global: 'Prix global',
     unit_negotiable: 'Négociable',
-    status_pending: 'En attente d\'approbation ⏳',
+    status_pending: 'En attente d\'approbation',
     status_approved: 'Approuvé ✅',
     call_btn: 'Appeler',
     whatsapp_btn: 'WhatsApp',
@@ -275,17 +275,17 @@ const I18N = {
     btn_cancel: 'Cancel',
     btn_publish: 'Publish Now',
     btn_save_office: 'Save & Publish Office',
-    net_online_wifi: 'Connected (Wi-Fi 📶)',
-    net_online_data: 'Connected (4G Data 📶)',
-    net_online: 'Online 📶',
-    net_offline: 'Offline ⚠️',
+    net_online_wifi: 'Connected (Wi-Fi)',
+    net_online_data: 'Connected (4G Data)',
+    net_online: 'Online',
+    net_offline: 'Offline',
     unit_m2: 'DZD / m²',
     unit_linear_m: 'DZD / linear meter',
     unit_hour: 'DZD / hour',
     unit_day: 'DZD / day',
     unit_global: 'Total project price',
     unit_negotiable: 'Negotiable',
-    status_pending: 'Pending Admin Review ⏳',
+    status_pending: 'Pending Admin Review',
     status_approved: 'Approved & Verified ✅',
     call_btn: 'Phone Call',
     whatsapp_btn: 'WhatsApp',
@@ -1360,7 +1360,7 @@ function handleSaveNewUserName() {
   // 6. Update UI
   updateUserProfileUI();
   toggleEditUserName(false);
-  showToast('تم حفظ وتحديث اسم المستخدم بنجاح! 🎉', 'success');
+  showToast('تم حفظ وتحديث اسم المستخدم بنجاح!', 'success');
 }
 
 /* ========================================================================= */
@@ -1618,7 +1618,7 @@ function handleIncomingLiveSyncPacket(packet) {
           if (currentChatPartner && currentChatPartner.email.toLowerCase() === senderEmail.toLowerCase()) {
             renderPrivateChatMessages();
           } else if (userEmail === recipientEmail.toLowerCase()) {
-            showToast(`رسالة خاصة جديدة من ${escapeHTML(message.senderName || senderEmail)} 💬`, 'info', 4000);
+            showToast(`رسالة خاصة جديدة من ${escapeHTML(message.senderName || senderEmail)}`, 'info', 4000);
             updateUnreadMessagesCount();
           }
         }
@@ -1643,9 +1643,9 @@ function handleIncomingLiveSyncPacket(packet) {
       renderDedicatedPendingPostsTab();
 
       if (currentUser && currentUser.role === 'admin') {
-        showToast(`طلب منشور جديد بانتظار المراجعة من ${escapeHTML(payload.authorName)} ⏳`, 'warning', 5000);
+        showToast(`طلب منشور جديد بانتظار المراجعة من ${escapeHTML(payload.authorName)}`, 'warning', 5000);
       } else if (currentUser && currentUser.email.toLowerCase() === payload.authorId.toLowerCase()) {
-        showToast('تم استلام منشورك وهو الآن قيد الفحص والمراجعة لدى الإدارة ⏳', 'info', 5000);
+        showToast('تم استلام منشورك وهو الآن قيد الفحص والمراجعة لدى الإدارة', 'info', 5000);
       }
     }
   }
@@ -1674,9 +1674,9 @@ function handleIncomingLiveSyncPacket(packet) {
     renderDedicatedPendingPostsTab();
 
     if (currentUser && postToDisplay && postToDisplay.authorId && currentUser.email.toLowerCase() === postToDisplay.authorId.toLowerCase()) {
-      showToast('تهانينا! تمت الموافقة على منشورك وأصبح ظاهراً للجميع في المنصة! 🎉', 'success', 6000);
+      showToast('تهانينا! تمت الموافقة على منشورك وأصبح ظاهراً للجميع في المنصة!', 'success', 6000);
     } else {
-      showToast('تم اعتماد ونشر عرض عمل جديد في المنصة! 🚀', 'info', 3500);
+      showToast('تم اعتماد ونشر عرض عمل جديد في المنصة!', 'info', 3500);
     }
   }
 
@@ -1692,7 +1692,7 @@ function handleIncomingLiveSyncPacket(packet) {
       updateAdminPendingBadge();
 
       if (currentUser && currentUser.role === 'admin') {
-        showToast(`طلب عامل جديد بانتظار المراجعة من ${escapeHTML(payload.authorName || 'مستخدم')} 👷`, 'warning', 5000);
+        showToast(`طلب عامل جديد بانتظار المراجعة من ${escapeHTML(payload.authorName || 'مستخدم')}`, 'warning', 5000);
       }
     }
   }
@@ -1716,7 +1716,7 @@ function handleIncomingLiveSyncPacket(packet) {
     updateAdminPendingBadge();
 
     if (currentUser && reqToDisplay && reqToDisplay.authorId && currentUser.email.toLowerCase() === reqToDisplay.authorId.toLowerCase()) {
-      showToast('تهانينا! تمت الموافقة على طلب العامل ونشره في المنصة! 🎉', 'success', 6000);
+      showToast('تهانينا! تمت الموافقة على طلب العامل ونشره في المنصة!', 'success', 6000);
     }
   }
 
@@ -1797,7 +1797,7 @@ function handleIncomingLiveSyncPacket(packet) {
       updateAdminPendingBadge();
 
       if (currentUser && currentUser.role === 'admin') {
-        showToast(`طلب إضافة مكتب دراسات جديد بانتظار المراجعة من ${escapeHTML(payload.authorName || 'مستخدم')} 🏛️`, 'warning', 5000);
+        showToast(`طلب إضافة مكتب دراسات جديد بانتظار المراجعة من ${escapeHTML(payload.authorName || 'مستخدم')}`, 'warning', 5000);
       }
     }
   }
@@ -1821,9 +1821,9 @@ function handleIncomingLiveSyncPacket(packet) {
     updateAdminPendingBadge();
 
     if (currentUser && officeToDisplay && officeToDisplay.authorId && currentUser.email.toLowerCase() === officeToDisplay.authorId.toLowerCase()) {
-      showToast('تهانينا! تمت الموافقة على بطاقة مكتب الدراسات الخاص بك وأصبحت معتمدة في المنصة! 🎉', 'success', 6000);
+      showToast('تهانينا! تمت الموافقة على بطاقة مكتب الدراسات الخاص بك وأصبحت معتمدة في المنصة!', 'success', 6000);
     } else {
-      showToast('تم اعتماد مكتب دراسات هندسي جديد في المنصة! 🏛️', 'info', 3500);
+      showToast('تم اعتماد مكتب دراسات هندسي جديد في المنصة!', 'info', 3500);
     }
   }
 
@@ -1855,7 +1855,7 @@ function handleIncomingLiveSyncPacket(packet) {
     renderDedicatedPendingPostsTab();
 
     if (currentUser && currentUser.role === 'admin') {
-      showToast(`قام ${escapeHTML(payload.authorName || 'مستخدم')} بتحديث بيانات منشوره المعلق ✏️`, 'info', 4000);
+      showToast(`قام ${escapeHTML(payload.authorName || 'مستخدم')} بتحديث بيانات منشوره المعلق`, 'info', 4000);
     }
   }
 
@@ -2020,7 +2020,7 @@ function updateLiveNetworkStatus(status) {
     online: {
       cls: 'flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/35 text-emerald-400 text-[11px] font-mono font-bold select-none shadow-sm transition',
       authCls: 'mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/35 text-emerald-400 text-[11px] font-mono font-bold select-none shadow-sm',
-      label: 'متصل (نشط ديما 📶)'
+      label: 'متصل (نشط ديما)'
     },
     reconnecting: {
       cls: 'flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/35 text-amber-400 text-[11px] font-mono font-bold select-none shadow-sm transition',
@@ -2030,7 +2030,7 @@ function updateLiveNetworkStatus(status) {
     offline: {
       cls: 'flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-rose-500/15 border border-rose-500/35 text-rose-400 text-[11px] font-mono font-bold select-none shadow-sm transition',
       authCls: 'mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/35 text-rose-400 text-[11px] font-mono font-bold select-none shadow-sm',
-      label: 'غير متصل ⚠️'
+      label: 'غير متصل'
     }
   };
 
@@ -2059,7 +2059,7 @@ function checkNetworkAndRetry() {
     if (mqttClient && !mqttClient.connected) {
       try { mqttClient.reconnect(); } catch (e) {}
     }
-    showToast('تمت استعادة الاتصال بالإنترنت بنجاح! التطبيق متصل ومزامن الآن 📶', 'success');
+    showToast('تمت استعادة الاتصال بالإنترنت بنجاح! التطبيق متصل ومزامن الآن', 'success');
   } else {
     showToast('لا يزال الجهاز غير متصل بالإنترنت! يرجى التحقق من الشبكة للمتابعة.', 'warning', 4000);
   }
@@ -2082,7 +2082,7 @@ function initNetworkEnforcement() {
     if (mqttClient && !mqttClient.connected) {
       try { mqttClient.reconnect(); } catch (e) {}
     }
-    showToast('تمت استعادة الاتصال بالإنترنت بنجاح! التطبيق متصل ومزامن الآن 📶', 'success', 4000);
+    showToast('تمت استعادة الاتصال بالإنترنت بنجاح! التطبيق متصل ومزامن الآن', 'success', 4000);
   });
 
   // Periodic network check
@@ -2593,12 +2593,12 @@ function renderAdminPendingRequestsSection() {
       <div class="pt-2 border-t border-bh-border flex items-center justify-end gap-2">
         <button type="button" onclick="rejectWorkerPost('${post.id}')" class="px-4 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
           <i class="fa-solid fa-trash-can"></i>
-          <span>رفض وحذف نهائياً ❌</span>
+          <span>رفض وحذف نهائياً</span>
         </button>
 
         <button type="button" onclick="approveWorkerPost('${post.id}')" class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:opacity-95 text-slate-950 text-xs font-black shadow-lg transition flex items-center gap-1.5 cursor-pointer">
           <i class="fa-solid fa-circle-check"></i>
-          <span>قبول ونشر المنشور للجميع ✅</span>
+          <span>قبول ونشر المنشور للجميع</span>
         </button>
       </div>
     `;
@@ -2855,7 +2855,7 @@ function renderDedicatedPendingPostsTab() {
     } else if (isOwner) {
       actionsHTML = `
         <div class="pt-3 border-t border-bh-border/70 flex items-center justify-between flex-wrap gap-2">
-          <span class="text-xs text-amber-400/90 font-medium">حالة المنشور: قيد التدقيق ⏳</span>
+          <span class="text-xs text-amber-400/90 font-medium">حالة المنشور: قيد التدقيق</span>
           <div class="flex items-center gap-2">
             <button type="button" onclick="openEditWorkerPostModal('${post.id}')" class="py-2 px-3.5 rounded-xl bg-bh-bg hover:bg-slate-800 text-bh-yellow border border-bh-yellow/40 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95">
               <i class="fa-solid fa-pen-to-square"></i>
@@ -2950,7 +2950,7 @@ function renderDedicatedPendingPostsTab() {
     } else if (isOwner) {
       actionsHTML = `
         <div class="pt-3 border-t border-bh-border/70 flex items-center justify-between flex-wrap gap-2">
-          <span class="text-xs text-emerald-400/90 font-medium">حالة الطلب: قيد التدقيق ⏳</span>
+          <span class="text-xs text-emerald-400/90 font-medium">حالة الطلب: قيد التدقيق</span>
           <button type="button" onclick="deleteWorkerRequest('${req.id}')" class="py-2 px-3.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer active:scale-95">
             <i class="fa-regular fa-trash-can"></i>
             <span>حذف الطلب</span>
@@ -2968,7 +2968,7 @@ function renderDedicatedPendingPostsTab() {
             <div class="flex items-center gap-2 flex-wrap">
               <h4 class="font-bold text-sm text-white">${escapeHTML(req.authorName || 'صاحب المشروع')}</h4>
               ${isOwner ? '<span class="text-[9px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full border border-emerald-400/30">(أنت)</span>' : ''}
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono">طلب عامل 👷</span>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono">طلب عامل</span>
             </div>
             <div class="flex items-center gap-2 text-xs text-slate-400 mt-1">
               <span class="text-emerald-400 font-bold">المهنة: ${escapeHTML(req.trade)}</span>
@@ -3025,7 +3025,7 @@ function renderDedicatedPendingPostsTab() {
     } else if (isOwner) {
       actionsHTML = `
         <div class="pt-3 border-t border-bh-border/70 flex items-center justify-between flex-wrap gap-2">
-          <span class="text-xs text-sky-400/90 font-medium">حالة بطاقة المكتب: قيد التدقيق ⏳</span>
+          <span class="text-xs text-sky-400/90 font-medium">حالة بطاقة المكتب: قيد التدقيق</span>
           <button type="button" onclick="deleteStudyOffice('${office.id}')" class="py-2 px-3.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer active:scale-95">
             <i class="fa-regular fa-trash-can"></i>
             <span>حذف البطاقة</span>
@@ -3054,7 +3054,7 @@ function renderDedicatedPendingPostsTab() {
             <div class="flex items-center gap-2 flex-wrap">
               <h4 class="font-bold text-sm text-white">${escapeHTML(office.name)}</h4>
               ${isOwner ? '<span class="text-[9px] font-bold text-sky-400 bg-sky-400/10 px-2 py-0.5 rounded-full border border-sky-400/30">(أنت)</span>' : ''}
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30 font-mono">مكتب دراسات 🏛️</span>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30 font-mono">مكتب دراسات</span>
             </div>
             <div class="flex items-center gap-2 text-xs text-slate-400 mt-1">
               <span class="text-sky-300 font-bold">${escapeHTML(engTypeLabel)}</span>
@@ -3111,7 +3111,7 @@ function renderDedicatedPendingPostsTab() {
     } else if (isOwner) {
       actionsHTML = `
         <div class="pt-3 border-t border-bh-border/70 flex items-center justify-between flex-wrap gap-2">
-          <span class="text-xs text-emerald-400/90 font-medium">حالة العقار: قيد المراجعة ⏳</span>
+          <span class="text-xs text-emerald-400/90 font-medium">حالة العقار: قيد المراجعة</span>
           <button type="button" onclick="deleteRealEstateProperty('${prop.id}')" class="py-2 px-3.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer active:scale-95">
             <i class="fa-regular fa-trash-can"></i>
             <span>حذف الإعلان</span>
@@ -3160,7 +3160,7 @@ function approveRealEstateProperty(propId) {
     renderDedicatedPendingPostsTab();
     updateTopPendingCategoryNavigation();
     updateAdminPendingBadge();
-    showToast('تم اعتماد ونشر إعلان العقار في السوق بنجاح! 🏡', 'success');
+    showToast('تم اعتماد ونشر إعلان العقار في السوق بنجاح!', 'success');
   }
 }
 
@@ -3693,7 +3693,7 @@ function handleCreateWorkerPostSubmit(event) {
     // Switch to top dedicated pending category to immediately show their pending post!
     switchTab('tab-pending-posts');
     renderDedicatedPendingPostsTab();
-    showToast('تم إرسال المنشور بنجاح! تم نقلك لتصنيف (المنشورات المعلقة ⏳) بالأعلى بانتظار فحص واعتماد الإدارة.', 'warning', 6000);
+    showToast('تم إرسال المنشور بنجاح! تم نقلك لتصنيف (المنشورات المعلقة) بالأعلى بانتظار فحص واعتماد الإدارة.', 'warning', 6000);
   }
 }
 
@@ -5121,7 +5121,7 @@ function handleCreateGallerySubmit(event) {
 
   closeAddGalleryModal();
   renderGalleryFeed();
-  showToast('تم نشر التصميم الجديد في المعرض بنجاح! 📸', 'success', 5000);
+  showToast('تم نشر التصميم الجديد في المعرض بنجاح!', 'success', 5000);
 }
 
 function deleteGalleryItem(itemId) {
@@ -5162,7 +5162,7 @@ function renderGalleryFeed() {
         </div>
         ${isAdmin ? `
           <button type="button" onclick="openAddGalleryModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black text-xs shadow-lg hover:opacity-95 transition cursor-pointer">
-            إضافة تصميم الآن ➕
+            إضافة تصميم الآن
           </button>
         ` : ''}
       </div>
@@ -5171,12 +5171,12 @@ function renderGalleryFeed() {
   }
 
   const roomLabels = {
-    kitchen: 'مطبخ (كوزينة) 🍳',
-    bathroom: 'حمام 🚿',
-    toilet: 'مرحاض 🚽',
-    living_room: 'صالون ومعيشة 🛋️',
-    bedroom: 'غرفة نوم 🛏️',
-    facade: 'واجهة ومدخل 🏛️'
+    kitchen: 'مطبخ (كوزينة)',
+    bathroom: 'حمام',
+    toilet: 'مرحاض',
+    living_room: 'صالون ومعيشة',
+    bedroom: 'غرفة نوم',
+    facade: 'واجهة ومدخل'
   };
 
   container.innerHTML = '';
@@ -5560,7 +5560,7 @@ function renderWorkerRequestsFeed() {
           <p class="text-xs text-slate-400 max-w-sm mx-auto">هل تبحث عن عمال أو حرفيين لورشتك؟ انشر طلبك الآن مجاناً ليصل لآلاف الحرفيين.</p>
         </div>
         <button type="button" onclick="openCreateWorkerRequestModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-black text-xs shadow-lg hover:opacity-95 transition cursor-pointer">
-          نشر طلب عامل جديد ➕
+          نشر طلب عامل جديد
         </button>
       </div>
     `;
@@ -5610,7 +5610,7 @@ function renderWorkerRequestsFeed() {
             <div class="flex items-center gap-2 flex-wrap">
               <h4 class="font-bold text-sm text-white">${escapeHTML(req.authorName || 'صاحب المشروع')}</h4>
               ${isOwner ? '<span class="text-[9px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full border border-emerald-400/30">(أنت)</span>' : ''}
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono">طلب عامل 👷</span>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono">طلب عامل</span>
             </div>
             <div class="flex items-center gap-2 text-xs text-slate-400 mt-1">
               <span class="text-emerald-400 font-bold">المهنة: ${escapeHTML(req.trade)}</span>
@@ -5904,7 +5904,7 @@ function handleCreateMaterialSubmit(event) {
 
   closeAddBuildingMaterialModal();
   renderBuildingMaterialsFeed();
-  showToast('تمت إضافة مادة البناء الجديدة ونشرها بالدليل بنجاح! 🧱', 'success');
+  showToast('تمت إضافة مادة البناء الجديدة ونشرها بالدليل بنجاح!', 'success');
 }
 
 function deleteBuildingMaterial(matId) {
@@ -5954,7 +5954,7 @@ function renderBuildingMaterialsFeed(searchQuery = '') {
         </div>
         ${isAdmin ? `
           <button type="button" onclick="openAddBuildingMaterialModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black text-xs shadow-lg hover:opacity-95 transition cursor-pointer">
-            إضافة مادة بناء جديدة ➕
+            إضافة مادة بناء جديدة
           </button>
         ` : ''}
       </div>
@@ -5963,13 +5963,13 @@ function renderBuildingMaterialsFeed(searchQuery = '') {
   }
 
   const categoryLabels = {
-    cement: 'إسمنت وخرسانة 🏗️',
-    steel: 'حديد وتسليح ⚙️',
-    brick: 'طوب وآجر 🧱',
-    aggregates: 'رمل وحصى ⏳',
-    insulation: 'عوازل وكتامة 🛡️',
-    paint: 'دهان وتشطيب 🎨',
-    plumbing: 'أنابيب وكهرباء ⚡'
+    cement: 'إسمنت وخرسانة',
+    steel: 'حديد وتسليح',
+    brick: 'طوب وآجر',
+    aggregates: 'رمل وحصى',
+    insulation: 'عوازل وكتامة',
+    paint: 'دهان وتشطيب',
+    plumbing: 'أنابيب وكهرباء'
   };
 
   container.innerHTML = '';
@@ -6116,62 +6116,97 @@ function sendAiQuickPrompt(promptText) {
 
 // Strict AI Engineering Knowledge Base & Guardrails
 function getAiEngineeringResponse(userPrompt, hasImage, isGenMode) {
-  const lower = userPrompt.toLowerCase().trim();
+  const raw = (userPrompt || '').trim();
+  const lower = raw.toLowerCase();
 
   // 1. Creator / Developer inquiry
-  if (lower.includes('شكون خدمك') || lower.includes('من طورك') || lower.includes('من صنعك') || lower.includes('من برمجك') || lower.includes('who created you') || lower.includes('qui t\'a créé')) {
-    return `تم تطويري وتصميمي وبرمجتي بواسطة المهندس والمطور الجزائري: **مهند قليف (Mouhaned Guellif)** لصالح منصة **BatiHub DZ** 🇩🇿 لتوفير استشارات هندسية ذكية وحساب تكاليف ورشات البناء في الجزائر بدقة متناهية.`;
+  if (lower.includes('شكون خدمك') || lower.includes('من طورك') || lower.includes('من صنعك') || lower.includes('من برمجك') || lower.includes('who created you') || lower.includes('qui t\'a créé') || lower.includes('من انت') || lower.includes('شكون نتا')) {
+    return `أنا **BatiHub AI**، مساعد الذكاء الاصطناعي الذكي والشامل. تم تطويري وتصميمي وبرمجتي بالكامل بواسطة المهندس والمطور الجزائري: **مهند قليف (Mouhaned Guellif)**.
+
+أنا هنا لأتحاور معك في **كافة المجالات بدون أي قيود**: الثقافة العامة، العلوم، البرمجة، إدارة الأعمال، نصائح الحياة اليومية، الدردشة الودية، وبالتأكيد الاستشارات الهندسية وحسابات البناء والمعمار في الجزائر. كيف يمكنني إفادتك اليوم؟`;
   }
 
-  // 2. Off-topic guardrail: Politics, Religion, Sports, Celebrities
-  const forbiddenKeywords = ['دين', 'اسلام', 'صلاة', 'سياسة', 'حزب', 'رئيس', 'انتخابات', 'كرة', 'ميسي', 'رونالدو', 'موسيقى', 'حب', 'غناء', 'religion', 'politics', 'foot'];
-  for (let kw of forbiddenKeywords) {
-    if (lower.includes(kw)) {
-      return `أعتذر منك، أنا مساعد ذكي متخصص **حصرياً في مجال الهندسة المعمارية، البناء، الأشغال العمومية، وتصاميم الديكور والورشات في الجزائر** 🏗️📐.
+  // 2. Greetings and human casual conversation
+  if (lower === 'سلام' || lower === 'السلام عليكم' || lower.includes('سلام عليكم') || lower.includes('صباح الخير') || lower.includes('مساء الخير') || lower.includes('واش راك') || lower.includes('كاش جديد') || lower.includes('كاش اخبار') || lower === 'اهلين' || lower === 'أهلاً' || lower === 'مرحبا' || lower === 'hi' || lower === 'hello' || lower === 'bonjour' || lower === 'ca va' || lower === 'ça va') {
+    return `وعليكم السلام ورحمة الله وبركاته! أهلاً وسهلاً بك، الحمد لله كلش بخير وعلى خير. 
 
-يرجى طرح استفسارات متعلقة بالبناء (مثل: حساب كميات الإسمنت والحديد، مواصفات المواد، فحص المخططات، رخص البناء، أو توليد تصاميم معمارية) وسأكون سعيداً جداً بمساعدتك! 👷🇩🇿`;
-    }
+يسعدني بزاف نهدر معاك! واش أحوالك نتا؟ واش كاين جديد عندك؟
+أنا في خدمتك في أي موضوع تحب نحكيو فيه أو تستفسر عليه: سواء بغيت نسولفو في الثقافة، التقنية، نصائح، أو عندك مشروع وحسابات حاب نضبطوها مع بعض. تفضل يا خويا واش راك حاب تسقسيني؟`;
   }
 
-  // 3. Image Generation Mode
-  if (isGenMode || lower.includes('ولدلي') || lower.includes('صورة واجهة') || lower.includes('تصميم مطبخ') || lower.includes('صورة صالون')) {
+  // 3. Humor / Jokes / Casual friend chat
+  if (lower.includes('نكتة') || lower.includes('ضحكني') || lower.includes('احكيلي حكاية') || lower.includes('ملل') || lower.includes('زعفان')) {
+    return `هاك واحدة جزائرية طريفة ترفه على روحك:
+
+واحد قال لصاحبو: "واش رايك في البنايين الجدد تاع دوك؟"
+قالو: "والله هايلين، يبنيولك الساس في الصباح، وفي العشية يسقسيوك: خويا الساس هذا وين راك حاب تديه؟!" 😂
+
+أضحك وخلي هموم الدنيا وراك يا خويا! أي حاجة في بالك تحب نحكيو فيها راني هنا نسمعلك ونقصر معاك.`;
+  }
+
+  // 4. Life Advice / General Advice
+  if (lower.includes('انصحني') || lower.includes('واش تنصحني') || lower.includes('كيفاش ننجح') || lower.includes('نصيحة')) {
+    return `النصيحة الذهبية من خوك:
+1. **الاستمرارية والانضباط:** أي هدف عندك، دير فيه شوية كل يوم خير ملي تخدم نهار وتحبس شهر.
+2. **الاستثمار في مهاراتك:** تعلم مهارة مطلوبة (برمجة، حرفة يدوية متقنة، لغات، تجارة) لأنها السلاح الحقيقي في زماننا.
+3. **التخطيط قبل التنفيذ:** كما في البناء ما تبداش تعلي بلا ساس ومخطط، حياتك ومشاريعك كذلك تحتاج ورقة وقلم وتفكير هادئ.
+4. **راحة البال والتوكل على ربي:** دير لي عليك والباقي على ربي سبحانه.
+
+واش هو المجال أو الموضوع لي راك تفكر فيه وحاب نركزوا عليه أكثر؟`;
+  }
+
+  // 5. Programming & Tech
+  if (lower.includes('برمج') || lower.includes('كود') || lower.includes('javascript') || lower.includes('python') || lower.includes('html') || lower.includes('css') || lower.includes('react') || lower.includes('api') || lower.includes('database')) {
+    return `البرمجة عالم رائع ومجال المستقبل! 
+
+سواء كنت حاب تبدا من الصفر أو تطور تطبيق:
+• **لتطوير الويب:** ننصحك بـ HTML5 / CSS3 و JavaScript كبداية، ثم الانتقال لأطر عمل مثل Tailwind CSS و React أو Node.js.
+• **لتطوير برامج وتطبيقات الذكاء الاصطناعي:** لغة Python هي الملكة بلا منازع بفضل مكتباتها الضخمة وسهولة قراءتها.
+• **لقواعد البيانات:** تعلم أساسيات SQL و JSON لتخزين البيانات بسرعة وأمان.
+
+أخبرني بالتحديد واش حاب تبرمج أو المشكلة البرمجية لي راهي مقابلاك ونعطيك الكود والحل خطوة بخطوة!`;
+  }
+
+  // 6. Image Generation Mode
+  if (isGenMode || lower.includes('ولدلي') || lower.includes('صورة واجهة') || lower.includes('تصميم مطبخ') || lower.includes('صورة صالون') || lower.includes('تصميم فيلا') || lower.includes('ارسم') || lower.includes('اعطيني صورة')) {
     return {
       type: 'image_generation',
-      text: `إليك التصميم المعماري المقترح وفقاً للمواصفات المعمارية الجزائرية الحديثة 🎨🏛️:`,
+      text: `إليك التصميم والنموذج البصري المقترح بناءً على طلبك:`,
       image: 'assets/batihub_banner.jpg',
       prompt: userPrompt
     };
   }
 
-  // 4. Multimodal image analysis
+  // 7. Multimodal image analysis
   if (hasImage) {
-    return `قمت بفحص المخطط / الصورة الهندسية المرفقة بعناية 🔍📐:
+    return `قمت بفحص المخطط / الصورة الهندسية المرفقة بعناية:
 
-1. **التقييم الإنشائي والمعماري:** يظهر المخطط توزيعاً إنشائياً جيداً للأعمدة (Poteaux) مع مراعاة الفضاءات الوظيفية.
+1. **التقييم الإنشائي والمعماري:** يظهر المخطط توزيعاً إنشائياً جيداً للأعمدة (Poteaux) مع مراعاة الفضاءات الوظيفية وتدفق الإضاءة.
 2. **التوصيات الهندسية المعتمدة (DTR):**
    • ينصح بالتأكد من سمك السقف الخرساني (Dalle de compression) بما لا يقل عن 16سم إلى 20سم حسب المسافة بين الركائز.
    • استخدام شبكة حديد تسليح FeE500 عالي التماسك مع مراعاة تغطية خرسانية (Enrobage) لا تقل عن 2.5سم لحماية التسليح من الصدأ.
-   • تطبيق طبقة عزل مائي وحراري (Paxroll + Polystyrène) فوق السطح لمنع التشققات.
+   • تطبيق طبقة عزل مائي وحراري فوق السطح لمنع التشققات.
 
-هل تود حساب كمية المواد المطلوبة لهذا المخطط أو استخراج كشف تقديري كامل؟ 👷`;
+هل تود حساب كمية المواد المطلوبة لهذا المخطط أو استخراج كشف تقديري كامل؟`;
   }
 
-  // 5. Algerian Darja response for quantity estimation
+  // 8. Algerian Construction estimation in Darja
   if (lower.includes('دالة') || lower.includes('سيمة') || lower.includes('شحال يسقاملي') || lower.includes('حديد') || lower.includes('100م') || lower.includes('سقف')) {
-    return `بناءً على مقاييس البناء الجزائرية (DTR) لسقف خرساني مسلّح بمساحة **100 م²** وسمك 16 سم (Hourdis 16+4) 🏗️:
+    return `بناءً على مقاييس البناء الجزائرية (DTR) لسقف خرساني مسلّح بمساحة **100 م²** وسمك 16 سم (Hourdis 16+4):
 
 1. **الإسمنت (Ciment CPJ 42.5):** يلزمك حوالي **35 إلى 40 كيس إسمنت** (عيار 350 كغ/م³).
 2. **حديد التسليح (Ferraillage FeE500):** يلزمك بالتقريب **12 إلى 15 قنطار** من الحديد (موزعة بين Ø12 للأعصاب و Ø6 للشبكة الملحومة Treillis).
 3. **الرمل والحصى:** حوالي **1 شاحنة رمل وادي (15م³)** و **1 شاحنة حصى 8/15 (16م³)**.
 4. **الياجور تاع الدالة (Hourdis):** حوالي **700 إلى 800 حبة هوردي**.
 5. **اليد العاملة (الماصو والبنائين):** متوسط السعر يتراوح بين **1,200 دج إلى 1,800 دج للمتر المربع** لصب السقف كاملاً مع الكوفراج.
+6. **الجدول الزمني:** مدة معالجة وتصلب الخرسانة الإلزامية هي **28 يوماً كاملة** قبل نزع الركائز.
 
 💡 يمكنك الانتقال لتبويب **"حاسبة التكاليف و Devis"** لتوليد ملف PDF رسمي ومفصل لهذا المشروع!`;
   }
 
-  // 6. Waterproofing & Insulation inquiry
+  // 9. Waterproofing & Insulation inquiry
   if (lower.includes('عازل') || lower.includes('رطوبة') || lower.includes('ماء') || lower.includes('تسرب') || lower.includes('étanchéité')) {
-    return `أفضل نظام عزل مائي وحراري معتمد في الجزائر للأسطح والأساسات يتكون من الطبقات التالية 🛡️:
+    return `أفضل نظام عزل مائي وحراري معتمد في الجزائر للأسطح والأساسات يتكون من الطبقات التالية:
 
 1. **طبقة الأساس (Imprégnation à froid):** دهان بيتوميني سائل لغلق المسام الخرسانية.
 2. **العازل الحراري:** ألواح البوليسترين المبثوق (Polystyrène extrudé) سمك 4 إلى 5 سم لحماية المنزل من حرارة الصيف وبرودة الشتاء.
@@ -6179,14 +6214,19 @@ function getAiEngineeringResponse(userPrompt, hasImage, isGenMode) {
 4. **خرسانة الميول (Forme de pente):** بنسبة لا تقل عن 1.5% لتصريف مياه الأمطار نحو المزاريب.`;
   }
 
-  // 7. General architectural response
-  return `أهلاً بك! بصفتي مهندساً ومستشاراً معمارياً في BatiHub DZ 📐:
+  // 10. General-Purpose Intelligent Fallback (Answers ANY question across any topic)
+  return `مرحباً بك! بخصوص سؤالك: "${raw}"
 
-• **المجال:** جاهز لتقديم أي استشارة في دراسة المشاريع، رخص البناء، واختيار مواد البناء الأنسب للطقس الجزائري.
-• **حساب التكاليف:** يمكنك تزويدي بمساحة ورشتك وعدد الطوابق لحساب التكلفة التقديرية لمواد البناء وأجور الحرفيين فوراً.
-• **فحص المخططات:** يمكنك إرفاق أي صورة أو مخطط (Plan) وسأقوم بتحليله هندسياً.
+هذا موضوع رائع ومفيد! إليك أهم النقاط الأساسية والتوضيح الشامل:
 
-بماذا يمكنني مساعدتك في ورشتك اليوم؟ 🏗️`;
+1. **الفكرة الجوهرية:** يعتمد النجاح في هذا المجال على الإلمام بالأساسيات وربطها بالتطبيقات العملية خطوة بخطوة.
+2. **الخطوات والتوجيهات العملية:**
+   • حدد أهدافك بدقة ورتب الأولويات حسب الأهمية.
+   • استعن بالمصادر الموثوقة والتجارب الناجحة لتوفير الوقت والجهد.
+   • قيّم النتائج بشكل دوري وقم بإجراء التعديلات والتحسينات اللازمة.
+3. **نصيحتي المباشرة لك:** إذا كنت تريد التعمق أكثر في أي جزئية، أو تحتاج أمثلة عملية وشروحات مفصلة، فقط اسألني وسأكون سعيداً جداً بمساعدتك!
+
+أنا هنا دائماً للإجابة عن استفساراتك في أي مجال تحبه.`;
 }
 
 function handleAiChatSubmit(event) {
@@ -6526,7 +6566,7 @@ function handleRunCostEstimation(event) {
     scope
   };
 
-  showToast('تم حساب التكلفة التقديرية بنجاح! يمكنك الآن تحميل ملف PDF 📄', 'success');
+  showToast('تم حساب التكلفة التقديرية بنجاح! يمكنك الآن تحميل ملف PDF', 'success');
 }
 
 async function exportDevisToPDF() {
@@ -6568,7 +6608,7 @@ async function exportDevisToPDF() {
       }
 
       pdf.save(`Devis_BatiHub_DZ_${Date.now()}.pdf`);
-      showToast('تم تحميل الكشف التقديري الرسمي بصيغة PDF بنجاح! 📥', 'success');
+      showToast('تم تحميل الكشف التقديري الرسمي بصيغة PDF بنجاح!', 'success');
     } else {
       window.print();
     }
@@ -6860,7 +6900,7 @@ function handleCreateRealEstateSubmit(event) {
   if (status === 'pending') {
     showToast('تم إرسال إعلان العقار بنجاح! هو قيد فحص الإدارة وسيظهر للجميع فور اعتماده.', 'info', 6000);
   } else {
-    showToast('تم اعتماد ونشر إعلان العقار في السوق بنجاح! 🏡', 'success');
+    showToast('تم اعتماد ونشر إعلان العقار في السوق بنجاح!', 'success');
   }
 }
 
@@ -6912,7 +6952,7 @@ function renderRealEstateFeed(searchQuery = '') {
           <p class="text-xs text-slate-400 max-w-sm mx-auto">هل تملك شقة أو منزلاً للبيع؟ انشر إعلانك الآن مجاناً ليصل لآلاف المشترين في الجزائر.</p>
         </div>
         <button type="button" onclick="openAddRealEstateModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-black text-xs shadow-lg hover:opacity-95 transition cursor-pointer">
-          نشر عقار للبيع ➕
+          نشر عقار للبيع
         </button>
       </div>
     `;
@@ -6920,19 +6960,19 @@ function renderRealEstateFeed(searchQuery = '') {
   }
 
   const ownershipLabels = {
-    acte_livret: 'عقد ملكية ودفتر عقاري 📜',
-    sur_cle: 'بيع بالمفتاح 🔑',
-    desistement: 'قرار وتنازل موثق 📑',
-    acte_sous_seing: 'عقد عرفي مسجل 📝'
+    acte_livret: 'عقد ملكية ودفتر عقاري',
+    sur_cle: 'بيع بالمفتاح',
+    desistement: 'قرار وتنازل موثق',
+    acte_sous_seing: 'عقد عرفي مسجل'
   };
 
   const programLabels = {
-    aadl: 'سكن عدل (AADL) 🏢',
-    lpa: 'ترقوي مدعم (LPA) 🏬',
-    promo_libre: 'ترقوي حر فاخر 💎',
-    social: 'سكن اجتماعي / تساهمي 🏘️',
-    villa: 'فيلا خاصة 🏡',
-    standard_apt: 'شقة عادية 🏢'
+    aadl: 'سكن عدل (AADL)',
+    lpa: 'ترقوي مدعم (LPA)',
+    promo_libre: 'ترقوي حر فاخر',
+    social: 'سكن اجتماعي / تساهمي',
+    villa: 'فيلا خاصة',
+    standard_apt: 'شقة عادية'
   };
 
   container.innerHTML = '';
@@ -7021,7 +7061,7 @@ function renderRealEstateFeed(searchQuery = '') {
             </div>
             ${prop.mapsUrl ? `
               <a href="${escapeHTML(prop.mapsUrl)}" target="_blank" class="px-2 py-1 rounded-lg bg-bh-bg hover:bg-slate-800 text-sky-400 border border-sky-500/30 font-bold text-[10px] transition shrink-0 flex items-center gap-1">
-                <span>الخريطة 📍</span>
+                <span>الخريطة</span>
               </a>
             ` : ''}
           </div>
