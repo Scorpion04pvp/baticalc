@@ -259,7 +259,7 @@ async function createWindow() {
     minWidth: 1024,
     minHeight: 700,
     title: 'BatiHub DZ - Build • Connect • Create',
-    icon: path.join(__dirname, 'assets', 'batihub_logo.ico'),
+    icon: path.join(__dirname, 'assets', 'batihub_logo_v2.ico'),
     backgroundColor: '#07090f',
     autoHideMenuBar: true,
     webPreferences: {

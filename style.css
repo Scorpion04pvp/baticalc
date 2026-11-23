@@ -351,16 +351,8 @@ button:active, a:active, .worker-filter-pill:active, .office-filter-pill:active,
 }
 
 /* =========================================================================
-   CRISP TWEMOJI & 3D VECTOR EMOJIS
+   CLEAN NATIVE ICONS & MODERN EMOJIS
    ========================================================================= */
-img.emoji {
-  height: 1.25em !important;
-  width: 1.25em !important;
-  margin: 0 0.15em !important;
-  vertical-align: -0.2em !important;
-  display: inline-block !important;
-  image-rendering: -webkit-optimize-contrast;
-}
 
 /* Glassmorphism Refined Cards */
 .bh-glass-card {
@@ -417,4 +409,24 @@ img.emoji {
     background: #ffffff !important;
     padding: 0 !important;
   }
+}
+
+/* Enhanced Luxury Blueprint & Decorated Architectural Theme */
+body {
+  background-color: #06090e;
+  background-image: 
+    radial-gradient(circle at 10% 15%, rgba(255, 160, 0, 0.09) 0%, transparent 35%),
+    radial-gradient(circle at 90% 85%, rgba(255, 109, 0, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 50% 5%, rgba(14, 165, 233, 0.08) 0%, transparent 45%),
+    url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg stroke='%23ffa000' stroke-width='0.45' stroke-opacity='0.18'%3E%3Cpath d='M50 50v-6h-2v6h-6v2h6v6h2v-6h6v-2h-6zm0-40V4h-2v6h-6v2h6v6h2v-6h6v-2h-6zM10 50v-6H8v6H2v2h6v6h2v-6h6v-2h-6zm0-40V4H8v6H2v2h6v6h2v-6h6v-2h-6z'/%3E%3C/g%3E%3Cg stroke='%2338bdf8' stroke-width='0.35' stroke-opacity='0.12'%3E%3Ccircle cx='40' cy='40' r='24'/%3E%3Ccircle cx='0' cy='0' r='16'/%3E%3Ccircle cx='80' cy='80' r='16'/%3E%3Ccircle cx='80' cy='0' r='16'/%3E%3Ccircle cx='0' cy='80' r='16'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-attachment: fixed;
+  background-size: auto, auto, auto, 80px 80px;
+}
+
+/* Luxury Card Glassmorphism with Golden Ambient Glow */
+.bh-card-glow {
+  background: rgba(15, 21, 32, 0.92);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 160, 0, 0.22);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 160, 0, 0.05);
 }

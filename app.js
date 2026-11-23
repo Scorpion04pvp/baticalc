@@ -61,6 +61,8 @@ const I18N = {
     m_nav_offices: 'مكاتب دراسات',
     m_nav_messages: 'محادثات',
     m_nav_profile: 'حسابي',
+    nav_real_estate: 'عقارات ومنازل',
+    m_nav_real_estate: 'عقارات',
     nav_building_materials: 'دليل مواد البناء',
     nav_ai_engineer: 'مساعد المهندس الذكي (AI)',
     m_nav_materials: 'مواد البناء',
@@ -148,6 +150,8 @@ const I18N = {
     m_nav_workers: 'Services',
     m_nav_worker_requests: 'Demandes',
     m_nav_gallery: 'Galerie',
+    nav_real_estate: 'Immobilier & Vente',
+    m_nav_real_estate: 'Immobilier',
     nav_building_materials: 'Matériaux de construction',
     nav_ai_engineer: 'Assistant Ingénieur AI',
     m_nav_materials: 'Matériaux',
@@ -230,6 +234,8 @@ const I18N = {
     m_nav_workers: 'Services',
     m_nav_worker_requests: 'Requests',
     m_nav_gallery: 'Gallery',
+    nav_real_estate: 'Real Estate & Homes',
+    m_nav_real_estate: 'Properties',
     nav_building_materials: 'Building Materials',
     nav_ai_engineer: 'AI Architectural Assistant',
     m_nav_materials: 'Materials',
@@ -1134,6 +1140,8 @@ function transitionToDashboard() {
   renderStudyOfficesFeed();
   renderWorkerRequestsFeed();
   renderGalleryFeed();
+  renderBuildingMaterialsFeed();
+  renderRealEstateFeed();
   updateUnreadMessagesCount();
   updateTopPendingCategoryNavigation();
   renderDedicatedPendingPostsTab();
@@ -1393,6 +1401,7 @@ function switchTab(tabId) {
     'tab-gallery': 'mNavGallery',
     'tab-pending-posts': 'mNavPending',
     'tab-study-offices': 'mNavOffices',
+    'tab-real-estate': 'mNavRealEstate',
     'tab-building-materials': 'mNavMaterials',
     'tab-ai-engineer': 'mNavAi'
   };
@@ -1418,9 +1427,12 @@ function switchTab(tabId) {
     renderWorkerRequestsFeed();
   } else if (tabId === 'tab-gallery') {
     renderGalleryFeed();
+  } else if (tabId === 'tab-real-estate') {
+    renderRealEstateFeed();
   } else if (tabId === 'tab-building-materials') {
     renderBuildingMaterialsFeed();
   } else if (tabId === 'tab-ai-engineer') {
+    populateEstimatorArtisansDropdown();
     // initialize AI if needed
   } else if (tabId === 'tab-worker-board') {
     renderWorkerPostsFeed();
@@ -2710,6 +2722,7 @@ function renderDedicatedPendingPostsTab() {
   const allPosts = getStorageJSON('batihub_worker_posts', []);
   const allOffices = getStorageJSON('batihub_study_offices', []);
   const allRequests = getStorageJSON('batihub_worker_requests', []);
+  const allProperties = getStorageJSON('batihub_real_estate', []);
 
   // Update top navigation badges & header
   updateTopPendingCategoryNavigation();
@@ -2718,6 +2731,7 @@ function renderDedicatedPendingPostsTab() {
   let pendingPosts = allPosts.filter(p => p.status === 'pending');
   let pendingOffices = allOffices.filter(o => o.status === 'pending');
   let pendingRequests = allRequests.filter(r => r.status === 'pending');
+  let pendingProperties = allProperties.filter(p => p.status === 'pending');
 
   if (!isAdmin) {
     if (!currentUser) {
@@ -2742,9 +2756,10 @@ function renderDedicatedPendingPostsTab() {
     pendingPosts = pendingPosts.filter(p => p.authorId && p.authorId.toLowerCase() === userEmail);
     pendingOffices = pendingOffices.filter(o => o.authorId && o.authorId.toLowerCase() === userEmail);
     pendingRequests = pendingRequests.filter(r => r.authorId && r.authorId.toLowerCase() === userEmail);
+    pendingProperties = pendingProperties.filter(p => p.authorId && p.authorId.toLowerCase() === userEmail);
   }
 
-  const totalPending = pendingPosts.length + pendingOffices.length + pendingRequests.length;
+  const totalPending = pendingPosts.length + pendingOffices.length + pendingRequests.length + pendingProperties.length;
 
   if (totalPending === 0) {
     let emptyIcon = isAdmin ? 'fa-shield-halved' : 'fa-hourglass-half';
@@ -3061,7 +3076,106 @@ function renderDedicatedPendingPostsTab() {
 
     container.appendChild(card);
   });
+
+  // 4. Render Pending Real Estate Properties
+  pendingProperties.forEach(prop => {
+    const card = document.createElement('div');
+    card.className = 'bg-bh-card border border-emerald-500/40 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 relative overflow-hidden transition hover:border-emerald-500/60';
+
+    const isOwner = currentUser && prop.authorId && currentUser.email.toLowerCase() === prop.authorId.toLowerCase();
+
+    let propBannerHTML = `
+      <div class="p-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid ${isAdmin ? 'fa-shield-halved' : 'fa-hourglass-half'} text-emerald-400"></i>
+          <span>${isAdmin ? 'إعلان عقار معلق بانتظار قرار الإدارة' : 'إعلان العقار قيد الفحص والمراجعة وسيظهر للجميع فور اعتماده'}</span>
+        </div>
+        <span class="text-[10px] text-emerald-400/80 font-mono">${new Date(prop.createdAt).toLocaleDateString()}</span>
+      </div>
+    `;
+
+    let actionsHTML = '';
+    if (isAdmin) {
+      actionsHTML = `
+        <div class="pt-3 border-t border-bh-border/70 flex items-center gap-2.5 flex-wrap">
+          <button type="button" onclick="approveRealEstateProperty('${prop.id}')" class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98">
+            <i class="fa-solid fa-check text-sm"></i>
+            <span>قبول واعتماد إعلان العقار فوراً</span>
+          </button>
+          <button type="button" onclick="rejectRealEstateProperty('${prop.id}')" class="flex-1 py-2.5 px-4 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98">
+            <i class="fa-solid fa-xmark text-sm"></i>
+            <span>رفض وحذف نهائياً</span>
+          </button>
+        </div>
+      `;
+    } else if (isOwner) {
+      actionsHTML = `
+        <div class="pt-3 border-t border-bh-border/70 flex items-center justify-between flex-wrap gap-2">
+          <span class="text-xs text-emerald-400/90 font-medium">حالة العقار: قيد المراجعة ⏳</span>
+          <button type="button" onclick="deleteRealEstateProperty('${prop.id}')" class="py-2 px-3.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer active:scale-95">
+            <i class="fa-regular fa-trash-can"></i>
+            <span>حذف الإعلان</span>
+          </button>
+        </div>
+      `;
+    }
+
+    card.innerHTML = `
+      ${propBannerHTML}
+      <div class="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-bh-border/70">
+        <div>
+          <h4 class="font-bold text-sm text-white">${escapeHTML(prop.title)}</h4>
+          <div class="flex items-center gap-2 text-xs text-emerald-400 mt-1">
+            <span>البائع: ${escapeHTML(prop.ownerName || 'مستخدم')}</span>
+            <span>•</span>
+            <span class="font-mono text-white font-bold">${escapeHTML(prop.price)}</span>
+            <span>•</span>
+            <span class="text-slate-400 font-mono text-[11px]">${escapeHTML(prop.location)}</span>
+          </div>
+        </div>
+      </div>
+      <div class="space-y-2">
+        <p class="text-xs text-slate-300 leading-relaxed">${escapeHTML(prop.description)}</p>
+        <div class="flex items-center gap-4 text-xs text-slate-400 pt-1 font-mono">
+          <span><i class="fa-solid fa-phone text-emerald-400 ml-1"></i> ${escapeHTML(prop.phone)}</span>
+          <span><i class="fa-solid fa-ruler-combined text-amber-400 ml-1"></i> ${escapeHTML(prop.area)}</span>
+        </div>
+      </div>
+      ${actionsHTML}
+    `;
+
+    container.appendChild(card);
+  });
+
 }
+
+function approveRealEstateProperty(propId) {
+  const properties = getStorageJSON('batihub_real_estate', []);
+  const prop = properties.find(p => p.id === propId);
+  if (prop) {
+    prop.status = 'approved';
+    setStorageJSON('batihub_real_estate', properties);
+    broadcastLiveEvent('approve_real_estate', { propId, property: prop });
+    renderRealEstateFeed();
+    renderDedicatedPendingPostsTab();
+    updateTopPendingCategoryNavigation();
+    updateAdminPendingBadge();
+    showToast('تم اعتماد ونشر إعلان العقار في السوق بنجاح! 🏡', 'success');
+  }
+}
+
+function rejectRealEstateProperty(propId) {
+  let properties = getStorageJSON('batihub_real_estate', []);
+  properties = properties.filter(p => p.id !== propId);
+  setStorageJSON('batihub_real_estate', properties);
+  broadcastLiveEvent('reject_real_estate', { propId });
+  renderRealEstateFeed();
+  renderDedicatedPendingPostsTab();
+  updateTopPendingCategoryNavigation();
+  updateAdminPendingBadge();
+  showToast('تم رفض وحذف إعلان العقار', 'info');
+}
+
 
 function openEditWorkerPostModal(postId) {
   const posts = getStorageJSON('batihub_worker_posts', []);
@@ -4692,6 +4806,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initDefaultFeedsIfEmpty();
   initDefaultWorkerRequestsIfEmpty();
   initDefaultGalleryIfEmpty();
+  initDefaultBuildingMaterialsIfEmpty();
+  initDefaultRealEstateIfEmpty();
 
   // Load persistent database from Electron disk if available
   if (window.electronDB) {
@@ -5563,26 +5679,12 @@ function renderWorkerRequestsFeed() {
 
 
 /* ========================================================================= */
-/* 22. TWEMOJI & 3D VECTOR EMOJI ENHANCER                                    */
+/* 22. CLEAN NATIVE ICONS & MODERN EMOJIS                                    */
 /* ========================================================================= */
 
 function parseTwemoji(element) {
-  if (typeof window !== 'undefined' && window.twemoji && typeof window.twemoji.parse === 'function') {
-    try {
-      window.twemoji.parse(element || document.body, {
-        folder: 'svg',
-        ext: '.svg'
-      });
-    } catch (e) {
-      // silent fallback
-    }
-  }
+  // Twemoji disabled as requested: native emojis and FontAwesome icons used cleanly
 }
-
-// Automatically parse Twemoji on DOM load and after render passes
-window.addEventListener('load', () => {
-  setTimeout(() => parseTwemoji(), 600);
-});
 
 /* ========================================================================= */
 /* 23. BUILDING MATERIALS CATALOG ENGINE (دليل مواد البناء في الجزائر)       */
@@ -6229,6 +6331,27 @@ function handleEstBlueprintSelect(event) {
   reader.readAsDataURL(file);
 }
 
+
+function populateEstimatorArtisansDropdown() {
+  const masonSelect = document.getElementById('estSelectedMasonPost');
+  const plumberSelect = document.getElementById('estSelectedPlumberPost');
+  if (!masonSelect || !plumberSelect) return;
+
+  const posts = getStorageJSON('batihub_worker_posts', []);
+  const masons = posts.filter(p => p.trade && (p.trade.includes('بناء') || p.trade.includes('mason') || p.trade.includes('حداد') || p.trade.includes('مقاول')));
+  const plumbers = posts.filter(p => p.trade && (p.trade.includes('ترصيص') || p.trade.includes('كهرباء') || p.trade.includes('plombier') || p.trade.includes('دهان')));
+
+  if (masons.length > 0) {
+    masonSelect.innerHTML = '<option value="auto">تلقائي: ترشيح أفضل حرفيي البناء المتوفرين بالمنصة</option>' + 
+      masons.map(m => `<option value="${m.id}">${escapeHTML(m.authorName || 'حرفي')} (${escapeHTML(m.wilaya || 'الجزائر')} - ${escapeHTML(m.trade)}) - ${escapeHTML(m.price || '')} ${escapeHTML(m.unit || 'دج')}</option>`).join('');
+  }
+
+  if (plumbers.length > 0) {
+    plumberSelect.innerHTML = '<option value="auto">تلقائي: ترشيح حرفيي الترصيص والكهرباء المعتمدين</option>' +
+      plumbers.map(p => `<option value="${p.id}">${escapeHTML(p.authorName || 'حرفي')} (${escapeHTML(p.wilaya || 'الجزائر')} - ${escapeHTML(p.trade)}) - ${escapeHTML(p.price || '')} ${escapeHTML(p.unit || 'دج')}</option>`).join('');
+  }
+}
+
 function handleRunCostEstimation(event) {
   if (event) event.preventDefault();
 
@@ -6319,7 +6442,8 @@ function handleRunCostEstimation(event) {
 
     if (hasPump) machCost += 60000;
     if (hasScaffold) machCost += 40000;
-    durationWeeks = Math.max(3, Math.round(totalAreaM2 / 40));
+    durationWeeks = Math.max(5, Math.round(totalAreaM2 / 35));
+    itemsBreakdown.push({ item: 'فترة معالجة وتصلب الخرسانة المسلحة القانونية (28 يوماً كاملة لضمان مقاومة fc28 = 25 MPa)', qty: '28 يوماً', unitPrice: 'مقاييس DTR', total: 0 });
 
   } else if (scope === 'kitchen_bath_remodel') {
     const wallType = document.querySelector('input[name="estDecorWallType"]:checked')?.value || 'full';
@@ -6472,5 +6596,465 @@ function handleGalleryCategorySelectChange(val) {
       customInputContainer.classList.add('hidden');
     }
   }
+}
+
+
+
+/* ========================================================================= */
+/* 27. REAL ESTATE & HOMES FOR SALE ENGINE (سوق العقارات وبيع المنازل)       */
+/* ========================================================================= */
+
+let activeRealEstateFilter = 'all';
+let cachedReImagesBase64 = [];
+
+const DEFAULT_REAL_ESTATE_LISTINGS = [
+  {
+    id: 'prop_aadl_01',
+    title: 'شقة F3 سكن عدل 2 طابق 4 موقع استراتيجي وتهوئة ممتازة',
+    ownerName: 'محمد لمين شريف',
+    phone: '0550123456',
+    price: '920 مليون دج',
+    ownershipType: 'sur_cle',
+    debtsStatus: 'remaining_installments',
+    debtsAmount: 'باقي أقساط عدل الشهرية (حوالي 120 مليون دج)',
+    programType: 'aadl',
+    layout: 'F3',
+    area: '85 م²',
+    structure: 'building',
+    floor: 'الطابق 4 (عمارة بمصعد كهربائي شغال)',
+    location: 'قسنطينة - المدينة الجديدة علي منجلي، الوحدة الجوارية 14',
+    mapsUrl: 'https://maps.google.com/?q=36.2443,6.5703',
+    description: 'شقة مشطبة بالكامل، تدفئة مركزية راكبة وخزان ماء 1000 لتر. قريبة من الابتدائي والمتوسطة ومحطة الترامواي.',
+    images: ['assets/batihub_banner.jpg'],
+    status: 'approved',
+    authorId: 'mohamed.cherif@gmail.com',
+    likes: [],
+    comments: [],
+    createdAt: '2026-11-21T14:00:00.000Z'
+  },
+  {
+    id: 'prop_lpa_02',
+    title: 'شقة F4 ترقوي مدعم LPA موقع راقي مطلة على البحر',
+    ownerName: 'ياسين بوقرة',
+    phone: '0661987654',
+    price: '1 مليار و 450 مليون دج',
+    ownershipType: 'acte_livret',
+    debtsStatus: 'free',
+    debtsAmount: 'خالية تماماً من أي ديون أو رهون بنكية',
+    programType: 'lpa',
+    layout: 'F4',
+    area: '105 م²',
+    structure: 'building',
+    floor: 'الطابق 2 مع موقف سيارات مغطى ومصعد',
+    location: 'وهران - بئر الجير، إقامة مغلقة ومحروسة 24/24',
+    mapsUrl: 'https://maps.google.com/?q=35.7061,-0.5739',
+    description: 'شقة فاخرة ذات واجهتين، مطبخ مجهز كلياً بالأجهزة الكهرومنزلية، رخام إسباني، وشهادة مطابقة وعقد ملكية ودفتر عقاري صافي.',
+    images: ['assets/batihub_banner.jpg'],
+    status: 'approved',
+    authorId: 'yacine.bouguerra@gmail.com',
+    likes: [],
+    comments: [],
+    createdAt: '2026-11-22T10:30:00.000Z'
+  },
+  {
+    id: 'prop_villa_03',
+    title: 'فيلا عصرية فخمة R+2 مع مسبح وحديقة ومرآب لـ 3 سيارات',
+    ownerName: 'حاج كمال معوش',
+    phone: '0770554433',
+    price: '5 ملايير و 800 مليون دج',
+    ownershipType: 'acte_livret',
+    debtsStatus: 'free',
+    debtsAmount: 'دفتر عقاري وعقد ملكية مشهر فردي',
+    programType: 'villa',
+    layout: 'villa_multi',
+    area: '260 م²',
+    structure: 'ground_villa',
+    floor: 'سكن أرضي + طابقين (R+2) مع سطح مهيأ',
+    location: 'الجزائر العاصمة - زرالدة، حي الفيلات الهادئ',
+    mapsUrl: 'https://maps.google.com/?q=36.7128,2.8427',
+    description: 'تشطيبات دي لوكس: تكييف مركزي في كافة الغرف، نظام طاقة شمسية، كاميرات مراقبة، ومسبح مغطى.',
+    images: ['assets/batihub_banner.jpg'],
+    status: 'approved',
+    authorId: 'hadj.kamel@gmail.com',
+    likes: [],
+    comments: [],
+    createdAt: '2026-11-22T18:00:00.000Z'
+  }
+];
+
+function initDefaultRealEstateIfEmpty() {
+  let list = getStorageJSON('batihub_real_estate', null);
+  if (!list || !Array.isArray(list) || list.length === 0) {
+    setStorageJSON('batihub_real_estate', DEFAULT_REAL_ESTATE_LISTINGS);
+  }
+}
+
+function filterRealEstate(type, btn) {
+  activeRealEstateFilter = type || 'all';
+
+  document.querySelectorAll('.real-estate-filter-pill').forEach(b => {
+    b.classList.remove('active-filter');
+    b.classList.remove('border-bh-yellow');
+    b.classList.remove('bg-bh-yellow');
+    b.classList.remove('text-slate-950');
+    b.classList.add('bg-bh-card');
+    b.classList.add('text-slate-300');
+  });
+
+  if (btn) {
+    btn.classList.add('active-filter');
+    btn.classList.remove('bg-bh-card');
+    btn.classList.remove('text-slate-300');
+    btn.classList.add('border-bh-yellow');
+    btn.classList.add('bg-bh-yellow');
+    btn.classList.add('text-slate-950');
+  }
+
+  renderRealEstateFeed();
+}
+
+function handleSearchRealEstate(query) {
+  renderRealEstateFeed(query);
+}
+
+function openAddRealEstateModal() {
+  if (!currentUser) {
+    showToast('يرجى تسجيل الدخول أولاً لنشر إعلان عقار', 'warning');
+    switchAuthView('google');
+    transitionToAuth();
+    return;
+  }
+
+  cachedReImagesBase64 = [];
+  const fields = ['reTitle', 'reOwnerName', 'rePhone', 'rePrice', 'reDebtsAmount', 'reArea', 'reFloorInput', 'reLocation', 'reMapsUrl', 'reDescription'];
+  fields.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  const preview = document.getElementById('reImagesPreview');
+  const count = document.getElementById('reImagesCount');
+  if (preview) preview.innerHTML = '';
+  if (count) count.innerText = '0 صور محددة';
+
+  const ownerInput = document.getElementById('reOwnerName');
+  if (ownerInput && currentUser) {
+    ownerInput.value = currentUser.fullName || currentUser.firstName || '';
+  }
+
+  const modal = document.getElementById('modalAddRealEstate');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeAddRealEstateModal() {
+  const modal = document.getElementById('modalAddRealEstate');
+  if (modal) modal.classList.add('hidden');
+}
+
+function handleReStructureChange(val) {
+  const label = document.getElementById('reFloorLabel');
+  const input = document.getElementById('reFloorInput');
+  if (label && input) {
+    if (val === 'ground_villa') {
+      label.innerText = 'عدد طوابق الفيلا / السكن الأرضي :';
+      input.placeholder = 'مثلاً: طابق أرضي + طابقين (R+2)';
+    } else {
+      label.innerText = 'رقم الطابق في العمارة :';
+      input.placeholder = 'مثلاً: الطابق 3 مع مصعد';
+    }
+  }
+}
+
+function handleReImagesSelect(event) {
+  const files = event.target.files;
+  if (!files || files.length === 0) return;
+
+  const preview = document.getElementById('reImagesPreview');
+  const countLabel = document.getElementById('reImagesCount');
+  cachedReImagesBase64 = [];
+  if (preview) preview.innerHTML = '';
+
+  const maxFiles = Math.min(files.length, 5);
+  for (let i = 0; i < maxFiles; i++) {
+    const file = files[i];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      cachedReImagesBase64.push(e.target.result);
+      if (preview) {
+        const thumb = document.createElement('img');
+        thumb.src = e.target.result;
+        thumb.className = 'w-full h-16 object-cover rounded-xl border border-bh-border';
+        preview.appendChild(thumb);
+      }
+      if (countLabel) countLabel.innerText = `${cachedReImagesBase64.length} صور محددة`;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function handleCreateRealEstateSubmit(event) {
+  if (event) event.preventDefault();
+  if (!currentUser) return;
+
+  const title = (document.getElementById('reTitle').value || '').trim();
+  const ownerName = (document.getElementById('reOwnerName').value || '').trim();
+  const phone = (document.getElementById('rePhone').value || '').trim();
+  const price = (document.getElementById('rePrice').value || '').trim();
+  const ownershipType = document.getElementById('reOwnershipType').value;
+  const debtsStatus = document.getElementById('reDebtsStatus').value;
+  const debtsAmount = (document.getElementById('reDebtsAmount').value || '').trim();
+  const programType = document.getElementById('reProgramType').value;
+  const layout = document.getElementById('reLayout').value;
+  const area = (document.getElementById('reArea').value || '').trim();
+  const structure = document.getElementById('reBuildingStructure').value;
+  const floor = (document.getElementById('reFloorInput').value || '').trim();
+  const location = (document.getElementById('reLocation').value || '').trim();
+  const mapsUrl = (document.getElementById('reMapsUrl').value || '').trim();
+  const description = (document.getElementById('reDescription').value || '').trim();
+
+  if (!title || !ownerName || !phone || !price || !area || !location) {
+    showToast('يرجى ملء كافة الحقول الأساسية للعقار', 'warning');
+    return;
+  }
+
+  const isAdmin = currentUser.role === 'admin' || currentUser.email.toLowerCase() === 'batihubdz@gmail.com';
+  const status = isAdmin ? 'approved' : 'pending';
+
+  const newProperty = {
+    id: 'prop_' + Date.now(),
+    title,
+    ownerName,
+    phone,
+    price,
+    ownershipType,
+    debtsStatus,
+    debtsAmount: debtsAmount || (debtsStatus === 'free' ? 'خالية من الديون تماماً' : 'توجد أقساط متبقية'),
+    programType,
+    layout,
+    area: area.includes('م') ? area : `${area} م²`,
+    structure,
+    floor: floor || (structure === 'building' ? 'الطابق الأرضي' : 'سكن أرضي R+0'),
+    location,
+    mapsUrl: mapsUrl || `https://maps.google.com/?q=${encodeURIComponent(location)}`,
+    description,
+    images: cachedReImagesBase64.length > 0 ? cachedReImagesBase64 : ['assets/batihub_banner.jpg'],
+    status,
+    authorId: currentUser.email,
+    likes: [],
+    comments: [],
+    createdAt: new Date().toISOString()
+  };
+
+  const properties = getStorageJSON('batihub_real_estate', []);
+  properties.unshift(newProperty);
+  setStorageJSON('batihub_real_estate', properties);
+
+  broadcastLiveEvent('new_real_estate', newProperty);
+
+  closeAddRealEstateModal();
+  renderRealEstateFeed();
+  renderDedicatedPendingPostsTab();
+  updateTopPendingCategoryNavigation();
+  updateAdminPendingBadge();
+
+  if (status === 'pending') {
+    showToast('تم إرسال إعلان العقار بنجاح! هو قيد فحص الإدارة وسيظهر للجميع فور اعتماده.', 'info', 6000);
+  } else {
+    showToast('تم اعتماد ونشر إعلان العقار في السوق بنجاح! 🏡', 'success');
+  }
+}
+
+function deleteRealEstateProperty(propId) {
+  showAppModalAlert('تأكيد حذف العقار', 'هل أنت متأكد من حذف هذا الإعلان العقاري نهائياً؟', true, () => {
+    let properties = getStorageJSON('batihub_real_estate', []);
+    properties = properties.filter(p => p.id !== propId);
+    setStorageJSON('batihub_real_estate', properties);
+    broadcastLiveEvent('delete_real_estate', { propId });
+    renderRealEstateFeed();
+    showToast('تم حذف الإعلان العقاري بنجاح', 'info');
+  });
+}
+
+function renderRealEstateFeed(searchQuery = '') {
+  const container = document.getElementById('realEstateGridContainer');
+  if (!container) return;
+
+  initDefaultRealEstateIfEmpty();
+  let properties = getStorageJSON('batihub_real_estate', []);
+
+  // Filter approved only for normal users
+  properties = properties.filter(p => p.status === 'approved' || !p.status);
+
+  if (activeRealEstateFilter !== 'all') {
+    properties = properties.filter(p => p.programType === activeRealEstateFilter);
+  }
+
+  if (searchQuery && searchQuery.trim() !== '') {
+    const q = searchQuery.toLowerCase().trim();
+    properties = properties.filter(p => 
+      (p.title && p.title.toLowerCase().includes(q)) ||
+      (p.location && p.location.toLowerCase().includes(q)) ||
+      (p.price && p.price.toLowerCase().includes(q)) ||
+      (p.description && p.description.toLowerCase().includes(q))
+    );
+  }
+
+  const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.email.toLowerCase() === 'batihubdz@gmail.com');
+
+  if (properties.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full bg-bh-card border border-bh-border rounded-3xl p-10 text-center space-y-4">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-3xl">
+          <i class="fa-solid fa-house-chimney"></i>
+        </div>
+        <div class="space-y-1">
+          <h3 class="font-bold text-white text-base">لا توجد سكنات أو عقارات مطابقة للبحث</h3>
+          <p class="text-xs text-slate-400 max-w-sm mx-auto">هل تملك شقة أو منزلاً للبيع؟ انشر إعلانك الآن مجاناً ليصل لآلاف المشترين في الجزائر.</p>
+        </div>
+        <button type="button" onclick="openAddRealEstateModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-black text-xs shadow-lg hover:opacity-95 transition cursor-pointer">
+          نشر عقار للبيع ➕
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  const ownershipLabels = {
+    acte_livret: 'عقد ملكية ودفتر عقاري 📜',
+    sur_cle: 'بيع بالمفتاح 🔑',
+    desistement: 'قرار وتنازل موثق 📑',
+    acte_sous_seing: 'عقد عرفي مسجل 📝'
+  };
+
+  const programLabels = {
+    aadl: 'سكن عدل (AADL) 🏢',
+    lpa: 'ترقوي مدعم (LPA) 🏬',
+    promo_libre: 'ترقوي حر فاخر 💎',
+    social: 'سكن اجتماعي / تساهمي 🏘️',
+    villa: 'فيلا خاصة 🏡',
+    standard_apt: 'شقة عادية 🏢'
+  };
+
+  container.innerHTML = '';
+  properties.forEach(prop => {
+    const card = document.createElement('div');
+    card.className = 'bg-bh-card border border-bh-border hover:border-emerald-500/50 rounded-3xl overflow-hidden shadow-2xl transition flex flex-col justify-between group';
+
+    const isOwner = currentUser && prop.authorId && currentUser.email.toLowerCase() === prop.authorId.toLowerCase();
+    const mainImg = (prop.images && prop.images.length > 0) ? prop.images[0] : 'assets/batihub_banner.jpg';
+    const totalImages = prop.images ? prop.images.length : 1;
+
+    let thumbsHTML = '';
+    if (prop.images && prop.images.length > 1) {
+      thumbsHTML = `
+        <div class="flex items-center gap-1.5 p-2 bg-bh-bg/90 border-t border-bh-border overflow-x-auto no-scrollbar">
+          ${prop.images.map((img, idx) => `
+            <img src="${img}" onclick="openImageLightbox('${escapeHTML(img)}')" alt="Photo ${idx+1}" class="w-12 h-10 object-cover rounded-lg border border-bh-border hover:border-emerald-400 cursor-pointer transition shrink-0">
+          `).join('')}
+        </div>
+      `;
+    }
+
+    const ownBadge = ownershipLabels[prop.ownershipType] || 'ملكية عقارية';
+    const progBadge = programLabels[prop.programType] || 'سكن';
+    const isDebtsFree = prop.debtsStatus === 'free';
+
+    card.innerHTML = `
+      <div>
+        <div class="relative overflow-hidden max-h-56 bg-slate-950 cursor-pointer" onclick="openImageLightbox('${escapeHTML(mainImg)}')">
+          <img src="${mainImg}" alt="${escapeHTML(prop.title)}" class="w-full h-52 object-cover group-hover:scale-103 transition duration-500">
+          
+          <div class="absolute top-3 right-3 flex flex-col gap-1.5 items-end">
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-950/85 backdrop-blur-md text-emerald-300 border border-emerald-500/40">
+              ${progBadge}
+            </span>
+            <span class="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-slate-950/85 backdrop-blur-md text-amber-300 border border-amber-500/30">
+              ${ownBadge}
+            </span>
+          </div>
+
+          <span class="absolute bottom-3 right-3 px-3 py-1 rounded-xl text-xs font-mono font-bold bg-emerald-500 text-slate-950 shadow-lg">
+            ${escapeHTML(prop.price)}
+          </span>
+
+          ${totalImages > 1 ? `
+            <span class="absolute bottom-3 left-3 px-2 py-0.5 rounded-full text-[10px] font-mono bg-black/80 text-white flex items-center gap-1">
+              <i class="fa-solid fa-images"></i> ${totalImages} صور
+            </span>
+          ` : ''}
+        </div>
+        ${thumbsHTML}
+
+        <div class="p-5 space-y-3.5 text-right">
+          <h4 class="font-heading font-black text-sm text-white leading-snug">${escapeHTML(prop.title)}</h4>
+
+          <!-- Specs Badges Strip -->
+          <div class="grid grid-cols-3 gap-2 py-2 border-y border-bh-border/70 text-center font-mono text-xs">
+            <div class="space-y-0.5">
+              <span class="text-[10px] text-slate-400">النمط</span>
+              <div class="font-bold text-emerald-400">${escapeHTML(prop.layout)}</div>
+            </div>
+            <div class="space-y-0.5 border-x border-bh-border/60">
+              <span class="text-[10px] text-slate-400">المساحة</span>
+              <div class="font-bold text-white">${escapeHTML(prop.area)}</div>
+            </div>
+            <div class="space-y-0.5">
+              <span class="text-[10px] text-slate-400">الطابق</span>
+              <div class="font-bold text-amber-300 text-[11px] truncate">${escapeHTML(prop.floor)}</div>
+            </div>
+          </div>
+
+          <!-- Debts Strip -->
+          <div class="p-2.5 rounded-xl ${isDebtsFree ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-amber-500/10 border-amber-500/30 text-amber-300'} border text-[11px] font-semibold flex items-center justify-between">
+            <span class="flex items-center gap-1.5">
+              <i class="fa-solid ${isDebtsFree ? 'fa-circle-check text-emerald-400' : 'fa-triangle-exclamation text-amber-400'}"></i>
+              <span>${isDebtsFree ? 'خالية تماماً من الديون والرهن' : 'الديون المتبقية:'}</span>
+            </span>
+            <span class="font-mono text-[10px]">${escapeHTML(prop.debtsAmount || '')}</span>
+          </div>
+
+          <!-- Location with Maps link -->
+          <div class="flex items-center justify-between text-xs text-slate-300 pt-1">
+            <div class="flex items-center gap-1.5 truncate max-w-[210px]">
+              <i class="fa-solid fa-location-dot text-rose-400 shrink-0"></i>
+              <span class="truncate">${escapeHTML(prop.location)}</span>
+            </div>
+            ${prop.mapsUrl ? `
+              <a href="${escapeHTML(prop.mapsUrl)}" target="_blank" class="px-2 py-1 rounded-lg bg-bh-bg hover:bg-slate-800 text-sky-400 border border-sky-500/30 font-bold text-[10px] transition shrink-0 flex items-center gap-1">
+                <span>الخريطة 📍</span>
+              </a>
+            ` : ''}
+          </div>
+
+          ${prop.description ? `
+            <p class="text-xs text-slate-400 leading-relaxed">${escapeHTML(prop.description)}</p>
+          ` : ''}
+
+        </div>
+      </div>
+
+      <!-- Action Footer: Call, Chat, Delete -->
+      <div class="p-4 pt-3 border-t border-bh-border/70 flex items-center justify-between flex-wrap gap-2 text-xs">
+        <div class="flex items-center gap-2">
+          <a href="tel:${escapeHTML(prop.phone)}" class="py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold transition flex items-center gap-1.5 shadow-md active:scale-95">
+            <i class="fa-solid fa-phone text-xs"></i>
+            <span>اتصال: ${escapeHTML(prop.phone)}</span>
+          </a>
+          <button type="button" onclick="startChatFromPost('${escapeHTML(prop.authorId)}', '${escapeHTML(prop.ownerName || 'البائع')}', '')" class="py-2 px-3 rounded-xl bg-bh-bg hover:bg-slate-800 text-emerald-400 border border-emerald-500/30 font-bold transition flex items-center gap-1 cursor-pointer active:scale-95">
+            <i class="fa-solid fa-comments"></i>
+            <span>محادثة</span>
+          </button>
+        </div>
+
+        ${isOwner || isAdmin ? `
+          <button type="button" onclick="deleteRealEstateProperty('${prop.id}')" class="w-8 h-8 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 flex items-center justify-center transition cursor-pointer" title="حذف الإعلان">
+            <i class="fa-regular fa-trash-can text-xs"></i>
+          </button>
+        ` : ''}
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
 }
 
