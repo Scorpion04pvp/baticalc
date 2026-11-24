@@ -1,10 +1,10 @@
 // BatiHub DZ - Progressive Web App Service Worker
-const CACHE_NAME = 'batihub-dz-v4-full-release';
+const CACHE_NAME = 'batihub-dz-v4.2.0-standalone-tabs-and-gemini';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './style.css?v=4.1.0',
-  './app.js?v=4.1.0',
+  './style.css?v=4.2.0',
+  './app.js?v=4.2.0',
   './manifest.json',
   './assets/mqtt.min.js?v=4.1.0',
   './assets/batihub_logo.png',

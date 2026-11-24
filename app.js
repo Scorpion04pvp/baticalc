@@ -1403,7 +1403,9 @@ function switchTab(tabId) {
     'tab-study-offices': 'mNavOffices',
     'tab-real-estate': 'mNavRealEstate',
     'tab-building-materials': 'mNavMaterials',
-    'tab-ai-engineer': 'mNavAi'
+    'tab-ai-chat': 'mNavAi',
+    'tab-ai-engineer': 'mNavAi',
+    'tab-cost-estimator': 'mNavEstimator'
   };
 
   document.querySelectorAll('.mobile-nav-item').forEach(item => {
@@ -1431,9 +1433,11 @@ function switchTab(tabId) {
     renderRealEstateFeed();
   } else if (tabId === 'tab-building-materials') {
     renderBuildingMaterialsFeed();
-  } else if (tabId === 'tab-ai-engineer') {
+  } else if (tabId === 'tab-cost-estimator') {
     populateEstimatorArtisansDropdown();
-    // initialize AI if needed
+    populateEstimatorDecorDropdown();
+  } else if (tabId === 'tab-ai-chat' || tabId === 'tab-ai-engineer') {
+    updateGeminiKeyBadge();
   } else if (tabId === 'tab-worker-board') {
     renderWorkerPostsFeed();
   }
@@ -4879,8 +4883,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const accounts = initAccountsDatabase();
         let validUser = null;
 
-        // Auto-login if device is trusted or saved session exists
-        if (saved && saved.email && (saved.autoLogin || isDeviceTrustedForEmail(saved.email))) {
+        // 100% Persistent Login: Check localStorage first
+        const persistedUser = getStorageJSON('batihub_current_user', null);
+        if (persistedUser && persistedUser.email) {
+          const cleanEmail = persistedUser.email.toLowerCase();
+          let acc = accounts[cleanEmail];
+          if (!acc) {
+            acc = { ...persistedUser };
+            accounts[cleanEmail] = acc;
+            setStorageJSON('batihub_registered_accounts', accounts);
+          }
+          validUser = { ...acc };
+        } else if (saved && saved.email && (saved.autoLogin || isDeviceTrustedForEmail(saved.email))) {
           const cleanEmail = saved.email.toLowerCase();
           let acc = accounts[cleanEmail];
           if (!acc) {
@@ -4897,11 +4911,6 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           validUser = { ...acc };
           setStorageJSON('batihub_current_user', validUser);
-        } else {
-          const sessionUser = JSON.parse(sessionStorage.getItem('batihub_current_user') || 'null');
-          if (sessionUser && sessionUser.email && accounts[sessionUser.email.toLowerCase()]) {
-            validUser = sessionUser;
-          }
         }
 
         if (validUser) {
@@ -7098,3 +7107,248 @@ function renderRealEstateFeed(searchQuery = '') {
   });
 }
 
+
+
+/* ========================================================================= */
+/* 26. GOOGLE GEMINI API INTEGRATION & CHAT ENHANCEMENT                      */
+/* ========================================================================= */
+
+function openGeminiApiKeyModal() {
+  const modal = document.getElementById('modalGeminiApiKey');
+  const input = document.getElementById('inputGeminiApiKey');
+  if (modal) {
+    modal.classList.remove('hidden');
+    if (input) {
+      input.value = localStorage.getItem('batihub_gemini_api_key') || '';
+    }
+  }
+}
+
+function closeGeminiApiKeyModal() {
+  const modal = document.getElementById('modalGeminiApiKey');
+  if (modal) modal.classList.add('hidden');
+}
+
+function toggleGeminiKeyVisibility() {
+  const input = document.getElementById('inputGeminiApiKey');
+  const icon = document.getElementById('iconToggleGeminiKey');
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (icon) icon.className = 'fa-solid fa-eye-slash text-xs';
+  } else {
+    input.type = 'password';
+    if (icon) icon.className = 'fa-solid fa-eye text-xs';
+  }
+}
+
+function saveGeminiApiKey() {
+  const input = document.getElementById('inputGeminiApiKey');
+  const key = (input ? input.value : '').trim();
+  if (key) {
+    localStorage.setItem('batihub_gemini_api_key', key);
+    showToast('تم حفظ وتفعيل مفتاح Google Gemini بنجاح!', 'success');
+  } else {
+    localStorage.removeItem('batihub_gemini_api_key');
+    showToast('تمت استعادة الوضع المدمج الافتراضي للذكاء الاصطناعي', 'info');
+  }
+  updateGeminiKeyBadge();
+  closeGeminiApiKeyModal();
+}
+
+function clearGeminiApiKey() {
+  localStorage.removeItem('batihub_gemini_api_key');
+  const input = document.getElementById('inputGeminiApiKey');
+  if (input) input.value = '';
+  updateGeminiKeyBadge();
+  closeGeminiApiKeyModal();
+  showToast('تم حذف مفتاح Gemini واستعادة الوضع الافتراضي', 'info');
+}
+
+function updateGeminiKeyBadge() {
+  const btnText = document.getElementById('geminiKeyStatusBtnText');
+  if (!btnText) return;
+  const key = localStorage.getItem('batihub_gemini_api_key');
+  if (key) {
+    btnText.innerHTML = '<span class="text-emerald-400 font-bold">Google Gemini: مفعّل</span>';
+  } else {
+    btnText.textContent = 'مفتاح Google Gemini API';
+  }
+}
+
+function openGeminiHelpModal() {
+  const modal = document.getElementById('modalGeminiHelp');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeGeminiHelpModal() {
+  const modal = document.getElementById('modalGeminiHelp');
+  if (modal) modal.classList.add('hidden');
+}
+
+function clearAiChatHistory() {
+  const container = document.getElementById('aiChatMessagesContainer');
+  if (!container) return;
+  container.innerHTML = `
+    <div class="flex items-start gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-400 to-blue-600 text-slate-950 flex items-center justify-center font-bold text-sm shrink-0 shadow-md">
+        <i class="fa-solid fa-robot"></i>
+      </div>
+      <div class="ai-bubble-bot p-4 rounded-2xl max-w-2xl space-y-2 border border-cyan-500/20">
+        <div class="flex items-center justify-between gap-2 border-b border-bh-border/60 pb-1.5">
+          <span class="font-bold text-cyan-300 text-xs">BatiHub AI • المساعد الذكي العام</span>
+          <span class="text-[10px] text-slate-400 font-mono">الآن</span>
+        </div>
+        <p class="text-slate-200 leading-relaxed">
+          تم بدء محادثة جديدة! أنا مساعد الذكاء الاصطناعي BatiHub AI، جاهز للإجابة عن أسئلتك في كافة المجالات دون قيود. تفضل بطرح سؤالك!
+        </p>
+      </div>
+    </div>
+  `;
+  showToast('تم مسح المحادثة وبدء جلسة جديدة', 'info');
+}
+
+/* Call Google Gemini 1.5 Flash API if key configured */
+async function callGeminiApiLive(userPrompt, base64Image) {
+  const apiKey = localStorage.getItem('batihub_gemini_api_key');
+  if (!apiKey) return null;
+
+  try {
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+    
+    const parts = [{ text: userPrompt }];
+    if (base64Image) {
+      const mime = base64Image.split(';')[0].split(':')[1] || 'image/jpeg';
+      const cleanData = base64Image.split(',')[1] || base64Image;
+      parts.push({
+        inline_data: {
+          mime_type: mime,
+          data: cleanData
+        }
+      });
+    }
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: 'user',
+            parts: parts
+          }
+        ],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 2048
+        }
+      })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      console.warn('Gemini API returned error:', errData);
+      return null;
+    }
+
+    const data = await res.json();
+    const candidate = data.candidates && data.candidates[0];
+    if (candidate && candidate.content && candidate.content.parts && candidate.content.parts[0]) {
+      return candidate.content.parts[0].text;
+    }
+    return null;
+  } catch (e) {
+    console.error('Gemini API live call failed:', e);
+    return null;
+  }
+}
+
+/* ========================================================================= */
+/* 27. ESTIMATOR GALLERY DECOR LINKING                                      */
+/* ========================================================================= */
+
+let selectedDecorPostForEstimator = null;
+
+function populateEstimatorDecorDropdown() {
+  const select = document.getElementById('estSelectedDecorPost');
+  if (!select) return;
+
+  const gallery = getStorageJSON('batihub_gallery_posts', DEFAULT_SAMPLE_GALLERY || []);
+  if (gallery.length === 0) return;
+
+  select.innerHTML = '<option value="none">تلقائي: بدون تحديد تصميم مسبق (حساب قياسي حر)</option>' +
+    gallery.map(g => `<option value="${g.id}">${escapeHTML(g.title)} (${g.roomType || 'ديكور'})</option>`).join('');
+}
+
+function handleSelectDecorPostForEstimator(postId) {
+  const preview = document.getElementById('estSelectedDecorPreview');
+  const thumb = document.getElementById('estDecorThumb');
+  const title = document.getElementById('estDecorTitle');
+  const specs = document.getElementById('estDecorSpecs');
+
+  if (!postId || postId === 'none') {
+    selectedDecorPostForEstimator = null;
+    if (preview) preview.classList.add('hidden');
+    return;
+  }
+
+  const gallery = getStorageJSON('batihub_gallery_posts', DEFAULT_SAMPLE_GALLERY || []);
+  const found = gallery.find(g => g.id === postId);
+  if (found) {
+    selectedDecorPostForEstimator = found;
+    if (preview) preview.classList.remove('hidden');
+    if (thumb) thumb.src = found.image || 'assets/batihub_banner.jpg';
+    if (title) title.textContent = found.title;
+    if (specs) specs.textContent = `${found.specs || ''} • المساحة: ${found.area || 'حسب الطلب'}`;
+    showToast(`تم ربط تصميم (${found.title}) بنجاح مع الكشف التقديري!`, 'success');
+  }
+}
+
+function clearSelectedDecorInEstimator() {
+  const select = document.getElementById('estSelectedDecorPost');
+  if (select) select.value = 'none';
+  handleSelectDecorPostForEstimator('none');
+}
+
+/* ========================================================================= */
+/* 28. MULTI-PLATFORM DOWNLOAD MODAL HANDLERS                                */
+/* ========================================================================= */
+
+function openDownloadAppModal() {
+  const modal = document.getElementById('modalDownloadApp');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeDownloadAppModal() {
+  const modal = document.getElementById('modalDownloadApp');
+  if (modal) modal.classList.add('hidden');
+}
+
+function triggerWindowsDesktopDownload() {
+  showToast('نسخة الحاسوب متوفرة عبر تشغيل ملف BatiHub-DZ.bat المرفق أو عبر رابط الويب المباشر', 'info', 5000);
+}
+
+function triggerAndroidPwaInstall() {
+  if (window.deferredPrompt) {
+    window.deferredPrompt.prompt();
+    window.deferredPrompt.userChoice.then(() => {
+      window.deferredPrompt = null;
+    });
+  } else {
+    showToast('لتثبيت التطبيق على أندرويد: افتح الرابط في Google Chrome ثم انقر على (⋮) واختر "تثبيت التطبيق"', 'info', 6000);
+  }
+}
+
+function showIosInstallInstructions() {
+  showToast('للآيفون: افتح الرابط في Safari ثم اضغط زر المشاركة (Share) ثم اختر "إضافة إلى الشاشة الرئيسية"', 'info', 6000);
+}
+
+function copyPlatformLiveUrl() {
+  const input = document.getElementById('livePlatformUrlInput');
+  const url = input ? input.value : 'https://scorpion04pvp.github.io/baticalc/';
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('تم نسخ رابط المنصة المباشر بنجاح! شاركه الآن مع الجميع', 'success');
+  }).catch(() => {
+    showToast(`رابط المنصة هو: ${url}`, 'info');
+  });
+}
