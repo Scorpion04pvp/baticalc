@@ -4,9 +4,10 @@
   "description": "BatiHub DZ - Build • Connect • Create | All Construction Services in One Place",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "node server.js",
     "desktop": "electron .",
-    "web": "npx serve ."
+    "electron": "electron .",
+    "web": "node server.js"
   },
   "keywords": [
     "batihub",

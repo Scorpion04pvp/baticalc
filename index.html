@@ -278,10 +278,10 @@
               <i class="fa-solid fa-compass-drafting text-sky-400"></i>
               <span>مكاتب دراسات</span>
             </button>
-                      <!-- Download App Pill Button -->
-          <button type="button" onclick="openDownloadAppModal()" class="hidden sm:flex px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition items-center gap-1.5 cursor-pointer shadow-sm">
-            <i class="fa-solid fa-mobile-screen-button text-emerald-400"></i>
-            <span>تحميل للهاتف والحاسوب</span>
+          <!-- Download App Pill Button -->
+          <button type="button" onclick="openDownloadAppModal()" class="flex px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition items-center gap-1.5 cursor-pointer shadow-sm shrink-0">
+            <i class="fa-solid fa-cloud-arrow-down text-emerald-400"></i>
+            <span>تحميل التطبيق</span>
           </button>
           <button type="button" onclick="openMessagesHubModal()" class="px-3 py-1.5 rounded-xl bg-bh-card hover:bg-bh-cardhover text-slate-300 hover:text-white border border-bh-border hover:border-amber-400/40 text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer">
               <i class="fa-solid fa-comments text-amber-400"></i>
@@ -750,18 +750,16 @@
               </div>
             </div>
 
-            <!-- Action Buttons: Gemini Key & Help & Clear -->
+            <!-- Action Buttons: Gemini Status & Clear -->
             <div class="flex items-center gap-2 flex-wrap">
-              <button type="button" onclick="openGeminiApiKeyModal()" class="px-3.5 py-2 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/40 text-cyan-300 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm">
-                <i class="fa-solid fa-key text-xs text-bh-yellow"></i>
-                <span id="geminiKeyStatusBtnText">مفتاح Google Gemini API</span>
-              </button>
-              <button type="button" onclick="openGeminiHelpModal()" class="px-3 py-2 rounded-xl bg-bh-bg hover:bg-slate-800 border border-bh-border text-slate-300 hover:text-white text-xs font-semibold transition flex items-center gap-1 cursor-pointer" title="كيفية إنشاء مفتاح مجاني؟">
-                <i class="fa-solid fa-circle-question text-cyan-400"></i>
-                <span>شرح المفتاح</span>
-              </button>
-              <button type="button" onclick="clearAiChatHistory()" class="px-3 py-2 rounded-xl bg-bh-bg hover:bg-rose-500/20 border border-bh-border hover:border-rose-500/40 text-slate-400 hover:text-rose-300 text-xs transition cursor-pointer" title="مسح المحادثة">
-                <i class="fa-solid fa-trash-can"></i>
+              <div class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-500/15 to-cyan-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2 shadow-sm select-none">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <i class="fa-solid fa-brain text-xs text-amber-400"></i>
+                <span id="geminiKeyStatusBtnText">Google Gemini AI: مدمج ومفعل دائماً ⚡</span>
+              </div>
+              <button type="button" onclick="clearAiChatHistory()" class="px-3 py-2 rounded-xl bg-bh-bg hover:bg-rose-500/20 border border-bh-border hover:border-rose-500/40 text-slate-400 hover:text-rose-300 text-xs transition cursor-pointer" title="مسح المحادثة وبدء جلسة جديدة">
+                <i class="fa-solid fa-trash-can ml-1"></i>
+                <span>مسح المحادثة</span>
               </button>
             </div>
           </div>
@@ -1416,6 +1414,141 @@
 
       </div>
 
+      <!-- ========================================================================= -->
+      <!-- GLOBAL FOOTER DOWNLOAD SECTION: WINDOWS PC • ANDROID • IOS IPHONE         -->
+      <!-- ========================================================================= -->
+      <section id="sectionDownloadApp" class="mt-14 rounded-3xl bg-gradient-to-br from-[#0e1420] via-[#090d14] to-[#06080d] border border-amber-500/30 p-6 sm:p-10 shadow-[0_15px_50px_rgba(0,0,0,0.8)] relative overflow-hidden text-right" dir="rtl">
+        <!-- Subtle Glow Background -->
+        <div class="absolute -top-24 -left-24 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-bh-border/70 pb-5">
+            <div class="flex items-center gap-3.5">
+              <img src="assets/batihub_logo.png" alt="BatiHub DZ" class="w-12 h-12 object-contain drop-shadow-md">
+              <div>
+                <h3 class="font-extrabold text-white text-lg sm:text-xl flex items-center gap-2">
+                  <span>تحميل وتثبيت تطبيق BatiHub DZ على كافة الأجهزة</span>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono">PWA & Desktop</span>
+                </h3>
+                <p class="text-xs text-slate-400 mt-1">
+                  تطبيق جزائري متكامل، سريع، يعمل بدون الحاجة إلى متجر تطبيقات وبأيقونة رسمية على شاشتك الرئيسية!
+                </p>
+              </div>
+            </div>
+            
+            <button type="button" onclick="openDownloadAppModal()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs transition flex items-center gap-2 cursor-pointer shadow-lg self-start sm:self-auto shrink-0">
+              <i class="fa-solid fa-cloud-arrow-down text-sm"></i>
+              <span>نافذة التحميل السريع</span>
+            </button>
+          </div>
+
+          <!-- Cards Grid for the 3 Platforms -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            <!-- 1. Windows PC -->
+            <div class="p-5 rounded-2xl bg-bh-bg/80 border border-bh-border hover:border-blue-500/50 transition duration-300 flex flex-col justify-between space-y-4 group">
+              <div class="space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <div class="w-12 h-12 rounded-2xl bg-blue-500/15 text-blue-400 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+                    <i class="fa-brands fa-windows"></i>
+                  </div>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300">ويندوز PC</span>
+                </div>
+                <h4 class="font-bold text-white text-sm">تطبيق الحاسوب (Windows PC)</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                  تطبيق مستقل لسطح المكتب فائق السرعة، حفظ محلي وتلقائي، ويعمل مباشرة بدون متصفح.
+                </p>
+              </div>
+              <div class="space-y-2">
+                <button type="button" onclick="triggerWindowsDesktopDownload()" class="w-full py-2.5 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white font-bold rounded-xl text-xs transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
+                  <i class="fa-solid fa-download"></i>
+                  <span>تشغيل لحاسوب ويندوز</span>
+                </button>
+                <button type="button" onclick="copyPlatformLiveUrl()" class="w-full py-1.5 bg-bh-card hover:bg-slate-800 text-slate-300 font-semibold rounded-lg text-[11px] border border-bh-border transition flex items-center justify-center gap-1 cursor-pointer">
+                  <i class="fa-solid fa-link text-[10px]"></i>
+                  <span>نسخ الرابط المباشر للويب</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. Android Phone -->
+            <div class="p-5 rounded-2xl bg-bh-bg/80 border border-bh-border hover:border-emerald-500/50 transition duration-300 flex flex-col justify-between space-y-4 group">
+              <div class="space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+                    <i class="fa-brands fa-android"></i>
+                  </div>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">أندرويد</span>
+                </div>
+                <h4 class="font-bold text-white text-sm">هواتف أندرويد (Android)</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                  تثبيت بنقرة واحدة كتطبيق أصلي (PWA)، تظهر أيقونة BatiHub DZ على الشاشة الرئيسية وتعمل بملء الشاشة مع حفظ تسجيل الدخول الدائم.
+                </p>
+              </div>
+              <div class="space-y-2">
+                <button type="button" onclick="triggerAndroidPwaInstall()" class="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black rounded-xl text-xs transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
+                  <i class="fa-solid fa-mobile-screen-button"></i>
+                  <span>تثبيت تطبيق أندرويد الآن</span>
+                </button>
+                <div class="text-[10px] text-slate-400 text-center">أو عبر Chrome: انقر (⋮) ثم "تثبيت التطبيق"</div>
+              </div>
+            </div>
+
+            <!-- 3. iOS / iPhone -->
+            <div class="p-5 rounded-2xl bg-bh-bg/80 border border-bh-border hover:border-slate-400 transition duration-300 flex flex-col justify-between space-y-4 group">
+              <div class="space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <div class="w-12 h-12 rounded-2xl bg-slate-700/30 text-slate-200 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+                    <i class="fa-brands fa-apple"></i>
+                  </div>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-700/40 text-slate-300">آيفون وآيباد</span>
+                </div>
+                <h4 class="font-bold text-white text-sm">آبل (iOS / iPhone / iPad)</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                  في متصفح Safari، اضغط على زر المشاركة (Share) ثم اختر "إضافة إلى الشاشة الرئيسية" لتظهر أيقونة التطبيق الرسمية فوراً.
+                </p>
+              </div>
+              <div class="space-y-2">
+                <button type="button" onclick="showIosInstallInstructions()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs transition border border-bh-border flex items-center justify-center gap-2 cursor-pointer">
+                  <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                  <span>طريقة التثبيت على آيفون</span>
+                </button>
+                <div class="text-[10px] text-slate-400 text-center">يعمل بنقاء كامل وبدون شريط المتصفح</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Live Web Links / Render Domain -->
+          <div class="p-4 rounded-2xl bg-bh-bg/95 border border-bh-border space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <span class="text-xs font-semibold text-slate-200">الروابط المباشرة للمنصة (على سيرفرات الويب العالمية) :</span>
+              <span class="text-[11px] text-emerald-400 font-bold flex items-center gap-1">
+                <i class="fa-solid fa-circle-check"></i>
+                متصل وجاهز للعمل
+              </span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div class="flex items-center gap-2 bg-bh-card border border-bh-border rounded-xl p-2 px-3">
+                <span class="text-[11px] font-bold text-amber-400 shrink-0">رابط Render:</span>
+                <input type="text" id="renderPlatformUrlInput" readonly value="https://batihub-dz.onrender.com" class="flex-1 bg-transparent text-xs text-slate-200 font-mono text-left focus:outline-none" dir="ltr">
+                <button type="button" onclick="copyRenderUrl()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-semibold transition cursor-pointer">
+                  <i class="fa-solid fa-copy"></i>
+                </button>
+              </div>
+              <div class="flex items-center gap-2 bg-bh-card border border-bh-border rounded-xl p-2 px-3">
+                <span class="text-[11px] font-bold text-cyan-400 shrink-0">رابط GitHub Pages:</span>
+                <input type="text" id="ghPlatformUrlInput" readonly value="https://scorpion04pvp.github.io/baticalc/" class="flex-1 bg-transparent text-xs text-slate-200 font-mono text-left focus:outline-none" dir="ltr">
+                <button type="button" onclick="copyPlatformLiveUrl()" class="px-2.5 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-xs font-semibold transition cursor-pointer">
+                  <i class="fa-solid fa-copy"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </main>
 
     <!-- MOBILE BOTTOM NAVIGATION -->
@@ -1445,9 +1578,14 @@
         <span class="text-[8px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_materials">مواد البناء</span>
       </button>
 
-      <button type="button" onclick="switchTab('tab-ai-engineer')" id="mNavAi" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1.5 rounded-xl text-slate-400 hover:text-white transition active:scale-90 shrink-0">
+      <button type="button" onclick="switchTab('tab-ai-chat')" id="mNavAi" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1.5 rounded-xl text-slate-400 hover:text-white transition active:scale-90 shrink-0">
         <i class="fa-solid fa-wand-magic-sparkles text-sm text-cyan-400"></i>
         <span class="text-[8px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_ai">ذكاء AI</span>
+      </button>
+
+      <button type="button" onclick="switchTab('tab-cost-estimator')" id="mNavEstimator" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1.5 rounded-xl text-slate-400 hover:text-white transition active:scale-90 shrink-0">
+        <i class="fa-solid fa-file-invoice-dollar text-sm text-amber-400"></i>
+        <span class="text-[8px] font-semibold mt-0.5 tracking-tight">كشف Devis</span>
       </button>
 
       <button type="button" onclick="switchTab('tab-pending-posts')" id="mNavPending" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-400 hover:text-white transition active:scale-90 relative">
@@ -1466,12 +1604,13 @@
         <span class="text-[8px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_offices">مكاتب</span>
       </button>
 
-                <!-- Download App Pill Button -->
-          <button type="button" onclick="openDownloadAppModal()" class="hidden sm:flex px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition items-center gap-1.5 cursor-pointer shadow-sm">
-            <i class="fa-solid fa-mobile-screen-button text-emerald-400"></i>
-            <span>تحميل للهاتف والحاسوب</span>
-          </button>
-          <button type="button" onclick="openMessagesHubModal()" id="mNavMessages" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-400 hover:text-white transition active:scale-90 relative">
+      <!-- Dedicated Download Tab on Mobile -->
+      <button type="button" onclick="openDownloadAppModal()" id="mNavDownload" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1.5 rounded-xl text-emerald-400 hover:text-white transition active:scale-90 shrink-0">
+        <i class="fa-solid fa-cloud-arrow-down text-sm"></i>
+        <span class="text-[8px] font-bold mt-0.5 tracking-tight">تحميل</span>
+      </button>
+
+      <button type="button" onclick="openMessagesHubModal()" id="mNavMessages" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-400 hover:text-white transition active:scale-90 relative">
         <i class="fa-solid fa-comments text-sm text-amber-400"></i>
         <span id="mUnreadBadge" class="hidden absolute top-0.5 right-1 w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
         <span class="text-[8px] font-semibold mt-0.5 tracking-tight" data-i18n="m_nav_messages">محادثات</span>
@@ -2386,134 +2525,16 @@
 
   
   <!-- ========================================================================= -->
-  <!-- MODAL: GOOGLE GEMINI API KEY SETTINGS                                    -->
-  <!-- ========================================================================= -->
-  <div id="modalGeminiApiKey" class="modal-backdrop hidden">
-    <div class="modal-box max-w-md w-full p-6 space-y-5 text-right relative" dir="rtl">
-      <div class="flex items-center justify-between pb-3 border-b border-bh-border">
-        <div class="flex items-center gap-2">
-          <i class="fa-solid fa-key text-bh-yellow text-base"></i>
-          <h3 class="font-bold text-white text-base">مفتاح Google Gemini API</h3>
-        </div>
-        <button type="button" onclick="closeGeminiApiKeyModal()" class="w-7 h-7 rounded-full bg-bh-bg hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer">
-          <i class="fa-solid fa-xmark text-sm"></i>
-        </button>
-      </div>
-
-      <div class="space-y-2 text-xs text-slate-300">
-        <p>يمكنك تزويد المساعد الذكي بمفتاح مجاني من <strong>Google AI Studio</strong> للاستفادة من قوة نماذج <strong>Gemini 1.5 Flash</strong> الفائقة في كافة المجالات الحياتية والعلمية دون حدود!</p>
-        <div class="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-[11px] leading-relaxed">
-          <i class="fa-solid fa-circle-info ml-1"></i>
-          المفتاح مجاني 100% من جوجل ويتم حفظه مشفراً في جهازك الشخصي فقط ولا تتم مشاركته مع أي طرف خارجي.
-        </div>
-      </div>
-
-      <div class="space-y-1.5">
-        <label class="block text-xs font-semibold text-slate-300">أدخل مفتاح API الخاص بك :</label>
-        <div class="relative">
-          <input type="password" id="inputGeminiApiKey" placeholder="AIzaSy..." class="w-full bg-bh-bg border border-bh-border rounded-xl p-3 pl-10 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-cyan-400">
-          <button type="button" onclick="toggleGeminiKeyVisibility()" class="absolute left-3 top-3 text-slate-400 hover:text-white transition">
-            <i id="iconToggleGeminiKey" class="fa-solid fa-eye text-xs"></i>
-          </button>
-        </div>
-      </div>
-
-      <div class="flex items-center justify-between pt-2 border-t border-bh-border gap-2">
-        <button type="button" onclick="openGeminiHelpModal()" class="text-xs text-cyan-400 hover:underline flex items-center gap-1">
-          <i class="fa-solid fa-circle-question"></i>
-          <span>كيف أحصل على مفتاح مجاني؟</span>
-        </button>
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="clearGeminiApiKey()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 text-xs transition">حذف</button>
-          <button type="button" onclick="saveGeminiApiKey()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-black text-xs shadow-lg hover:opacity-95 transition">حفظ وتفعيل</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================================================= -->
-  <!-- MODAL: HOW TO GET FREE GEMINI API KEY GUIDE                               -->
-  <!-- ========================================================================= -->
-  <div id="modalGeminiHelp" class="modal-backdrop hidden">
-    <div class="modal-box max-w-lg w-full p-6 sm:p-7 space-y-5 text-right relative" dir="rtl">
-      <div class="flex items-center justify-between pb-3 border-b border-bh-border">
-        <div class="flex items-center gap-2">
-          <i class="fa-solid fa-circle-question text-cyan-400 text-base"></i>
-          <h3 class="font-bold text-white text-base">دليل إنشاء مفتاح Google Gemini مجاناً</h3>
-        </div>
-        <button type="button" onclick="closeGeminiHelpModal()" class="w-7 h-7 rounded-full bg-bh-bg hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer">
-          <i class="fa-solid fa-xmark text-sm"></i>
-        </button>
-      </div>
-
-      <div class="space-y-4 text-xs text-slate-300 leading-relaxed">
-        <p class="font-semibold text-white">اتبع هذه الخطوات البسيطة (تأخذ دقيقة واحدة فقط وبدون دفع أي فلس):</p>
-        
-        <div class="space-y-3">
-          <div class="flex items-start gap-3 p-3 rounded-2xl bg-bh-bg border border-bh-border">
-            <span class="w-6 h-6 rounded-full bg-cyan-500 text-slate-950 font-black flex items-center justify-center text-xs shrink-0">1</span>
-            <div>
-              <strong class="text-white block mb-0.5">افتح منصة Google AI Studio الرسمية :</strong>
-              <a href="https://aistudio.google.com/" target="_blank" class="text-cyan-400 hover:underline font-mono text-[11px] flex items-center gap-1 mt-1">
-                <span>https://aistudio.google.com</span>
-                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-              </a>
-            </div>
-          </div>
-
-          <div class="flex items-start gap-3 p-3 rounded-2xl bg-bh-bg border border-bh-border">
-            <span class="w-6 h-6 rounded-full bg-cyan-500 text-slate-950 font-black flex items-center justify-center text-xs shrink-0">2</span>
-            <div>
-              <strong class="text-white block mb-0.5">سجل دخولك بحساب Google (Gmail) :</strong>
-              <span>استخدم بريدك الإلكتروني العادي لتسجيل الدخول مباشرة.</span>
-            </div>
-          </div>
-
-          <div class="flex items-start gap-3 p-3 rounded-2xl bg-bh-bg border border-bh-border">
-            <span class="w-6 h-6 rounded-full bg-cyan-500 text-slate-950 font-black flex items-center justify-center text-xs shrink-0">3</span>
-            <div>
-              <strong class="text-white block mb-0.5">انقر على الزر الأزرق "Get API key" :</strong>
-              <span>ستجده في الشريط الجانبي أو أعلى الصفحة الرئيسية.</span>
-            </div>
-          </div>
-
-          <div class="flex items-start gap-3 p-3 rounded-2xl bg-bh-bg border border-bh-border">
-            <span class="w-6 h-6 rounded-full bg-cyan-500 text-slate-950 font-black flex items-center justify-center text-xs shrink-0">4</span>
-            <div>
-              <strong class="text-white block mb-0.5">انقر على "Create API key in new project" :</strong>
-              <span>سيظهر لك كود طويل يبدأ بـ <code class="text-bh-yellow font-mono">AIzaSy...</code>، اضغط على زر Copy لنسخه.</span>
-            </div>
-          </div>
-
-          <div class="flex items-start gap-3 p-3 rounded-2xl bg-bh-bg border border-emerald-500/30">
-            <span class="w-6 h-6 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-xs shrink-0">5</span>
-            <div>
-              <strong class="text-white block mb-0.5">الصق المفتاح في BatiHub AI واضغط حفظ :</strong>
-              <span class="text-slate-300">مبروك! سيعمل معك الذكاء الاصطناعي مباشرة بقوة Google Gemini العالمية!</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex items-center justify-end pt-2 border-t border-bh-border">
-        <button type="button" onclick="closeGeminiHelpModal(); openGeminiApiKeyModal();" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-black text-xs shadow-md hover:opacity-95 transition">
-          الانتقال لإدخال المفتاح الآن
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================================================= -->
   <!-- MODAL: DOWNLOAD BATI HUB DZ FOR ALL PLATFORMS                             -->
   <!-- ========================================================================= -->
   <div id="modalDownloadApp" class="modal-backdrop hidden">
     <div class="modal-box max-w-xl w-full p-6 sm:p-8 space-y-6 text-right relative" dir="rtl">
       <div class="flex items-center justify-between pb-3 border-b border-bh-border">
         <div class="flex items-center gap-3">
-          <img src="assets/batihub_logo.png" alt="Logo" class="w-9 h-9 object-contain">
+          <img src="assets/batihub_logo.png" alt="Logo" class="w-10 h-10 object-contain drop-shadow">
           <div>
             <h3 class="font-bold text-white text-base">تحميل وتثبيت تطبيق BatiHub DZ</h3>
-            <p class="text-[11px] text-slate-400">متاح على جميع الهواتف الذكية والحواسيب والمتصفحات</p>
+            <p class="text-[11px] text-slate-400">متاح على جميع الهواتف الذكية والحواسيب والمتصفحات بدون متجر</p>
           </div>
         </div>
         <button type="button" onclick="closeDownloadAppModal()" class="w-7 h-7 rounded-full bg-bh-bg hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer">
@@ -2523,7 +2544,7 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <!-- 1. Windows PC -->
-        <div class="p-4 rounded-2xl bg-bh-bg border border-bh-border hover:border-bh-yellow transition flex flex-col justify-between space-y-3">
+        <div class="p-4 rounded-2xl bg-bh-bg border border-bh-border hover:border-blue-500/60 transition flex flex-col justify-between space-y-3">
           <div class="space-y-1.5">
             <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-xl">
               <i class="fa-brands fa-windows"></i>
@@ -2531,7 +2552,7 @@
             <h4 class="font-bold text-white text-xs">الحاسوب (Windows PC)</h4>
             <p class="text-[11px] text-slate-400">نسخة سطح المكتب الأصلية، سريعة وتعمل بدون متصفح مع حفظ تلقائي.</p>
           </div>
-          <button type="button" onclick="triggerWindowsDesktopDownload()" class="w-full py-2 bg-gradient-to-r from-bh-yellow to-bh-orange text-slate-950 font-bold rounded-xl text-xs hover:opacity-95 transition shadow-sm flex items-center justify-center gap-1.5">
+          <button type="button" onclick="triggerWindowsDesktopDownload()" class="w-full py-2 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white font-bold rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
             <i class="fa-solid fa-download text-xs"></i>
             <span>تشغيل للحاسوب</span>
           </button>
@@ -2546,7 +2567,7 @@
             <h4 class="font-bold text-white text-xs">هواتف أندرويد (Android)</h4>
             <p class="text-[11px] text-slate-400">تثبيت فوري كتطبيق أندرويد PWA مع أيقونة رسمية على شاشتك الرئيسية.</p>
           </div>
-          <button type="button" onclick="triggerAndroidPwaInstall()" class="w-full py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-black rounded-xl text-xs hover:opacity-95 transition shadow-sm flex items-center justify-center gap-1.5">
+          <button type="button" onclick="triggerAndroidPwaInstall()" class="w-full py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
             <i class="fa-solid fa-mobile-screen text-xs"></i>
             <span>تثبيت للأندرويد</span>
           </button>
@@ -2561,19 +2582,30 @@
             <h4 class="font-bold text-white text-xs">آيفون وآيباد (iOS)</h4>
             <p class="text-[11px] text-slate-400">عبر متصفح Safari: اضغط مشاركة ثم "إضافة إلى الشاشة الرئيسية".</p>
           </div>
-          <button type="button" onclick="showIosInstallInstructions()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs transition border border-bh-border flex items-center justify-center gap-1.5">
+          <button type="button" onclick="showIosInstallInstructions()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs transition border border-bh-border flex items-center justify-center gap-1.5 cursor-pointer">
             <i class="fa-solid fa-arrow-up-from-bracket text-xs"></i>
             <span>طريقة الآيفون</span>
           </button>
         </div>
       </div>
 
-      <!-- Live Web Link Box -->
-      <div class="p-3.5 rounded-2xl bg-bh-bg/90 border border-bh-border space-y-2">
-        <label class="block text-xs font-semibold text-slate-300">الرابط المباشر للمنصة (يعمل على جميع الأجهزة في العالم) :</label>
+      <!-- Live Web Link Boxes -->
+      <div class="p-3.5 rounded-2xl bg-bh-bg/90 border border-bh-border space-y-3">
+        <label class="block text-xs font-semibold text-slate-300">الروابط المباشرة للمنصة (تعمل على كافة الأجهزة والمتصفحات) :</label>
+        
         <div class="flex items-center gap-2">
-          <input type="text" id="livePlatformUrlInput" readonly value="https://scorpion04pvp.github.io/baticalc/" class="flex-1 bg-bh-card border border-bh-border rounded-xl px-3 py-2 text-xs text-bh-yellow font-mono text-left" dir="ltr">
-          <button type="button" onclick="copyPlatformLiveUrl()" class="px-4 py-2 rounded-xl bg-bh-card hover:bg-slate-800 text-white border border-bh-border text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+          <span class="text-[11px] font-bold text-amber-400 w-24 shrink-0">رابط Render:</span>
+          <input type="text" id="liveRenderUrlModal" readonly value="https://batihub-dz.onrender.com" class="flex-1 bg-bh-card border border-bh-border rounded-xl px-3 py-1.5 text-xs text-amber-300 font-mono text-left" dir="ltr">
+          <button type="button" onclick="copyRenderUrl()" class="px-3.5 py-1.5 rounded-xl bg-bh-card hover:bg-slate-800 text-white border border-bh-border text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+            <i class="fa-solid fa-copy"></i>
+            <span>نسخ</span>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-[11px] font-bold text-cyan-400 w-24 shrink-0">رابط GitHub:</span>
+          <input type="text" id="livePlatformUrlInput" readonly value="https://scorpion04pvp.github.io/baticalc/" class="flex-1 bg-bh-card border border-bh-border rounded-xl px-3 py-1.5 text-xs text-cyan-300 font-mono text-left" dir="ltr">
+          <button type="button" onclick="copyPlatformLiveUrl()" class="px-3.5 py-1.5 rounded-xl bg-bh-card hover:bg-slate-800 text-white border border-bh-border text-xs font-bold transition flex items-center gap-1 cursor-pointer">
             <i class="fa-solid fa-copy"></i>
             <span>نسخ</span>
           </button>
